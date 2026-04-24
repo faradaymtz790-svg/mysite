@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Niches | plugbar</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gill+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-green: #15803d;
+            --light-green: #22c55e;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --border-green: rgba(34, 197, 94, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Gill Sans", sans-serif;
+            /* Signature Milky-to-Green Gradient */
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(248,250,252,1) 30%, 
+                rgba(34, 197, 94, 0.4) 50%, 
+                rgba(21, 128, 61, 0.7) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px 20px;
+            border-radius: 40px;
+            /* Match screen width like previous pages */
+            width: 95vw; 
+            max-width: 800px; 
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: floatIn 0.8s ease-out;
+            margin: 20px;
+        }
+
+        .logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive; /* Signature Font */
+            font-size: 80px;
+            font-weight: 400;
+            color: #0f172a;
+            margin: 0;
+            transform: rotate(-2deg);
+            line-height: 1;
+        }
+
+        p {
+            font-size: 18px;
+            color: #1e3a1e;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .niches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            width: 100%;
+            padding: 10px;
+        }
+
+        /* Niche Card Style - "Real Image" Feel */
+        .niche-card {
+            background: white;
+            padding: 20px 10px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-weight: 700;
+            color: #334155;
+            position: relative;
+        }
+
+        .niche-card span {
+            font-size: 32px; /* Large Icon */
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+        }
+
+        .niche-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            border-color: var(--light-green);
+        }
+
+        .niche-card.active {
+            background: #f0fdf4;
+            border-color: var(--light-green);
+            color: var(--primary-green);
+            box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Checkmark for active state */
+        .niche-card.active::after {
+            content: "✓";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 14px;
+            color: var(--primary-green);
+        }
+
+        .continue-btn {
+            margin-top: 40px;
+            padding: 20px;
+            width: 85%;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary-green), #166534);
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(21, 128, 61, 0.4);
+        }
+
+        .continue-btn:hover {
+            transform: scale(1.03);
+            filter: brightness(1.1);
+            box-shadow: 0 15px 30px -5px rgba(21, 128, 61, 0.5);
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 60px; }
+            .niches-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<form method="POST" id="nicheForm" action="{% url 'niche_selection' %}">
+    {% csrf_token %} <input type="hidden" name="username" value="{{ username }}">
+    <input type="hidden" name="email" value="{{ email }}">
+    <input type="hidden" name="phone" value="{{ phone }}">
+    <input type="hidden" name="password" value="{{ password }}">
+    <input type="hidden" name="confirm" value="{{ confirm }}">
+    <input type="hidden" name="niches" id="nichesInput">
+
+    <div class="container">
+        <img src="/static/mylogo.png" class="logo" alt="logo">
+        <h1>Plugbar</h1>
+        <p>Select your favorite niches to personalize your feed</p>
+
+        <div class="niches-grid">
+            <div class="niche-card" onclick="toggleNiche(this, '🌍 Geopolitics')"><span>🌍</span>Geopolitics</div>
+            <div class="niche-card" onclick="toggleNiche(this, '💰 Finance')"><span>💰</span>Finance</div>
+            <div class="niche-card" onclick="toggleNiche(this, '📰 Social News')"><span>📰</span>Social News</div>
+            <div class="niche-card" onclick="toggleNiche(this, '🎬 Entertainment')"><span>🎬</span>Entertainment</div>
+            <div class="niche-card" onclick="toggleNiche(this, '💻 Technology')"><span>💻</span>Technology</div>
+            <div class="niche-card" onclick="toggleNiche(this, '🔥 Motivation')"><span>🔥</span>Motivation</div>
+            <div class="niche-card" onclick="toggleNiche(this, '🏛 History')"><span>🏛</span>History</div>
+            <div class="niche-card" onclick="toggleNiche(this, '🗺 Geography')"><span>🗺</span>Geography</div>
+            <div class="niche-card" onclick="toggleNiche(this, '✈ Travel')"><span>✈</span>Travel</div>
+            <div class="niche-card" onclick="toggleNiche(this, '💪 Fitness')"><span>💪</span>Fitness</div>
+            <div class="niche-card" onclick="toggleNiche(this, '📊 Economy')"><span>📊</span>Economy</div>
+            <div class="niche-card" onclick="toggleNiche(this, '🔬 Science')"><span>🔬</span>Science</div>
+        </div>
+
+        <button type="button" class="continue-btn" onclick="submitNiches(event)">
+            Continue to Profile
+        </button>
+    </div>
+</form>
+
+<script>
+    const selectedNiches = new Set();
+
+    function toggleNiche(element, nicheName) {
+        element.classList.toggle('active');
+        if (selectedNiches.has(nicheName)) {
+            selectedNiches.delete(nicheName);
+        } else {
+            selectedNiches.add(nicheName);
+        }
+    }
+
+    function submitNiches(event) {
+        event.preventDefault();
+
+        if (selectedNiches.size === 0) {
+            alert('Please select at least one niche to continue.');
+            return;
+        }
+
+        // Convert Set to Array and then JSON string
+        const selectedArray = Array.from(selectedNiches);
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('niches', JSON.stringify(selectedArray));
+
+        // Pass to the hidden input for Django POST
+        document.getElementById('nichesInput').value = JSON.stringify(selectedArray);
+
+        // Security: Final check before submission
+        document.getElementById('nicheForm').submit();
+    }
+</script>
+</body>
+</html>

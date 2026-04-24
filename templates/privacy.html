@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | plugbar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-green: #00a86b;
+            --dark-green: #1b4332;
+            --light-green: #f4fbf7;
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light-green);
+            color: #334155;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Branding */
+        .logo-header {
+            font-family: 'Great Vibes', cursive;
+            color: var(--brand-green);
+            font-size: 50px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Card Styling */
+        .policy-card {
+            background: white;
+            padding: 60px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 168, 107, 0.08);
+            border: 1px solid #e1eee7;
+        }
+
+        h1 { color: var(--dark-green); font-size: 32px; margin-bottom: 5px; }
+        h3 { color: var(--brand-green); font-size: 20px; margin-top: 30px; display: flex; align-items: center; }
+        h3::before { content: "•"; margin-right: 10px; }
+
+        .date-badge {
+            background: var(--light-green);
+            color: var(--brand-green);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: #f1fff9;
+            border-left: 5px solid var(--brand-green);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            color: var(--dark-green);
+        }
+
+        ul { padding-left: 20px; }
+        li { margin-bottom: 10px; }
+
+        @media (max-width: 600px) {
+            .policy-card { padding: 30px; }
+            .logo-header { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-header">Plugbar</div>
+
+    <div class="policy-card">
+        <h1>Privacy Policy</h1>
+        <p class="date-badge">Last updated: April 11, 2026</p>
+        
+        <p>Welcome to <strong>Plugbar</strong>. We believe that your creative audio journey deserves a safe and private environment. This policy outlines how we handle your data when you interact with our platform.</p>
+
+        <section>
+            <h3>1. The Data We Value</h3>
+            <p>To provide you with the best audio social experience, we process two types of data:</p>
+            <ul>
+                <li><strong>Identity Data:</strong> Your username, email, and security credentials.</li>
+                <li><strong>Creative Data:</strong> The audio stories you record, the cover images you upload, and your profile metadata.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h3>2. Our Commitment</h3>
+            <div class="highlight-box">
+                plugbar is built for creators. We promise to never sell your private audio files or personal contact details to third-party marketing firms. Your content belongs to you.
+            </div>
+            <p>We use your data strictly to improve our recommendation algorithms, ensure the stability of our media servers, and maintain a safe, spam-free community.</p>
+        </section>
+
+        <section>
+            <h3>3. Public vs. Private</h3>
+            <p>When you post an audio story, it is shared with the public feed so your community can engage with it. However, your email address, password, and internal account settings remain strictly private and accessible only to you.</p>
+        </section>
+
+        <section>
+            <h3>4. Your Control</h3>
+            <p>You remain the pilot of your Togsphere experience. At any time, you can:</p>
+            <ul>
+                <li><strong>Modify</strong> your profile information in your settings.</li>
+                <li><strong>Remove</strong> any post, which triggers an immediate deletion of that file from our servers.</li>
+                <li><strong>Request</strong> full account deactivation by contacting our support team.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h3>5. Security</h3>
+            <p>We employ modern encryption standards to protect your data. While we strive to keep our platform secure, we recommend that you use a unique password and keep your login details protected.</p>
+        </section>
+
+        <section>
+            <h3>6. Questions?</h3>
+            <p>If you have any concerns regarding how your data is handled, our team is ready to assist. Please visit our <a href="{% url 'help' %}" style="color: var(--brand-green); font-weight: bold;">Help Center</a> to open a support ticket.</p>
+        </section>
+    </div>
+</div>
+
+</body>
+</html>

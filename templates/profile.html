@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.user.username|capfirst }} | PROFILE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green:#00a86b;
+            --light-green:#e6f7ef;
+            --bg-color:#f4fff6;
+            --border-color:#dbdbdb;
+            --text-main:#262626;
+        }
+
+        body { font-family:'Inter', sans-serif; background:var(--bg-color); margin:0; padding-top:80px; }
+
+        .navbar {
+            position:fixed; top:0; width:100%; height:65px;
+            background:white; display:flex; justify-content:space-between;
+            align-items:center; border-bottom:1px solid var(--border-color);
+            z-index:1000; padding: 0 5%; box-sizing: border-box;
+        }
+
+        .profile-wrapper {
+            width: 100%; max-width: 100%; margin: 0; background: white;
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px;
+        }
+
+        .cover { height: 250px; background: #d0f0d8; }
+        .cover img { width: 100%; height: 100%; object-fit: cover; }
+
+        .profile-header-main { padding: 20px 5%; }
+        
+        .badge-verified {
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: var(--primary-green); color: white; border-radius: 50%;
+            width: 16px; height: 16px; font-size: 10px; margin-left: 8px; vertical-align: middle;
+        }
+
+        .avatar-main {
+            width: 130px; height: 130px; border-radius: 50%; border: 5px solid white;
+            margin-top: -85px; background: white; object-fit: cover; display: block; 
+        }
+
+        .info-section { margin-top: 15px; text-transform: capitalize; }
+        .info-label { font-weight: 700; color: var(--text-main); margin-top: 12px; display: block; }
+        .underlined-text { text-decoration: underline; color: #444; }
+        .blue-link { color: #0044cc; text-decoration: underline; }
+
+        .stats-bar { display: flex; gap: 25px; margin: 20px 0; border-top: 1px solid #eee; padding-top: 15px; }
+        .stat-link { text-decoration: none; color: var(--text-main); font-size: 15px; cursor: pointer; text-transform: capitalize; }
+        .stat-link b { font-size: 18px; }
+
+        .btn-edit, .follow-btn { 
+            background: var(--primary-green); color: white; border: none; padding: 12px 25px;
+            border-radius: 30px; font-weight: 700; cursor: pointer; float: right; margin-top: 10px;
+            text-transform: capitalize; transition: 0.3s;
+        }
+
+        /* Styling for when actively following */
+        .follow-btn.following {
+            background: rgba(0,0,0,0.05);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .post { background:white; border-radius:24px; margin-bottom:35px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.08); width: 100%; }
+        .post-header { padding:15px; display:flex; justify-content:space-between; align-items: flex-start; }
+        .user-meta { display:flex; gap:10px; }
+        .post-avatar { width:40px; height:40px; border-radius:50%; }
+        .db-post-title { text-decoration: underline; color: green; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;}
+        
+        .audio-visual-container { height:320px; position:relative; background-size:cover; background-position:center; background-color: #222; overflow:hidden; }
+        .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
+        .v-bar { flex:1; height:5px; border-radius:3px; transition:0.05s; }
+
+        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 20px; left: 20px; z-index: 10; }
+
+        .post-actions-row { display: flex; align-items: center; gap: 25px; padding: 15px 20px; background: rgba(0, 0, 0, 0.02); }
+        .heart-btn { background:none; border:none; font-size:22px; cursor:pointer; color: #ccc; transition: 0.3s; }
+        .heart-btn.is-liked { color: var(--primary-green); transform: scale(1.1); }
+        .heart-btn:disabled { opacity: 0.5; cursor: wait; }
+
+        #editModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-body { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 500px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; text-transform: capitalize; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
+        
+        .fab-add-post {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            background-color: var(--primary-green); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; font-size: 35px; font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0, 168, 107, 0.3); z-index: 9999;
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
+        .fab-add-post:hover { transform: scale(1.1); background-color: #008f5b; }
+    </style>
+</head>
+<body>
+
+{% include 'navbar.html' %}
+{% csrf_token %} <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
+
+<div class="profile-wrapper">
+    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
+
+    <div class="profile-header-main">
+        {% if request.user == profile.user %}
+            <button class="btn-edit" onclick="openModal()">Edit Profile</button>
+        {% elif request.user.is_authenticated %}
+            <button class="follow-btn {% if is_following %}following{% endif %}" data-user-id="{{ viewed_user.id }}">
+                <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
+            </button>
+        {% endif %}
+        
+        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
+        
+        <div class="info-section">
+            <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
+                {{ profile.user.username|capfirst }}
+                <span class="badge-verified" title="Verified Member">✓</span>
+            </h1>
+            <span class="info-label">Bio</span>
+            <div class="underlined-text">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
+            
+            <span class="info-label">Location</span>
+            <div style="color: #666;">{{ profile.location|default:"Not specified" }}</div>
+
+            <span class="info-label">Link</span>
+            <div class="blue-link"><a href="{{ profile.links }}" target="_blank">{{ profile.links|default:"No link provided" }}</a></div>
+        </div>
+
+        <div class="stats-bar">
+            <a href="{% url 'following_list' user_id=profile.user.id %}" class="stat-link"><b>{{ following_count }}</b> Following</a>
+            <a href="{% url 'followers_list' user_id=profile.user.id %}" class="stat-link"><b id="follower-count-{{ viewed_user.id }}">{{ followers_count }}</b> Followers</a>
+            <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
+        </div>
+    </div>
+</div>
+
+<div class="profile-wrapper" style="background: transparent; box-shadow: none; padding: 0 5%;">
+    <h3 style="margin-bottom: 20px; color: var(--primary-green);">Posts Feed</h3>
+    {% for post in user_posts %}
+    <div class="post" id="post-card-{{ post.id }}">
+        <div class="post-header">
+            <div class="user-meta">
+                <img class="post-avatar" src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}">
+                <div>
+                    <div style="display: flex; align-items: center;">
+                        <b>{{ profile.user.username|capfirst }}</b>
+                        <span class="badge-verified" style="width: 12px; height: 12px; font-size: 8px;">✓</span>
+                    </div>
+                    <div style="font-size:12px;color:gray;">{{ post.created_at|timesince }} ago</div>
+                    <div style="margin-top: 5px; font-size: 13px;">POST TITLE: <span class="db-post-title">{{ post.title }}</span></div>
+                </div>
+            </div>
+            {% if request.user == profile.user %}
+            <span onclick="deletePost({{post.id}})" style="cursor:pointer" title="Delete Post">🗑️</span>
+            {% endif %}
+        </div>
+
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
+            <div class="visualizer-bars" id="viz{{post.id}}"></div>
+            {% if post.audio %}
+                <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onended="stopVisualizer({{post.id}})"></audio>
+                <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+            {% endif %}
+        </div>
+
+        <div class="post-actions-row">
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" id="heart-{{ post.id }}" onclick="handleLike(this, '{{ post.id }}')">❤</button>
+                <span id="like-count-{{ post.id }}" style="font-weight: 700;">{{ post.likes.count }}</span>
+            </div>
+            <div title="Unique Listeners">🎧 <span id="unique-listeners-{{post.id}}" style="font-weight: 700;">{{ post.listeners_count }}</span></div>
+            <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count }}</span></div>
+          
+            <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">
+    💬 <span style="font-weight: 700;">{{ post.comments.count }}</span>
+</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="editModal">
+    <div class="modal-body">
+        <h2 style="color:var(--primary-green);">Edit Profile</h2>
+        <form id="profileUpdateForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group"><label>Profile Image</label><input type="file" name="image" accept="image/*"></div>
+            <div class="form-group"><label>Cover Photo</label><input type="file" name="cover_photo" accept="image/*"></div>
+            <div class="form-group"><label>Bio</label><textarea name="bio" rows="4">{{ profile.bio }}</textarea></div>
+            <div class="form-group"><label>Location</label><input type="text" name="location" value="{{ profile.location }}"></div>
+            <div class="form-group"><label>Link</label><input type="url" name="links" value="{{ profile.links }}"></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn-edit" style="background:#666" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-edit" id="saveBtn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // CSRF Token Helper
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    let activeAudio = null;
+
+    function openModal() { document.getElementById('editModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    function handleLike(btn, postId) {
+        btn.disabled = true;
+        fetch(`/like-post/${postId}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() }
+        })
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById(`like-count-${postId}`).innerText = d.count;
+            if(d.liked) btn.classList.add('is-liked');
+            else btn.classList.remove('is-liked');
+            btn.disabled = false;
+        });
+    }
+
+    function stopVisualizer(id) {
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
+        const btn = document.getElementById('playBtn' + id);
+        if(btn) btn.innerHTML = "▶";
+    }
+
+    function togglePlay(id) {
+        let audio = document.getElementById("audio" + id),
+            btn = document.getElementById("playBtn" + id),
+            bars = document.querySelectorAll(`#viz${id} .v-bar`);
+
+        if (audio.paused) {
+            fetch(`/record-replay/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() }
+            })
+            .then(r => r.json())
+            .then(d => { document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+
+            if (!sessionStorage.getItem(`played_post_${id}`)) {
+                fetch(`/record-listener/${id}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCSRFToken() }
+                })
+                .then(r => r.json())
+                .then(d => { document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
+                sessionStorage.setItem(`played_post_${id}`, "true");
+            }
+            audio.play();
+            btn.innerHTML = "⏸";
+            audio.ontimeupdate = () => {
+                bars.forEach(b => {
+                    b.style.height = (Math.random() * 260 + 20) + "px";
+                    b.style.opacity = "1";
+                });
+            };
+        } else {
+            audio.pause();
+            stopVisualizer(id);
+        }
+    }
+
+    function deletePost(id) {
+        if(confirm("Are you sure?")) { 
+            fetch(`/delete-post/${id}/`, { 
+                method: "POST", 
+                headers: { "X-CSRFToken": getCSRFToken() } 
+            }).then(r => r.json()).then(d => { 
+                if(d.success) document.getElementById(`post-card-${id}`).remove(); 
+            }); 
+        }
+    }
+
+    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
+        e.preventDefault(); 
+        const btn = document.getElementById('saveBtn'); 
+        btn.disabled = true; 
+        const fd = new FormData(this);
+        const res = await fetch("{% url 'update_profile' %}", { 
+            method: 'POST', 
+            body: fd, 
+            headers: { 'X-CSRFToken': getCSRFToken() } 
+        });
+        const d = await res.json(); 
+        if(d.success) window.location.reload(); 
+        else alert("Error"); 
+        btn.disabled = false;
+    };
+
+    const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
+    document.querySelectorAll('.visualizer-bars').forEach(v => {
+        for(let i=0; i < 45; i++) { 
+            let b = document.createElement("div"); 
+            b.className = "v-bar"; 
+            b.style.backgroundColor = colors[i % colors.length];
+            v.appendChild(b); 
+        }
+    });
+
+    // Follow / Unfollow Logic
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const btn = this; 
+            const btnText = btn.querySelector('.btn-text');
+
+            fetch(`/follow/${userId}/`, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': getCSRFToken(), 
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    btn.classList.add('following'); 
+                    btnText.innerHTML = 'Following';
+                } else {
+                    btn.classList.remove('following');
+                    btnText.innerHTML = '+ Follow';
+                }
+
+                // Update the count badge globally
+                const countBadge = document.getElementById(`follower-count-${userId}`);
+                if (countBadge) {
+                    countBadge.innerHTML = data.followers_count;
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

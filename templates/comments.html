@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Discussion | MySite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00a86b;
+            --glass-white: rgba(255, 255, 255, 0.8);
+            --glass-green: rgba(0, 168, 107, 0.2);
+            --text-main: #1a1a1a;
+            --text-muted: #999;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #ffffff 0%, #f4fff6 40%, rgba(0, 168, 107, 0.15) 100%);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .comment-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--glass-white);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h2 { color: var(--primary-green); font-size: 20px; margin-bottom: 20px; }
+
+        .comment-form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            margin-bottom: 30px;
+        }
+
+        .title-input {
+            width: 100%;
+            border: 1px solid #eee;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-bottom: 15px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .audio-actions { display: flex; gap: 15px; margin-bottom: 15px; }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            background: none;
+        }
+
+        .action-btn:hover { border-color: var(--primary-green); background: var(--glass-green); }
+        .action-btn.recording { border-color: #ff4b4b; background: rgba(255, 75, 75, 0.1); color: #ff4b4b; }
+        
+        .icon { font-size: 24px; margin-bottom: 5px; }
+        .label { font-size: 12px; font-weight: 600; color: #666; }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 168, 107, 0.3);
+        }
+
+        .comment-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .comment-header { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        
+        /* Profile Link Wrapper */
+        .profile-link { text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .profile-link:hover .username { text-decoration: underline; }
+
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #eee; }
+        
+        .comment-user-info { flex: 1; }
+        .username { font-weight: 700; font-size: 14px; color: var(--text-main); transition: 0.2s; }
+        .comment-time { color: var(--text-muted); font-size: 11px; margin-left: 5px; }
+
+        .comment-title { margin: 8px 0; color: #444; line-height: 1.4; font-size: 15px; }
+
+        .comment-footer { display: flex; gap: 20px; align-items: center; margin-top: 10px; }
+        
+        .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #ccc;
+            font-weight: 700;
+            padding: 0;
+            transition: 0.2s;
+        }
+
+        .like-btn.is-liked { color: var(--primary-green) !important; }
+        .reply-trigger { font-size: 12px; color: var(--primary-green); font-weight: 700; cursor: pointer; }
+
+        .replies-container {
+            margin-left: 45px;
+            border-left: 2px solid #eefef6;
+            padding-left: 15px;
+            margin-top: 10px;
+        }
+
+        .reply-item { margin-bottom: 15px; font-size: 13px; }
+
+        .reply-form-wrapper { display: none; margin-top: 10px; margin-left: 45px; }
+        
+        audio { width: 100%; height: 35px; margin-top: 10px; border-radius: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="comment-container">
+    <h2>Discussion</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="comment-form-card" id="commentForm">
+        {% csrf_token %}
+        <input type="text" name="title" class="title-input" placeholder="Title of your comment..." required maxlength="150">
+        
+        <div class="audio-actions">
+            <label class="action-btn" for="audioFile">
+                <span class="icon">📁</span>
+                <span class="label">Files</span>
+                <input type="file" id="audioFile" name="audio_comment" accept="audio/*" style="display:none" onchange="updateFileLabel()">
+            </label>
+
+            <button type="button" class="action-btn" id="recordBtn">
+                <span class="icon">🎤</span>
+                <span class="label" id="recordLabel">Record</span>
+            </button>
+        </div>
+
+        <div id="audioPreviewContainer" style="display:none; margin-bottom:15px;">
+            <p style="font-size:12px; color:var(--primary-green);">Preview ready:</p>
+            <audio id="audioPreview" controls></audio>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Comment</button>
+    </form>
+
+    <div class="comments-list">
+        {% for comment in comments %}
+        {% if not comment.parent %}
+        <div class="comment-item" id="comment-{{ comment.id }}">
+            <div class="comment-header">
+                <a href="{% url 'profile' username=comment.user.username %}" class="profile-link">
+                    <img src="{% if comment.user.profile.image %}{{ comment.user.profile.image.url }}{% else %}https://via.placeholder.com/35{% endif %}" class="user-avatar">
+                    <div class="comment-user-info">
+                        <span class="username">@{{ comment.user.username }}</span>
+                        <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="comment-title">{{ comment.title }}</div>
+            
+            {% if comment.audio_comment %}
+            <audio controls><source src="{{ comment.audio_comment.url }}" type="audio/mpeg"></audio>
+            {% endif %}
+
+            <div class="comment-footer">
+                <button class="like-btn {% if request.user in comment.likes.all %}is-liked{% endif %}" 
+                        onclick="toggleCommentLike(this, {{ comment.id }})">
+                    ❤ <span class="count">{{ comment.likes.count }}</span>
+                </button>
+                <span class="reply-trigger" onclick="showReplyForm({{ comment.id }})">Reply</span>
+            </div>
+
+            <div class="replies-container">
+                {% for reply in comment.replies.all %}
+                <div class="reply-item">
+                    <div class="comment-header">
+                        <a href="{% url 'profile' username=reply.user.username %}" class="profile-link" style="gap: 7px;">
+                            <img src="{% if reply.user.profile.image %}{{ reply.user.profile.image.url }}{% else %}https://via.placeholder.com/25{% endif %}" style="width:25px; height:25px; border-radius:50%;">
+                            <span class="username" style="font-size:12px;">@{{ reply.user.username }}</span>
+                        </a>
+                    </div>
+                    <div style="padding-left:35px;">{{ reply.title }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="reply-form-wrapper" id="reply-form-{{ comment.id }}">
+                <form method="POST" action="." style="display:flex; gap:10px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    <input type="text" name="title" placeholder="Write a reply..." required 
+                           style="flex:1; border:1px solid #ddd; border-radius:15px; padding:8px 15px; font-size:13px;">
+                    <button type="submit" style="background:var(--primary-green); color:white; border:none; border-radius:15px; padding:0 15px;">Send</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p style="text-align:center; color:#999;">No audio comments yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function showReplyForm(id) {
+        const form = document.getElementById(`reply-form-${id}`);
+        form.style.display = (form.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function toggleCommentLike(btn, id) {
+        fetch(`/like-comment/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" }
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.querySelector('.count').innerText = data.count;
+            data.liked ? btn.classList.add('is-liked') : btn.classList.remove('is-liked');
+        });
+    }
+
+    let mediaRecorder;
+    let audioChunks = [];
+    const recordBtn = document.getElementById('recordBtn');
+    const recordLabel = document.getElementById('recordLabel');
+    const audioPreview = document.getElementById('audioPreview');
+    const audioPreviewContainer = document.getElementById('audioPreviewContainer');
+
+    function updateFileLabel() {
+        const fileInput = document.getElementById('audioFile');
+        if(fileInput.files.length > 0) {
+            audioPreview.src = URL.createObjectURL(fileInput.files[0]);
+            audioPreviewContainer.style.display = 'block';
+        }
+    }
+
+    recordBtn.addEventListener('click', async () => {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                audioPreview.src = URL.createObjectURL(audioBlob);
+                audioPreviewContainer.style.display = 'block';
+                const file = new File([audioBlob], "recording.mp3", { type: "audio/mp3" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('audioFile').files = dataTransfer.files;
+            };
+            audioChunks = [];
+            mediaRecorder.start();
+            recordBtn.classList.add('recording');
+            recordLabel.innerText = "Stop";
+        } else {
+            mediaRecorder.stop();
+            recordBtn.classList.remove('recording');
+            recordLabel.innerText = "Record";
+        }
+    });
+</script>
+
+</body>
+</html>

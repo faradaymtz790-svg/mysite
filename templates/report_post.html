@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Post | Logsphere</title>
+    <style>
+        /* 50% Transparency Green Background */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(rgba(0, 168, 107, 0.5), rgba(0, 168, 107, 0.5)), 
+                        url('https://www.transparenttextures.com/patterns/cubes.png'); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
+        }
+        .report-card { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+        h2 { color: #262626; margin-top: 0; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #262626; }
+        select, textarea { width: 100%; padding: 12px; border: 1px solid #dbdbdb; border-radius: 12px; box-sizing: border-box; outline: none; }
+        select:focus, textarea:focus { border-color: #00a86b; }
+        .submit-btn { width: 100%; padding: 14px; background: #00a86b; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .submit-btn:hover { background: #008f5a; }
+        .back-link { display: block; text-align: center; margin-top: 15px; color: #8e8e8e; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="report-card">
+    <h2>Report this post</h2>
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Help us keep Logsphere safe. We review every report.</p>
+    
+    <form id="reportForm" method="POST" onsubmit="showAlert(event)">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="reason">Reason for report</label>
+            <select name="reason" id="reason" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="spam">Spam</option>
+                <option value="offensive">Offensive Content</option>
+                <option value="harassment">Harassment</option>
+                <option value="terms_violation">Violation of Terms of Use</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="details">Additional Details</label>
+            <textarea name="details" id="details" rows="4" placeholder="Briefly explain the issue..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Report</button>
+        <a href="/" class="back-link">Cancel and return to feed</a>
+    </form>
+</div>
+
+<script>
+    function showAlert(event) {
+        // Prevent immediate submission to show the alert
+        event.preventDefault();
+        alert("Thank you! Your report has been submitted. Our team will look into this shortly.");
+        // Submit the form manually after alert
+        event.target.submit();
+    }
+</script>
+
+</body>
+</html>

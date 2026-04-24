@@ -1,0 +1,87 @@
+{% load i18n %}
+
+<div class="lang-selector-wrapper">
+    <form action="{% url 'set_language' %}" method="post" id="lang-form">
+        {% csrf_token %}
+        
+        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+        
+        <div class="custom-select-container">
+            <select name="language" onchange="this.form.submit()" class="green-select">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% get_available_languages as LANGUAGES %}
+                
+                {% for lang_code, lang_name in LANGUAGES %}
+                    <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+                        {{ lang_name }}
+                    </option>
+                {% endfor %}
+            </select>
+            <span class="select-arrow"></span>
+        </div>
+    </form>
+</div>
+
+<style>
+    :root {
+        --primary-green: #10b981;
+        --hover-green: #059669;
+        --light-green: #ecfdf5;
+        --border-color: #d1d5db;
+        --text-color: #374151;
+    }
+
+    .lang-selector-wrapper {
+        font-family: 'Inter', system-ui, sans-serif;
+        padding: 10px;
+    }
+
+    .custom-select-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .green-select {
+        appearance: none;
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 0.95rem;
+        color: var(--text-color);
+        background-color: white;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .green-select:hover {
+        border-color: var(--primary-green);
+        background-color: var(--light-green);
+    }
+
+    .green-select:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    .select-arrow {
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        width: 0; 
+        height: 0; 
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--primary-green);
+        pointer-events: none;
+    }
+
+    [dir="rtl"] .select-arrow {
+        right: auto;
+        left: 15px;
+    }
+</style>

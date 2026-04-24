@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYSITE | Settings</title>
+    <style>
+        :root {
+            --primary-green: #00a86b;
+            --bg-light: #f8f9fa;
+            --text-dark: #262626;
+            --border-color: #eee;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: white;
+        }
+
+        /* 🌿 FULL SCREEN CONTAINER */
+        .settings-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .settings-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            font-size: 24px;
+            color: var(--text-dark);
+            margin-right: 15px;
+        }
+
+        .settings-header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* MENU LIST */
+        .settings-menu {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 25px;
+            text-decoration: none;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            font-size: 22px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .menu-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .arrow-right {
+            font-size: 14px;
+            color: #ccc;
+            transition: 0.3s;
+        }
+
+        /* 🟢 GREEN HOVER & TOUCH ANIMATION */
+        .menu-item:hover {
+            background-color: rgba(0, 168, 107, 0.05);
+            padding-left: 30px; /* Slight slide effect */
+        }
+
+        .menu-item:hover .menu-text, 
+        .menu-item:hover .menu-icon {
+            color: var(--primary-green);
+        }
+
+        .menu-item:hover .arrow-right {
+            color: var(--primary-green);
+            transform: translateX(5px);
+        }
+
+        /* Ripple Effect on Touch */
+        .menu-item:active {
+            background-color: rgba(0, 168, 107, 0.15);
+            transform: scale(0.98);
+        }
+
+        /* SECTION LABELS */
+        .section-label {
+            padding: 20px 25px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #8e8e8e;
+            text-transform: uppercase;
+            background-color: var(--bg-light);
+        }
+
+        /* LOGOUT BUTTON */
+        .logout-btn {
+            margin-top: 20px;
+            color: #ff4d4d !important;
+        }
+        
+        .logout-btn:hover {
+            background-color: #fff5f5 !important;
+        }
+    </style>
+</head>
+<body>
+{% csrf_token %}
+<div class="settings-container">
+    <header class="settings-header">
+        <a href="javascript:history.back()" class="back-btn">⬅</a>
+        <h1>Settings</h1>
+    </header>
+
+    <div class="settings-menu">
+        <div class="section-label">Account & Security</div>
+        
+        <a href="{% url 'account' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">👤</span>
+                <span class="menu-text">Account Information</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <a href="{% url 'language' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">🌐</span>
+                <span class="menu-text">Language</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <div class="section-label">Support & Resources</div>
+
+        <a href="{% url 'faqs' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">❓</span>
+                <span class="menu-text">FAQs</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <a href="{% url 'help' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">🆘</span>
+                <span class="menu-text">Help & Contact Us</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <a href="{% url 'invite' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">📩</span>
+                <span class="menu-text">Invite Friends</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <div class="section-label">Legal</div>
+
+        <a href="{% url 'terms' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">📜</span>
+                <span class="menu-text">Terms of Use</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <a href="{% url 'privacy' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">🔒</span>
+                <span class="menu-text">Privacy Policy</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <a href="{% url 'about' %}" class="menu-item">
+            <div class="menu-left">
+                <span class="menu-icon">ℹ️</span>
+                <span class="menu-text">About Us</span>
+            </div>
+            <span class="arrow-right">▶</span>
+        </a>
+
+        <a href="{% url 'login' %}" class="menu-item logout-btn">
+            <div class="menu-left">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">Log Out</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

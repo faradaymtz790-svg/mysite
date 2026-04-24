@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Mysite</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gill+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-green: #15803d;
+            --light-green: #22c55e;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --text-dark: #0f172a;
+            --text-muted: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Gill Sans", sans-serif;
+            /* Signature Milky-to-Green Gradient */
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(248,250,252,1) 30%, 
+                rgba(34, 197, 94, 0.4) 50%, 
+                rgba(21, 128, 61, 0.7) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 50px 40px;
+            border-radius: 40px;
+            /* Wider UI matching niche/login pages */
+            width: 95vw; 
+            max-width: 900px; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: floatIn 0.9s ease-out;
+            position: relative;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            border: 3px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 80px;
+            font-weight: 400;
+            color: var(--text-dark);
+            margin: 0;
+            transform: rotate(-2deg);
+            line-height: 1;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            text-align: left;
+        }
+
+        h3 {
+            color: var(--primary-green);
+            font-size: 22px;
+            border-bottom: 2px solid var(--border-green);
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .features-list {
+            background: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .features-list li {
+            font-size: 14px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 35px;
+            background: linear-gradient(135deg, var(--primary-green), #166534);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(21, 128, 61, 0.3);
+        }
+
+        .btn-back:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 25px rgba(21, 128, 61, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 60px; }
+            .container { padding: 30px 20px; }
+            .features-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <img src="/static/mylogo.png" class="logo" alt="Logo">
+        <h1>Plugbar</h1>
+        <div class="subtitle">Connecting voices through audio storytelling</div>
+    </div>
+
+    <div class="content-grid">
+        <div class="left-col">
+            <h3>Who We Are</h3>
+            <p>
+                We are <strong>Plugbar LLC</strong>, a company incorporated in Delaware, USA, with a remote-first team and headquarters operating from Tanzania. We are building a new kind of social platform centered around audio — where voices matter more than visuals.
+            </p>
+
+            <h3>Our Mission</h3>
+            <p>
+                To create a digital sanctuary where authenticity thrives. We believe the human voice carries emotions that text and images simply cannot capture.
+            </p>
+        </div>
+
+        <div class="right-col">
+            <h3>What We Do</h3>
+            <p>
+                We are the first audio-focused social platform designed for real engagement. Share stories, interact with listeners, and discover human connection.
+            </p>
+
+            <h3>Platform Features</h3>
+            <ul class="features-list">
+                <li>🎧 Audio Sharing</li>
+                <li>❤️ Engagement</li>
+                <li>💬 Conversations</li>
+                <li>👥 Follow System</li>
+                <li>🔔 Live Alerts</li>
+                <li>🎵 Length Tracking</li>
+                <li>📈 Replay Stats</li>
+                <li>🔍 Global Search</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <h3>Why Audio?</h3>
+        <p style="max-width: 700px; margin: 0 auto 30px;">
+            In a world of filtered photos and short-lived videos, audio brings back <strong>authenticity</strong>. It allows you to connect emotionally, multitask, and engage in a deeply personal way.
+        </p>
+
+        <a href="/" class="btn-back">Join the Conversation</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySite | Invite Friends</title>
+
+    <style>
+        :root {
+            --primary-green: #00a86b;
+            --dark-green: #006b45;
+            --soft-green: #eaffea;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --accent-glow: rgba(0, 168, 107, 0.3);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: radial-gradient(circle at top left, var(--soft-green), #ffffff, #f0fff4);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent-glow);
+            filter: blur(80px);
+            border-radius: 50%;
+            top: -100px;
+            right: -50px;
+            z-index: -1;
+        }
+
+        .invite-card {
+            max-width: 550px;
+            width: 90%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .icon-header {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: var(--dark-green);
+            margin: 0 0 10px 0;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .copy-box {
+            background: #ffffff;
+            border: 2px dashed var(--primary-green);
+            padding: 12px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        #inviteInput {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+            color: var(--dark-green);
+            background: transparent;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Clean 3-column layout */
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .social-btn {
+            padding: 15px 5px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-btn span { font-size: 24px; }
+
+        .whatsapp { background: #e7f9ed; color: #128c7e; }
+        .facebook { background: #e7effa; color: #1877f2; }
+        .sms { background: #f0f0f0; color: #333333; border: 1px solid #ddd; }
+        .telegram { background: #e1f5fe; color: #0088cc; }
+        .x-social { background: #f5f5f5; color: #000; }
+        .copy-alt { background: #fffdeb; color: #856404; }
+
+        .social-btn:hover { transform: translateY(-5px); filter: brightness(0.95); }
+
+        .steps {
+            background: linear-gradient(145deg, rgba(0, 168, 107, 0.08), rgba(255, 255, 255, 0.5));
+            padding: 25px;
+            border-radius: 25px;
+            text-align: left;
+        }
+
+        .step-item { display: flex; gap: 15px; margin-bottom: 12px; font-size: 14px; }
+        .step-num {
+            background: var(--primary-green);
+            color: white;
+            min-width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+<div class="invite-card">
+    <div class="icon-header">🚀</div>
+    <h1>Invite Your Friends</h1>
+    <p>Grow your MySite network. Share your referral link with your contacts.</p>
+
+    <div class="copy-box">
+        <input type="text" value="http://127.0.0.1:8000/signup/?ref={{ user.username }}" id="inviteInput" readonly>
+        <button class="copy-btn" onclick="copyInviteLink()">Copy Link</button>
+    </div>
+
+    <span style="font-size:12px; color:#999; text-transform:uppercase; letter-spacing:2px; display:block; margin-bottom:15px;">Share via Apps</span>
+    
+    <div class="social-grid">
+        <a href="sms:?&body=Check%20out%20MySite!%20Join%20me%20here:%20http://127.0.0.1:8000/signup/?ref={{ user.username }}" class="social-btn sms">
+            <span>📱</span> Messages
+        </a>
+
+        <a href="https://wa.me/?text=Join%20me%20on%20MySite!%20http://127.0.0.1:8000/signup/?ref={{ user.username }}" class="social-btn whatsapp">
+            <span>💬</span> WhatsApp
+        </a>
+        
+        <a href="https://www.facebook.com/sharer/sharer.php?u=http://127.0.0.1:8000/signup/?ref={{ user.username }}" target="_blank" class="social-btn facebook">
+            <span>🔵</span> Facebook
+        </a>
+
+        <a href="https://t.me/share/url?url=http://127.0.0.1:8000/signup/?ref={{ user.username }}&text=Join%20MySite" class="social-btn telegram">
+            <span>✈️</span> Telegram
+        </a>
+
+        <a href="https://twitter.com/intent/tweet?url=http://127.0.0.1:8000/signup/?ref={{ user.username }}&text=Join%20MySite" class="social-btn x-social">
+            <span>✖️</span> Twitter
+        </a>
+
+        <a href="#" onclick="copyInviteLink()" class="social-btn copy-alt">
+            <span>🔗</span> Copy Link
+        </a>
+    </div>
+
+    <div class="steps">
+        <div class="step-item"><div class="step-num">1</div><span>Tap <strong>Messages</strong> to invite your phone contacts.</span></div>
+        <div class="step-item"><div class="step-num">2</div><span>Choose a friend from your list.</span></div>
+        <div class="step-item"><div class="step-num">3</div><span>Send the link and start connecting!</span></div>
+    </div>
+</div>
+
+<script>
+    function copyInviteLink() {
+        var copyText = document.getElementById("inviteInput");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); 
+        navigator.clipboard.writeText(copyText.value);
+
+        const btn = document.querySelector('.copy-btn');
+        btn.innerHTML = "Copied! ✓";
+        btn.style.background = "#006b45";
+        setTimeout(() => {
+            btn.innerHTML = "Copy Link";
+            btn.style.background = "#00a86b";
+        }, 2000);
+    }
+</script>
+
+</body>
+</html>

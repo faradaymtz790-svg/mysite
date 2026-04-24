@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>plugbar| Help Center</title>
+
+    <style>
+        :root {
+            --primary-green: #00a86b;
+            --dark-green: #006b45;
+            --light-bg: #f4fff9;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(160deg, #eaffea 0%, #ffffff 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .faq-wrapper {
+            max-width: 800px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .faq-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .faq-header h1 {
+            font-size: 36px;
+            color: var(--dark-green);
+            margin-bottom: 10px;
+        }
+
+        .faq-header p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* SEARCH BAR MOCKUP - Good for UI */
+        .faq-search {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 40px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .faq-search:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 10px rgba(0, 168, 107, 0.1);
+        }
+
+        /* FAQ ITEM */
+        .faq-item {
+            background: var(--glass-bg);
+            border: 1px solid rgba(0, 168, 107, 0.1);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 17px;
+            color: var(--dark-green);
+            user-select: none;
+        }
+
+        .faq-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 168, 107, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: 0.4s;
+            color: var(--primary-green);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            padding: 0 25px;
+            color: #555;
+            font-size: 15px;
+            border-top: 1px solid transparent;
+        }
+
+        /* ACTIVE STATE */
+        .faq-item.active {
+            border-color: var(--primary-green);
+            background: #fff;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+            padding-bottom: 20px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 168, 107, 0.05);
+        }
+
+        .faq-item.active .faq-icon {
+            background: var(--primary-green);
+            color: white;
+            transform: rotate(180deg);
+        }
+
+        .support-footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .support-footer a {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="faq-wrapper">
+    <div class="faq-header">
+        <h1>Help Center</h1>
+        <p>Everything you need to know about plugbar</p>
+    </div>
+
+    <input type="text" class="faq-search" placeholder="Search for a question..." id="faqSearch">
+
+    <div id="faqList">
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How does the audio visualizer work?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                Our dynamic visualizer analyzes the audio frequencies in real-time as you play a track. The green bars will bounce and dance according to the beat of the music or voice recording!
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Who can see my audio posts?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                By default, your posts are visible to everyone on the feed. You can gain followers who will see your latest audio stories directly on their home page.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What audio formats are supported?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                We currently support MP3, WAV, and M4A formats. For the best experience, we recommend uploading high-quality MP3 files under 20MB.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How do I get my posts trending?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                Posts with more "Likes" and "Comments" move higher up the global feed. Engaging with other creators is the best way to grow your audience!
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                I'm seeing a "No such column" error. What do I do?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                This usually happens during our platform updates. Try logging out and back in, or contact support if the issue persists in your profile settings.
+            </div>
+        </div>
+    </div>
+
+    <div class="support-footer">
+        Still have questions? <a href="{% url 'help' %}">Contact Support</a>
+    </div>
+</div>
+
+<script>
+    function toggleFAQ(el) {
+        const item = el.parentElement;
+        const isActive = item.classList.contains('active');
+        
+        // Close all other FAQs first (Accordion effect)
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+        
+        // If it wasn't active, open it
+        if (!isActive) {
+            item.classList.add('active');
+        }
+    }
+
+    // Basic search functionality
+    document.getElementById('faqSearch').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let items = document.querySelectorAll('.faq-item');
+        
+        items.forEach(item => {
+            let text = item.innerText.toLowerCase();
+            item.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
+
+</body>
+</html>

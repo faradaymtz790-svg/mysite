@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>plugbar</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gill+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: "Gill Sans", sans-serif;
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(248,250,252,1) 30%, 
+                rgba(34, 197, 94, 0.4) 50%, 
+                rgba(21, 128, 61, 0.7) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 60px 40px;
+            border-radius: 40px;
+            width: 90%; 
+            max-width: 850px; 
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: floatIn 1s ease-out;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-container:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 110px;
+            font-weight: 400;
+            color: #0f172a;
+            margin: 0;
+            line-height: 0.8;
+            transform: rotate(-2deg); 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+            display: inline-block;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            font-style: italic;
+            color: #144890;
+            margin-top: 30px;
+            margin-bottom: 40px;
+            max-width: 90%;
+            line-height: 1.4;
+        }
+
+        /* --- UPDATED LOGO CONTAINER --- */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 180px;         /* Specific size for roundness */
+            height: 180px;        /* Matches width */
+            background: white;    /* Keeps logo visible */
+            border-radius: 50%;   /* Forces perfect circle */
+            overflow: hidden;     /* Clips any square corners of the image */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 4px solid white; /* Thick white border for professional look */
+            margin-top: 20px;
+        }
+
+        img {
+            width: 100%;          /* Fills the circle */
+            height: 100%;         /* Fills the circle */
+            object-fit: cover;    /* Ensures image covers the circle without distortion */
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 80px; }
+            h2 { font-size: 22px; }
+            .logo-container { width: 140px; height: 140px; }
+            .hero-container { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<a href="/signup/" class="hero-container">
+    <h1>plugbar</h1>
+    <h2><i><b>Expand skills, get notified and be entertained with your listening networks</b></i></h2>
+
+    <div class="logo-container">
+        <img src="/static/mylogo.png" alt="LogSphere Logo">
+    </div>
+</a>
+
+</body>
+</html>

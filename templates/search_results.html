@@ -1,0 +1,64 @@
+{% include 'navbar.html' %}
+
+<div class="feed" style="margin-top: 20px;">
+    {% if query %}
+        <h2 style="font-size: 18px; color: var(--text-muted); margin-bottom: 20px;">
+            Results for <span style="color: var(--primary-green);">"{{ query }}"</span>
+        </h2>
+    {% endif %}
+
+    {% if user_results %}
+        <div class="user-results-container" style="display: flex; gap: 20px; overflow-x: auto; padding: 10px 0 25px 0; scrollbar-width: none;">
+            {% for profile_user in user_results %}
+                <a href="{% url 'profile' profile_user.username %}" style="text-decoration: none; text-align: center; min-width: 100px;">
+                    <div style="position: relative; display: inline-block;">
+                        <img src="{% if profile_user.profile.image %}{{ profile_user.profile.image.url }}{% else %}https://via.placeholder.com/80{% endif %}" 
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-green); padding: 2px; background: white; transition: 0.3s;"
+                             onmouseover="this.style.transform='scale(1.05)'" 
+                             onmouseout="this.style.transform='scale(1)'">
+                    </div>
+                    <div style="margin-top: 8px;">
+                        <b style="color: var(--text-main); font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ profile_user.username }}
+                        </b>
+                        <span style="font-size: 11px; color: var(--text-muted);">
+                            {{ profile_user.followers.count }} followers
+                        </span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 30px;">
+    {% endif %}
+
+    {% if post_results %}
+        {% for post in post_results %}
+            <div class="post" id="post-card-{{ post.id }}">
+                <div class="post-header">
+                    <div class="user-meta">
+                        <a href="{% url 'profile' post.user.username %}" style="text-decoration: none;">
+                            <img class="avatar" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}">
+                        </a>
+                        <div>
+                            <b>{{ post.user.username }}</b>
+                            <div style="font-size:11px; color:green;">Matches: {{ post.title }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="audio-visual-container" style="background-image:url('{{ post.image.url }}'); height: 200px;">
+                     <div class="overlay-ui">
+                        <button class="play-trigger" onclick="togglePlay({{post.id}})">▶</button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        {% if not user_results %}
+            <div style="text-align:center; padding:100px; color:gray;">
+                <h3>No matches found</h3>
+                <p>Try searching for a different username or post title.</p>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>

@@ -1,0 +1,27 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="post-container">
+    <div class="profile-header">
+        <img src="{{ post.user.profile.profileimg.url }}" width="50">
+        <a href="/profile/{{ post.user.username }}">@{{ post.user.username }}</a>
+    </div>
+
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.caption }}</p>
+    {% if post.image %}
+        <img src="{{ post.image.url }}" style="max-width: 100%;">
+    {% endif %}
+
+    <hr>
+
+    <h4>Comments</h4>
+    {% for comment in comments %}
+        <div class="comment">
+            <strong>{{ comment.user.username }}</strong>: {{ comment.text }}
+        </div>
+    {% empty %}
+        <p>No comments yet. Be the first!</p>
+    {% endfor %}
+</div>
+{% endblock %}

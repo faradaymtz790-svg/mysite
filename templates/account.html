@@ -1,0 +1,68 @@
+{% include 'navbar.html' %}
+
+<div class="feed" style="margin-top: 40px; display: flex; justify-content: center;">
+    <div style="background: white; border-radius: 30px; padding: 40px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 1px solid var(--border-color); text-align: center;">
+        
+        <div style="width: 70px; height: 70px; background: #fff5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <span style="font-size: 30px;">⚙️</span>
+        </div>
+
+        <h2 style="margin: 0; color: var(--text-main); font-weight: 800;">Account Settings</h2>
+        <p style="color: var(--text-muted); margin-bottom: 40px;">Manage your security and account status</p>
+
+        <div id="initial-ui">
+            <div style="padding: 20px; border-radius: 20px; background: var(--bg-color); margin-bottom: 20px; border: 1px dashed var(--primary-green);">
+                <p style="font-size: 14px; color: var(--text-main); margin: 0;">Username: <strong>@{{ user.username }}</strong></p>
+            </div>
+            
+            <button onclick="showConfirm()" 
+                    style="width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #ffcccc; background: white; color: #dc3545; font-weight: 700; cursor: pointer; transition: 0.3s;"
+                    onmouseover="this.style.background='#fff5f5'"
+                    onmouseout="this.style.background='white'">
+                Delete Account
+            </button>
+        </div>
+
+        <div id="confirm-ui" style="display: none; animation: fadeIn 0.3s ease;">
+            <h3 style="color: #dc3545; margin-bottom: 10px;">Are you absolutely sure?</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">
+                This will permanently erase your posts, audio files, and followers.
+            </p>
+
+            <form action="{% url 'delete_account' %}" method="POST">
+                {% csrf_token %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button type="submit" 
+                            style="padding: 16px; border-radius: 15px; border: none; background: #dc3545; color: white; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
+                        Yes, I'm Sure
+                    </button>
+
+                    <button type="button" onclick="hideConfirm()" 
+                            style="padding: 16px; border-radius: 15px; border: none; background: var(--primary-green); color: white; font-weight: 700; cursor: pointer;">
+                        No, Keep My Account
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script>
+    function showConfirm() {
+        document.getElementById('initial-ui').style.display = 'none';
+        document.getElementById('confirm-ui').style.display = 'block';
+    }
+
+    function hideConfirm() {
+        document.getElementById('confirm-ui').style.display = 'none';
+        document.getElementById('initial-ui').style.display = 'block';
+    }
+</script>

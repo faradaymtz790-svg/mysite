@@ -1,0 +1,546 @@
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySite | Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00a86b;
+            --light-green: #e6f7ef;
+            --bg-color: #f4fff6;
+            --card-bg: #ffffff;
+            --border-color: #dbdbdb;
+            --text-main: #262626;
+            --text-muted: #8e8e8e;
+            --soft-green: #eaffea;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            padding-top: 80px;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 65px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+
+        /* Feed & Post Styling */
+        .feed {
+            width: 100vw;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .post {
+            width: 100vw;
+            max-width: 100%;
+            border-radius: 0;
+            margin-bottom: 20px;
+            box-shadow: none;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .post:hover { transform: translateY(-5px); }
+
+        .post-header {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        
+        .user-meta { display: flex; gap: 12px; align-items: center; }
+        .avatar { width: 44px; height: 44px; border-radius: 50%; background: #ddd; object-fit: cover; }
+        
+        .db-post-title {
+            font-family: 'Gill Sans', sans-serif;
+            text-decoration: underline;
+            color: green;
+            font-size:medium;
+        }
+
+        /* Audio Player & Visualizer */
+        .audio-visual-container {
+            width: 100%;
+            height: 80vh;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-color: #222;
+            overflow: hidden;
+            scroll-snap-align: start; 
+        }
+
+        .audio-visual-container::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.2), transparent);
+            z-index: 1;
+        }
+
+        .visualizer-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 320px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .v-bar { flex: 1; height: 5px; border-radius: 3px; transition: 0.1s; opacity: 0.7; }
+
+        .overlay-ui {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .play-trigger {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-green);
+            border: none;
+            font-size: 26px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Actions & UI Elements */
+        .post-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 25px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.02);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .heart-btn {
+            color: #ccc;
+            transition: 0.3s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 24px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .heart-btn.is-liked { color: #28a745 !important; transform: scale(1.1); }
+
+        .action-item { display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
+        .action-item:hover { transform: translateY(-2px); }
+        .action-value { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .comment-link { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 6px; }
+
+        .share-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .share-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .share-options-grid button { padding: 12px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-color); cursor: pointer; font-weight: 600; }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            text-decoration: none;
+            z-index: 1000;
+        }
+
+        .follow-btn {
+            background: transparent;
+            border: 1.5px solid var(--primary-green);
+            color: var(--primary-green);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .follow-btn:hover { background: var(--soft-green); transform: scale(1.05); }
+        .follow-btn.following { background: var(--primary-green); color: white; }
+
+        .follower-badge {
+            font-size: 11px;
+            background: #eee;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+
+        .dots-menu { cursor: pointer; font-size: 24px; color: #888; padding: 0 10px; font-weight: bold; }
+        .options-dropdown {
+            display: none;
+            position: absolute;
+            top: 35px;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            width: 150px;
+            padding: 5px 0;
+        }
+        .options-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+        .options-dropdown button:hover { background: #f4fff6; color: var(--primary-green); }
+    </style>
+</head>
+<body>
+
+{% include 'navbar.html' %}
+
+<div class="feed">
+    {% for post in posts %}
+    {% if post.user.id not in request.user.profile.blocked_users.all|dictsort:"id" %}
+    <div class="post" id="post-card-{{ post.id }}">
+        <div class="post-header">
+            <div class="user-meta">
+                <a href="{% url 'profile' post.user.username %}" style="text-decoration: none;">
+                    <img class="avatar" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/44{% endif %}">
+                </a>
+                
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div style="text-transform: uppercase; font-weight: 700; font-size: 11px; color: #555; font-size: medium;">
+                        POST TITLE : <span class="db-post-title">{{ post.title }}</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <a href="{% url 'profile' post.user.username %}" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+                            <b style="cursor: pointer; font-size: 15px;">{{ post.user.username }}</b>
+                            <span style="display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-green); color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 8px; font-weight: bold; margin-left: 4px;" title="Verified Member">✓</span>
+                        </a>
+                        
+                        <span class="follower-badge" id="follower-count-{{ post.user.id }}">
+                            {{ post.user.followers.count }} followers
+                        </span>
+                        
+                        {% if post.user != user %}
+                        <button class="follow-btn {% if post.user in user.following.all %}following{% endif %}" 
+                                data-user-id="{{ post.user.id }}" 
+                                id="follow-btn-{{ post.user.id }}">
+                            <span class="btn-text">
+                                {% if post.user in user.following.all %}Following{% else %}+ Follow{% endif %}
+                            </span>
+                        </button>
+                        {% endif %}
+                        <span style="font-size:11px; color:var(--text-muted);">{{ post.created_at|date:"M d • H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="position: relative;">
+                <div class="dots-menu" onclick="toggleDots(this)">⋯</div>
+                <div class="options-dropdown">
+                    <a href="{% url 'report_post' post.id %}" style="text-decoration:none; color:inherit;">
+                        <button>🚩 Report Post</button>
+                    </a>
+                    {% if post.user != user %}
+                        <button onclick="toggleBlockUser({{ post.user.id }}, this)" id="block-btn-{{ post.user.id }}">
+                            {% if post.user in user.blocked_users.all %}
+                                ✅ Unblock User
+                            {% else %}
+                                🚫 Block User
+                            {% endif %}
+                        </button>
+                    {% endif %}
+                    {% if post.user == user %}
+                        <button onclick="deletePost({{ post.id }})" style="color:red;">🗑️ Delete Post</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }} {% else %}https://via.placeholder.com/600x320{% endif %}')"> 
+            <div class="visualizer-bars" id="viz{{post.id}}"></div>
+            <div class="overlay-ui">
+                {% if post.audio %}
+                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}"></audio>
+                    <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                {% else %}
+                    <p style="color: white; font-size: 12px;">Audio missing</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="post-actions-row">
+            <div class="action-item" title="Like">
+                <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" 
+                        id="heart-{{ post.id }}" 
+                        onclick="handleLike(this, '{{ post.id }}')">❤</button>
+                <span id="like-count-{{ post.id }}" class="action-value">{{ post.likes.count }}</span>
+            </div>
+            <div class="action-item" title="Unique Players">
+                <span class="action-icon">🎧</span>
+                <span id="unique-listeners-{{post.id}}" class="action-value">{{ post.listeners_count }}</span>
+            </div>
+            <div class="action-item" title="Total Replays">
+                <span class="action-icon">👂</span>
+                <span id="total-replays-{{post.id}}" class="action-value">{{ post.replays_count }}</span>
+            </div>
+            <div class="action-item" onclick="openShareMenu({{ post.id }}, '{{ request.build_absolute_uri }}')" title="Share">
+                <span class="action-icon">📤</span>
+                <span id="share-count-{{ post.id }}" class="action-value">{{ post.shares_count|default:0 }}</span>
+            </div>
+            
+            <div class="action-item">
+    <a href="{% url 'post_comments' post.id %}" class="comment-link">
+        <span class="action-icon">💬</span>
+        <span class="action-value">{{ post.comments.all.count }}</span>
+    </a>
+</div>
+        </div>
+    </div>
+    {% endif %}
+    {% empty %}
+    <div style="text-align:center; padding:100px; color:gray;">
+        <h2>Feed is empty</h2>
+        <p>Upload a post to get started!</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="shareModal" class="share-modal" onclick="closeShareMenu()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Share Post</h3>
+        <div class="share-options-grid">
+            <button onclick="copyLink()">🔗 Copy Link</button>
+            <button onclick="shareExternal('whatsapp')">💬 WhatsApp</button>
+            <button onclick="shareExternal('twitter')">🐦 Twitter</button>
+            <button onclick="shareExternal('facebook')">👥 Facebook</button>
+        </div>
+        <button onclick="closeShareMenu()">Cancel</button>
+    </div>
+</div>
+
+<a href="/create_post/" class="floating-btn">+</a>
+
+<script>
+    function getCSRFToken(){
+        return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
+    }
+
+    function handleLike(element, postId) {
+        const countLabel = document.getElementById(`like-count-${postId}`);
+        fetch(`/like-post/${postId}/`, { 
+            method: "POST", 
+            headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" } 
+        })
+        .then(r => r.json())
+        .then(data => {
+            countLabel.innerText = data.count;
+            data.liked ? element.classList.add('is-liked') : element.classList.remove('is-liked');
+        });
+    }
+
+    function togglePlay(id) {
+        let audio = document.getElementById("audio" + id);
+        let btn = document.getElementById("playBtn" + id);
+        let replaySpan = document.getElementById(`total-replays-${id}`);
+        let listenerSpan = document.getElementById(`unique-listeners-${id}`);
+        let bars = document.querySelectorAll(`#viz${id} .v-bar`);
+
+        if (audio.paused) {
+            audio.play();
+            btn.innerHTML = "⏸";
+            fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+            .then(r => r.json()).then(d => {
+                if (d.total_plays !== undefined) replaySpan.innerText = d.total_plays; 
+                if (d.unique_listeners !== undefined) listenerSpan.innerText = d.unique_listeners;
+            });
+            audio.ontimeupdate = () => {
+                bars.forEach(bar => { bar.style.height = (Math.random() * 260 + 20) + "px"; bar.style.opacity = "1"; });
+            };
+        } else {
+            audio.pause();
+            btn.innerHTML = "▶";
+            bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
+        }
+    }
+
+    function deletePost(id){
+        if(!confirm("Delete?")) return;
+        fetch(`/delete-post/${id}/`, { method:"POST", headers:{"X-CSRFToken":getCSRFToken()} })
+        .then(() => document.getElementById(`post-card-${id}`).remove());
+    }
+
+    const vizColors = ['#00a86b', 'rgba(0,168,107,0.5)', '#3498db', '#f1c40f', '#9b59b6', '#e67e22', '#795548', '#e91e63'];
+    document.querySelectorAll('.visualizer-bars').forEach(v => {
+        for(let i=0; i < 45; i++) {
+            let bar = document.createElement("div");
+            bar.className = "v-bar";
+            bar.style.backgroundColor = vizColors[i % vizColors.length];
+            v.appendChild(bar);
+        }
+    });
+
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            fetch(`/follow/${userId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const userButtons = document.querySelectorAll(`.follow-btn[data-user-id="${userId}"]`);
+                userButtons.forEach(btn => {
+                    const text = btn.querySelector('.btn-text');
+                    if (data.status === 'followed') {
+                        btn.classList.add('following');
+                        text.innerHTML = 'Following';
+                    } else {
+                        btn.classList.remove('following');
+                        text.innerHTML = '+ Follow';
+                    }
+                });
+                const countBadges = document.querySelectorAll(`#follower-count-${userId}`);
+                countBadges.forEach(badge => {
+                    badge.innerHTML = `${data.followers_count} followers`;
+                });
+            });
+        });
+    });
+
+    let currentShareUrl = ""; let currentPostId = null;
+    function openShareMenu(postId, url) { currentPostId = postId; currentShareUrl = url; document.getElementById('shareModal').style.display = 'flex'; }
+    function closeShareMenu() { document.getElementById('shareModal').style.display = 'none'; }
+    function incrementShareCount(id) {
+        fetch(`/share-count/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+        .then(r => r.json()).then(d => {
+            if(d.shares) document.getElementById(`share-count-${id}`).innerText = d.shares;
+        });
+    }
+    function copyLink() {
+        navigator.clipboard.writeText(currentShareUrl).then(() => {
+            alert("Copied!"); incrementShareCount(currentPostId); closeShareMenu();
+        });
+    }
+    function shareExternal(platform) {
+        let link = platform === 'whatsapp' ? `https://wa.me/?text=${currentShareUrl}` : 
+                   platform === 'twitter' ? `https://twitter.com/intent/tweet?url=${currentShareUrl}` :
+                   `https://www.facebook.com/sharer/sharer.php?u=${currentShareUrl}`;
+        window.open(link, '_blank');
+        incrementShareCount(currentPostId);
+        closeShareMenu();
+    }
+
+    function toggleDots(element) {
+        document.querySelectorAll('.options-dropdown').forEach(m => {
+            if (m !== element.nextElementSibling) m.style.display = 'none';
+        });
+        const dropdown = element.nextElementSibling;
+        dropdown.style.display = (dropdown.style.display === 'block') ? 'none' : 'block';
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.dots-menu')) {
+            document.querySelectorAll('.options-dropdown').forEach(m => m.style.display = 'none');
+        }
+    }
+
+    function toggleBlockUser(userId, btnElement) {
+        fetch(`/block-user/${userId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/json"
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.is_blocked) {
+                btnElement.innerText = "✅ Unblock User";
+            } else {
+                btnElement.innerText = "🚫 Block User";
+            }
+        })
+        .catch(err => console.error("Error:", err));
+    }
+</script>
+</body>
+</html>
