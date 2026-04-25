@@ -11,7 +11,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-hsy53_7qwm+25*bs898nb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['mysite-yqfn.onrender.com', 'localhost', '127.0.0.1']
+
+ALLOWED_HOSTS = [
+    'mysite-2-l8z8.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
+
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -137,3 +144,10 @@ RECAPTCHA_PRIVATE_KEY = ' 6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu '
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 ACCOUNT_ADAPTER = 'core.adapters.MyAccountAdapter'
+
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://mysite-2-l8z8.onrender.com'
+]
