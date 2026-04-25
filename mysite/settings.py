@@ -13,11 +13,15 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 
 ALLOWED_HOSTS = [
-    'mysite-2-l8z8.onrender.com',
-    'localhost',
-    '127.0.0.1'
+    "mysite-2-l8z8.onrender.com",
+    "mysite-yqfn.onrender.com",
+    "localhost",
+    "127.0.0.1"
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://mysite-2-l8z8.onrender.com"
+]
 
 
 # Application definition
@@ -147,7 +151,3 @@ ACCOUNT_ADAPTER = 'core.adapters.MyAccountAdapter'
 
 
 
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://mysite-2-l8z8.onrender.com'
-]
