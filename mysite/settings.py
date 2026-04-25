@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-hsy53_7qwm+25*bs898nbfk+s74owevbgl9_(!ts@7g#1y-r85
 DEBUG = False
 
 # This allows your local computer AND Render to run the site
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
+
+ALLOWED_HOSTS = ['mysite-yqfn.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
