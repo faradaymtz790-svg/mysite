@@ -13,10 +13,9 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 
 ALLOWED_HOSTS = [
-    "mysite-2-l8z8.onrender.com",
-    "mysite-yqfn.onrender.com",
-    "localhost",
-    "127.0.0.1"
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',   # 👈 BEST FIX (covers all Render URLs)
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -142,10 +141,6 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# reCAPTCHA
-RECAPTCHA_PUBLIC_KEY = ' 6LeiG7QsAAAAAKUF2Yj01yJ4X7CmhmDdXb4X_Z6X '
-RECAPTCHA_PRIVATE_KEY = ' 6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu '
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 ACCOUNT_ADAPTER = 'core.adapters.MyAccountAdapter'
 

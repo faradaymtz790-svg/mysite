@@ -48,7 +48,8 @@ urlpatterns += i18n_patterns(
     path('rosetta/', include('rosetta.urls')),
     path('accounts/', include('allauth.urls')),
 
-    path('home/', views.home_view, name='home'),
+    
+    path('', views.home_view, name='root'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     

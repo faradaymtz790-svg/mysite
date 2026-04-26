@@ -1,30 +1,29 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+
+
+import time
+import random
+import json
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-import json
 
-from .models import Post, Follow, Comment, Notification
 
 from django.views.decorators.csrf import csrf_exempt
-
 from django.utils.translation import gettext as _
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Comment
+from .models import Post, Follow, Comment, Notification, PostLikes
 from .forms import CommentForm
 
 
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from .models import Post, PostLikes
 
 
-from django.urls import path, include
-from core import views  # This line must be at the very far left (no spaces)
+
+# This line must be at the very far left (no spaces)
 
  # Use 'core' (or whatever your app name is)
 
@@ -75,12 +74,6 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 
 
-import time
-import random
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.contrib.auth import login
 # from ratelimit.decorators import ratelimit # Uncomment if you install django-ratelimit
 
 # @ratelimit(key='ip', rate='3/15m', block=True) # Optional: prevents brute force
@@ -93,30 +86,50 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 
+
+
 def signup(request):
     if request.method == 'POST':
-        # --- 1. SECURITY CHECKS (Honeypot, Time, Math) ---
-        
-        # Honeypot: Catch simple bots
+
+        # --- 1. SECURITY CHECKS (Honeypot, Time, CAPTCHA) ---
+
+        # Honeypot (bot trap)
         if request.POST.get('company_name_extra'):
             return redirect('signup')
 
-        # Time Delay: Catch fast automated scripts
+        # Time check
         load_time = request.POST.get('form_load_time')
-        submit_time = int(time.time())
-        if load_time:
-            try:
+
+        try:
+            submit_time = int(time.time())
+
+            if load_time:
                 if submit_time - int(load_time) < 4:
                     messages.error(request, "Form submitted too quickly. Are you a bot?")
                     return redirect('signup')
-            except ValueError:
+
+        except (ValueError, TypeError):
+            return redirect('signup')
+
+        # CAPTCHA (SAFE VERSION)
+        try:
+            user_answer = request.POST.get('captcha_answer')
+            correct_answer = request.session.get('captcha_result')
+
+            if correct_answer is None:
+                messages.error(request, "Captcha expired. Please try again.")
                 return redirect('signup')
 
-        # Math CAPTCHA: Catch logic-based bots
-        user_answer = request.POST.get('captcha_answer')
-        correct_answer = request.session.get('captcha_result')
-        if not user_answer or int(user_answer) != correct_answer:
-            messages.error(request, "Incorrect math answer. Please try again.")
+            if user_answer is None:
+                messages.error(request, "Please answer the captcha.")
+                return redirect('signup')
+
+            if int(user_answer) != int(correct_answer):
+                messages.error(request, "Incorrect math answer. Please try again.")
+                return redirect('signup')
+
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid captcha input.")
             return redirect('signup')
 
         # --- 2. DATA CAPTURE ---
@@ -138,36 +151,37 @@ def signup(request):
             messages.error(request, "Username is already taken.")
             return redirect('signup')
 
-        # --- 4. CREATION & AUTHENTICATION ---
+        # --- 4. CREATE USER ---
         try:
-            # Create the user
-            user = User.objects.create_user(username=username, email=email, password=password)
-            
-            # Optional: Save phone if you have it in a profile model
-            # phone = request.POST.get('phone')
-            # if hasattr(user, 'profile'):
-            #     user.profile.phone = phone
-            #     user.profile.save()
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
 
-            # Clean up session
-            if 'captcha_result' in request.session:
-                del request.session['captcha_result']
+            # Clean session safely
+            request.session.pop('captcha_result', None)
 
-            # FIX: Specify the backend to resolve the Multiple Authentication Backends error
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            
-            return redirect('niche_selection') 
+            # LOGIN USER (SAFE)
+            login(request, user)
+
+            return redirect('niche_selection')
 
         except Exception as e:
             messages.error(request, f"Signup failed: {e}")
             return redirect('signup')
 
-    # GET REQUEST: Logic to load the form
+    # --- GET REQUEST (LOAD FORM) ---
     num1 = random.randint(1, 10)
     num2 = random.randint(1, 10)
+
     request.session['captcha_result'] = num1 + num2
-    
-    return render(request, 'signup.html', {'num1': num1, 'num2': num2})
+
+    return render(request, 'signup.html', {
+        'num1': num1,
+        'num2': num2
+    })
+
 
 
 
