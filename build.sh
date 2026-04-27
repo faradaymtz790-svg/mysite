@@ -6,7 +6,7 @@ set -o errexit
 pip install -r requirements.txt
 
 # Convert static files (CSS/JS) into a production-ready format
-python manage.py collectstatic --no-input
+python manage.py collectstatic --noinput
 
 # Run database migrations
 python manage.py migrate
