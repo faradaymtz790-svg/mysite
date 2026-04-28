@@ -15,11 +15,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-development-only-key'
 # Set DEBUG to False in Render environment variables
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-
-# ALLOWED HOSTS - Allow all Render subdomains to be safe
+# ALLOWED HOSTS
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
-# CSRF - Make sure your specific domain is trusted
+# Render specific hostname for CSRF
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
-    'whitenoise.runserver_nostatic', # Optimized static serving
+    'whitenoise.runserver_nostatic', 
 
     # Local apps
     'core', 
@@ -59,9 +59,9 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Keep this high up
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.locale.LocaleMiddleware',  # Crucial for i18n_patterns
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -79,14 +79,15 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'], # For global templates
+        'APP_DIRS': True,                 # Looks in core/templates/
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'core.context_processors.notification_count', # Your custom processor
+                'core.context_processors.notification_count', 
             ],
         },
     },
@@ -95,12 +96,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # =========================
-# DATABASE (PostgreSQL)
+# DATABASE (Dynamic for Render)
 # =========================
 
-
-
-# This logic tells Django: "If I'm on Render, use Postgres. If I'm on my PC, use SQLite."
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
@@ -123,15 +121,16 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # =========================
-# RECAPTCHA & AUTH
+# AUTH & REDIRECTS
 # =========================
 
-RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeiG7QsAAAAAKUF2Yj01yJ4X7CmhmDdXb4X_Z6X')
-RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu')
-
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'profile'
+LOGIN_REDIRECT_URL = 'feed'  # Redirect here after successful login
 LOGOUT_REDIRECT_URL = 'login'
+
+# Allauth specifics (if needed)
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
 
 # =========================
 # INTERNATIONALIZATION
@@ -149,3 +148,16 @@ LANGUAGES = [
 ]
 
 LOCALE_PATHS = [BASE_DIR / 'locale']
+
+# Automatically append slashes to URLs
+APPEND_SLASH = True
+
+# =========================
+# RECAPTCHA
+# =========================
+
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeiG7QsAAAAAKUF2Yj01yJ4X7CmhmDdXb4X_Z6X')
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu')
+
+# Standard Django requirement
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

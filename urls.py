@@ -50,6 +50,11 @@ urlpatterns += i18n_patterns(
 
     
     path('', views.home_view, name='root'),
+
+    from django.views.generic import RedirectView
+
+# Inside your urlpatterns...
+path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     

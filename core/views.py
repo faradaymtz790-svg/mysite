@@ -30,9 +30,10 @@ from .forms import CommentForm
 # =========================
 # BASIC PAGES
 # =========================
-def home_view(request):
-    return render(request, 'home.html')
 
+def home_view(request):
+    # This sends anyone who hits the home page directly to signup
+    return redirect('signup')
 
 def language(request):
     return render(request, 'language.html')
