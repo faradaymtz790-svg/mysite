@@ -79,8 +79,11 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # For global templates
-        'APP_DIRS': True,                 # Looks in core/templates/
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),        # Root level
+            os.path.join(BASE_DIR, 'core', 'templates'), # Inside core app
+        ],
+        'APP_DIRS': True,                 
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -96,7 +99,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # =========================
-# DATABASE (Dynamic for Render)
+# DATABASE (Dynamic for Render/Local)
 # =========================
 
 DATABASES = {
@@ -111,24 +114,24 @@ DATABASES = {
 # =========================
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # WhiteNoise production storage
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # =========================
 # AUTH & REDIRECTS
 # =========================
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'feed'  # Redirect here after successful login
+LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Allauth specifics (if needed)
+# Allauth specifics
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
 
@@ -147,7 +150,7 @@ LANGUAGES = [
     ('fr', 'French'),
 ]
 
-LOCALE_PATHS = [BASE_DIR / 'locale']
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 # Automatically append slashes to URLs
 APPEND_SLASH = True
