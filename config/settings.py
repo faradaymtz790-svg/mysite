@@ -100,10 +100,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # DATABASE (PostgreSQL)
 # =========================
 
+
+
+# This logic tells Django: "If I'm on Render, use Postgres. If I'm on my PC, use SQLite."
 DATABASES = {
     'default': dj_database_url.config(
-        # Set DATABASE_URL in Render to your Internal Database URL
-        default=os.environ.get('DATABASE_URL'),
+        default='sqlite:///db.sqlite3',
         conn_max_age=600
     )
 }
