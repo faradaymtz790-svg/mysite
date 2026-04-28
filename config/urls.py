@@ -44,7 +44,7 @@ urlpatterns = [
 # 🔹 LANGUAGE URLs (Wrapped in i18n_patterns)
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
-    
+    path('', views.home_view, name='index')
     path('rosetta/', include('rosetta.urls')),
     path('accounts/', include('allauth.urls')),
 
@@ -99,4 +99,4 @@ path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
 
 # 🔹 MEDIA FILES
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
