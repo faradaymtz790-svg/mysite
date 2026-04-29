@@ -60,9 +60,9 @@ INSTALLED_APPS = [
 
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dwccyjh8z',
-    'API_KEY': '248674278674249',
-    'API_SECRET': '248674278674249'
+    'CLOUD_NAME':'dwccyjh8z',
+    'API_KEY':'248674278674249',
+    'API_SECRET':' WNIl9RI-ydiYETlwAof-BmJorgY'
 }
 
 # This tells Django to use Cloudinary for Media
