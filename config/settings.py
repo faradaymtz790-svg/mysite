@@ -9,22 +9,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # =========================
 
-# On Render, set this in the Environment tab. 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-development-only-key')
 
-# Set DEBUG to False in Render environment variables
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ALLOWED HOSTS
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'mysite1-9fu9.onrender.com']
 
 # Render specific hostname for CSRF
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://*.onrender.com"]
-    "https://mysite1-9fu9.onrender.com"
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:8000",
+        "https://*.onrender.com",
+        "https://mysite1-9fu9.onrender.com"
+    ]
 
 # =========================
 # APPLICATIONS
@@ -44,8 +44,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.google',
+    # Commented out to prevent 500 error until configured in Admin
+    # 'allauth.socialaccount.providers.facebook',
+    # 'allauth.socialaccount.providers.google',
     'whitenoise.runserver_nostatic', 
 
     # Local apps
@@ -62,7 +63,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',  # Crucial for i18n_patterns
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -81,8 +82,6 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            # This tells Django to look inside: project_root/mysite/templates/
-            os.path.join(BASE_DIR, 'mysite', 'templates'), 
             os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
@@ -92,18 +91,16 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                #'core.context_processors.notification_count', 
+                # 'core.context_processors.notification_count', 
             ],
         },
     },
 ]
 
-
-
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # =========================
-# DATABASE (Dynamic for Render/Local)
+# DATABASE
 # =========================
 
 DATABASES = {
@@ -135,6 +132,11 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
+# Allauth Config
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
 # =========================
 # INTERNATIONALIZATION
@@ -152,8 +154,6 @@ LANGUAGES = [
 ]
 
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
-
-# Automatically append slashes to URLs
 APPEND_SLASH = True
 
 # =========================
@@ -163,11 +163,4 @@ APPEND_SLASH = True
 RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeiG7QsAAAAAKUF2Yj01yJ4X7CmhmDdXb4X_Z6X')
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu')
 
-# Standard Django requirement
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# Replace your old ACCOUNT settings with these:
-# KEEP THESE (They are the modern 2026 way)
-ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_EMAIL_REQUIRED = True  # Add this back so email is actually saved
