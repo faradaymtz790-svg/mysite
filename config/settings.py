@@ -62,7 +62,7 @@ INSTALLED_APPS = [
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME':'dwccyjh8z',
     'API_KEY':'248674278674249',
-    'API_SECRET':' WNIl9RI-ydiYETlwAof-BmJorgY'
+    'API_SECRET':'399534717969768'
 }
 
 # This tells Django to use Cloudinary for Media
@@ -192,3 +192,4 @@ CLOUDINARY_STORAGE = {
 
 # This is the "Magic Switch" that sends uploads to the Cloud
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
