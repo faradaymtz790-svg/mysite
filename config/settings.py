@@ -20,13 +20,17 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
-    CSRF_TRUSTED_ORIGINS = [
-        "http://localhost:8000",
-        "https://*.onrender.com",
-        "https://mysite1-9fu9.onrender.com"
-    ]
+  
+ # Force Django to trust your Render URL
+CSRF_TRUSTED_ORIGINS = [
+    "https://mysite1-9fu9.onrender.com",
+    "https://*.onrender.com",
+]
 
-# =========================
+# This is often needed on Render to handle the https transition
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') 
+  
+
 # APPLICATIONS
 # =========================
 
