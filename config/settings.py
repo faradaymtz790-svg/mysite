@@ -38,6 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # added
+    'cloudinary_storage',
+    'cloudinary',
+    # ...
+
     # Third-party
     'rosetta',
     'django_recaptcha',
@@ -52,6 +57,18 @@ INSTALLED_APPS = [
     # Local apps
     'core', 
 ]
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dwccyjh8z',
+    'API_KEY': '248674278674249',
+    'API_SECRET': '248674278674249'
+}
+
+# This tells Django to use Cloudinary for Media
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
 
 SITE_ID = 1
 
@@ -164,3 +181,14 @@ RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeiG7QsAAAAAKUF2
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# This is the "Magic Switch" that sends uploads to the Cloud
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
