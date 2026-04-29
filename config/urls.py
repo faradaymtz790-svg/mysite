@@ -1,33 +1,3 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
-from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls.i18n import i18n_patterns
-from core import views  # ✅ Fixed: Ensure this points to 'core'
-from django.conf import settings
-from django.conf.urls.static import static
-
-from django.urls import path, include
-from django.conf.urls.i18n import i18n_patterns
-from django.conf import settings
-from django.conf.urls.static import static
-
-
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
@@ -36,12 +6,12 @@ from django.conf.urls.static import static
 from core import views 
 from core.views import my_profile_redirect
 
-# 🔹 NON-language URLs (Must stay outside i18n_patterns)
+# 1. NON-language URLs
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 
-# 🔹 LANGUAGE URLs (Wrapped in i18n_patterns)
+# 2. LANGUAGE URLs
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('', views.home_view, name='index'),
@@ -78,10 +48,8 @@ urlpatterns += i18n_patterns(
     path('notifications/read/', views.mark_notifications_read, name='mark_read'),
     path('like-comment/<int:comment_id>/', views.like_comment, name='like_comment'),
     path('delete-post/<int:id>/', views.delete_post),
-    # Make sure the name is exactly 'post_comments'
-path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
+    path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
 
-    # ⚙️ SETTINGS SECTION
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),
     path('settings/account/', views.account_view, name='account'),
@@ -97,14 +65,6 @@ path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
     prefix_default_language=False  
 )
 
-# 🔹 MEDIA FILES
-if settings.DEBUG:
-   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-   
-# This allows Django to serve media files like audio and images on Render
-if not settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# 3. MEDIA & STATIC serving (Crucial for Render)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
