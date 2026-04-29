@@ -24,6 +24,7 @@ if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
     CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://*.onrender.com"]
+    "https://mysite1-9fu9.onrender.com"
 
 # =========================
 # APPLICATIONS
@@ -134,9 +135,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Allauth specifics
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_REQUIRED = True
 
 # =========================
 # INTERNATIONALIZATION
@@ -170,5 +168,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Replace your old ACCOUNT settings with these:
+# KEEP THESE (They are the modern 2026 way)
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
+ACCOUNT_EMAIL_REQUIRED = True  # Add this back so email is actually saved

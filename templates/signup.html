@@ -1,4 +1,7 @@
-{% load socialaccount %}
+{% load static %}
+{# We comment out socialaccount until you configure it in Admin to prevent 500 errors #}
+{# {% load socialaccount %} #}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,15 +35,13 @@
         .social button:hover, .social a:hover { background: #f1f5f9; transform: translateY(-2px); border-color: var(--border-blue); }
         .login-link { display: inline-block; margin-top: 35px; color: var(--primary-blue); text-decoration: none; font-weight: 700; font-size: 15px; }
         .login-link:hover { text-decoration: underline; }
-        
-        /* New Math Label Style */
         .math-label { background: #eef2ff; padding: 10px 20px; border-radius: 12px; margin-bottom: 10px; color: var(--primary-blue); font-weight: 700; border: 1px dashed var(--border-blue); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="/static/mylogo.png" class="logo-main" alt="Logo">
+    <img src="{% static 'mylogo.png' %}" class="logo-main" alt="Logo">
     <h1>plugbar</h1>
     <h3><i><b>Expand skills, get notified and be entertained with your listening networks</b></i></h3>
 
@@ -54,11 +55,9 @@
 
     <form method="POST" action="{% url 'signup' %}">
         {% csrf_token %}
-
         <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1;">
             <input type="text" name="company_name_extra" tabindex="-1" autocomplete="off">
         </div>
-
         <input type="hidden" name="form_load_time" id="form_load_time">
 
         <div class="form-group">
@@ -99,14 +98,15 @@
 
     <div class="divider">OR</div>
     <div class="social">
-        <button type="button">
+        {# Changed to standard buttons to avoid "SocialApp.DoesNotExist" crash #}
+        <button type="button" onclick="alert('Social login coming soon!')">
             <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" width="20" alt="FB">
             Continue with Facebook
         </button>
-        <a href="{% provider_login_url 'google' method='oauth2' %}">
+        <button type="button" onclick="alert('Social login coming soon!')">
             <img src="https://cdn-icons-png.flaticon.com/512/281/281764.png" width="20" alt="Google">
             Continue with Google
-        </a>
+        </button>
     </div>
     <a href="{% url 'login' %}" class="login-link">Already have an account? Login →</a>
 </div>
@@ -128,7 +128,6 @@
         field.type = field.type === "password" ? "text" : "password";
     }
 
-    // Capture Load Time for Delay Check
     document.getElementById('form_load_time').value = Math.floor(Date.now() / 1000);
 
     document.querySelector("form").addEventListener("submit", function() {
