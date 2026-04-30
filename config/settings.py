@@ -176,8 +176,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('dwccyjh8z'),
     'API_KEY': os.environ.get('978525184535127'),
-    'API_SECRET': os.environ.get('fC4CakJMbY5a5YY29wluEauaOwk'), 
+    'API_SECRET': os.environ.get('fC4CakJMbY5a5YY29wluEauaOwk'),
+    'SECURE': True,
 }
 
 # This is the line that actually switches from local to cloud
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = '/media/'

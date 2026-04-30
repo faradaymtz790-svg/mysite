@@ -573,26 +573,13 @@ def update_profile(request):
         p.bio = request.POST.get('bio')
         p.location = request.POST.get('location')
         p.links = request.POST.get('links')
-        
-        # Function to handle ANY image type and compress it
-        def process_image(uploaded_file):
-            try:
-                img = Image.open(uploaded_file)
-                # Convert to RGB to support PNG/WebP conversion to JPEG
-                if img.mode in ("RGBA", "P"):
-                    img = img.convert("RGB")
-                
-                output = io.BytesIO()
-                # Saving as JPEG handles most types and reduces size
-                img.save(output, format='JPEG', quality=70)
-                return ContentFile(output.getvalue(), name=uploaded_file.name)
-            except Exception:
-                return uploaded_file # Fallback if Pillow fails
 
+        # Directly assign the files. 
+        # Cloudinary will handle the "heavy lifting" of storage and compression.
         if request.FILES.get('image'): 
-            p.image = process_image(request.FILES.get('image'))
+            p.image = request.FILES.get('image')
         if request.FILES.get('cover_photo'): 
-            p.cover_photo = process_image(request.FILES.get('cover_photo'))
+            p.cover_photo = request.FILES.get('cover_photo')
             
         p.save()
         return JsonResponse({'success': True})
