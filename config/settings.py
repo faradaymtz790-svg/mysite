@@ -8,16 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =========================
 # SECURITY
 # =========================
-
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-development-only-key')
 
+# Set DEBUG to False in Render environment variable
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'mysite1-9fu9.onrender.com']
 
-# Render specific hostname for CSRF
-
-# Render specific hostname for CSRF
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
@@ -25,17 +22,15 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
         "https://mysite1-9fu9.onrender.com",
-        "https://*.onrender.com",
     ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-  
 
+# =========================
 # APPLICATIONS
 # =========================
-
 INSTALLED_APPS = [
-    'cloudinary_storage',       # MUST be at the top
+    'cloudinary_storage',         # MUST be at the top
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,13 +49,11 @@ INSTALLED_APPS = [
     'core', 
 ]
 
-
 SITE_ID = 1
 
 # =========================
 # MIDDLEWARE
 # =========================
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', 
@@ -79,13 +72,10 @@ ROOT_URLCONF = 'config.urls'
 # =========================
 # TEMPLATES
 # =========================
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),
-        ],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -93,7 +83,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # 'core.context_processors.notification_count', 
             ],
         },
     },
@@ -104,7 +93,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # =========================
 # DATABASE
 # =========================
-
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
@@ -115,26 +103,37 @@ DATABASES = {
 # =========================
 # STATIC & MEDIA FILES
 # =========================
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# WhiteNoise production storage
+# Fix for the "No directory at: staticfiles" UserWarning
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT)
+
+# WhiteNoise storage for static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Cloudinary storage for media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Corrected Cloudinary Logic
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dwccyjh8z',
+    'API_KEY': '978525184535127',
+    'API_SECRET': 'fC4CakJMbY5a5YY29wluEauaOwk',
+    'SECURE': True,
+}
 
 # =========================
 # AUTH & REDIRECTS
 # =========================
-
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Allauth Config
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -143,7 +142,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 # =========================
 # INTERNATIONALIZATION
 # =========================
-
 LANGUAGE_CODE = 'en'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -161,25 +159,7 @@ APPEND_SLASH = True
 # =========================
 # RECAPTCHA
 # =========================
-
 RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeiG7QsAAAAAKUF2Yj01yJ4X7CmhmDdXb4X_Z6X')
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHvODEtyCrJ40ZUqkSMEoXevDStu')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-
-# =========================
-# PERMANENT STORAGE (CLOUDINARY)
-# =========================
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('dwccyjh8z'),
-    'API_KEY': os.environ.get('978525184535127'),
-    'API_SECRET': os.environ.get('fC4CakJMbY5a5YY29wluEauaOwk'),
-    'SECURE': True,
-}
-
-# This is the line that actually switches from local to cloud
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-MEDIA_URL = '/media/'
