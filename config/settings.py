@@ -30,7 +30,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # APPLICATIONS
 # =========================
 INSTALLED_APPS = [
-    'cloudinary_storage',         # MUST be at the top
+    'cloudinary_storage',         # ✅ MUST be at the top
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -101,7 +101,7 @@ DATABASES = {
 }
 
 # =========================
-# STATIC & MEDIA FILES
+# STATIC & MEDIA FILES (Merged Fix)
 # =========================
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -111,11 +111,10 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 if not os.path.exists(STATIC_ROOT):
     os.makedirs(STATIC_ROOT)
 
-# WhiteNoise storage for static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Cloudinary storage for media files
+# ✅ UPDATED: Cloudinary handles both Static and Media for Render
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
