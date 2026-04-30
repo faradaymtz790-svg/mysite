@@ -16,62 +16,43 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'mysite1-9fu9.onrender.com']
 
 # Render specific hostname for CSRF
+
+# Render specific hostname for CSRF
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
-  
- # Force Django to trust your Render URL
-CSRF_TRUSTED_ORIGINS = [
-    "https://mysite1-9fu9.onrender.com",
-    "https://*.onrender.com",
-]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:8000",
+        "https://mysite1-9fu9.onrender.com",
+        "https://*.onrender.com",
+    ]
 
-# This is often needed on Render to handle the https transition
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
   
 
 # APPLICATIONS
 # =========================
 
 INSTALLED_APPS = [
+    'cloudinary_storage',       # MUST be at the top
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', # Keep this below cloudinary_storage
 
-    # added
-    'cloudinary_storage',
     'cloudinary',
-    # ...
-
-    # Third-party
     'rosetta',
     'django_recaptcha',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # Commented out to prevent 500 error until configured in Admin
-    # 'allauth.socialaccount.providers.facebook',
-    # 'allauth.socialaccount.providers.google',
     'whitenoise.runserver_nostatic', 
 
-    # Local apps
     'core', 
 ]
-
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME':'dwccyjh8z',
-    'API_KEY':'248674278674249',
-    'API_SECRET':'399534717969768'
-}
-
-# This tells Django to use Cloudinary for Media
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
 
 
 SITE_ID = 1
@@ -188,12 +169,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+# =========================
+# PERMANENT STORAGE (CLOUDINARY)
+# =========================
+
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': os.environ.get('dwccyjh8z'),
+    'API_KEY': os.environ.get('978525184535127'),
+    'API_SECRET': os.environ.get('fC4CakJMbY5a5YY29wluEauaOwk'), 
 }
 
-# This is the "Magic Switch" that sends uploads to the Cloud
+# This is the line that actually switches from local to cloud
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
