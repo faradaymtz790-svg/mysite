@@ -3,22 +3,24 @@ from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 from core import views 
 from core.views import my_profile_redirect
 
-# 1. NON-language URLs
+# 🔹 NON-language URLs
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 
-# 2. LANGUAGE URLs
+# 🔹 LANGUAGE URLs
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
-    path('', views.home_view, name='index'),
     path('rosetta/', include('rosetta.urls')),
     path('accounts/', include('allauth.urls')),
 
-    path('home/', views.home_view, name='home'),
+    # Root redirects to signup
+    path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
+    
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     
@@ -50,6 +52,7 @@ urlpatterns += i18n_patterns(
     path('delete-post/<int:id>/', views.delete_post),
     path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
 
+    # ⚙️ SETTINGS SECTION
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),
     path('settings/account/', views.account_view, name='account'),
@@ -65,6 +68,7 @@ urlpatterns += i18n_patterns(
     prefix_default_language=False  
 )
 
-# 3. MEDIA & STATIC serving (Crucial for Render)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# 🔹 MEDIA FILES (Only served by Django in Local Dev)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

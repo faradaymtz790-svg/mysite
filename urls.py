@@ -1,60 +1,26 @@
-"""
-URL configuration for mysite project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
-from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls.i18n import i18n_patterns
-from core import views  # ✅ Fixed: Ensure this points to 'core'
-from django.conf import settings
-from django.conf.urls.static import static
-
-from django.urls import path, include
-from django.conf.urls.i18n import i18n_patterns
-from django.conf import settings
-from django.conf.urls.static import static
-
-
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 from core import views 
 from core.views import my_profile_redirect
 
-# 🔹 NON-language URLs (Must stay outside i18n_patterns)
+# 🔹 NON-language URLs
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 
-# 🔹 LANGUAGE URLs (Wrapped in i18n_patterns)
+# 🔹 LANGUAGE URLs
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
-    
     path('rosetta/', include('rosetta.urls')),
     path('accounts/', include('allauth.urls')),
 
+    # Root redirects to signup
+    path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
     
-    path('', views.home_view, name='root'),
-
-    from django.views.generic import RedirectView
-
-# Inside your urlpatterns...
-path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     
@@ -84,8 +50,7 @@ path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
     path('notifications/read/', views.mark_notifications_read, name='mark_read'),
     path('like-comment/<int:comment_id>/', views.like_comment, name='like_comment'),
     path('delete-post/<int:id>/', views.delete_post),
-    # Make sure the name is exactly 'post_comments'
-path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
+    path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
 
     # ⚙️ SETTINGS SECTION
     path('settings/', views.settings_view, name='settings'),
@@ -103,6 +68,7 @@ path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
     prefix_default_language=False  
 )
 
-# 🔹 MEDIA FILES
+# 🔹 MEDIA FILES (Only served by Django in Local Dev)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
