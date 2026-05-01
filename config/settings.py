@@ -15,6 +15,10 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'mysite1-9fu9.onrender.com']
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
@@ -30,13 +34,14 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # APPLICATIONS
 # =========================
 INSTALLED_APPS = [
-    'cloudinary_storage',         # ✅ MUST be at the top
+    'cloudinary_storage',  
+    'whitenoise.runserver_nostatic',          # ✅ MUST be above staticfiles
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles', # Keep this below cloudinary_storage
+    'django.contrib.staticfiles', 
 
     'cloudinary',
     'rosetta',
@@ -44,7 +49,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'whitenoise.runserver_nostatic', 
+   
 
     'core', 
 ]
@@ -91,7 +96,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # =========================
-# DATABASE
+# DATABASE (Persistent Fix)
 # =========================
 DATABASES = {
     'default': dj_database_url.config(
@@ -101,30 +106,41 @@ DATABASES = {
 }
 
 # =========================
-# STATIC & MEDIA FILES (Merged Fix)
+# STATIC & MEDIA FILES
 # =========================
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Fix for the "No directory at: staticfiles" UserWarning
-if not os.path.exists(STATIC_ROOT):
-    os.makedirs(STATIC_ROOT)
+# ✅ Optimized Storage: WhiteNoise for CSS/JS, Cloudinary for Media (Audio/Images)
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
-# ✅ UPDATED: Cloudinary handles both Static and Media for Render
-STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+# Compatibility for older Django versions
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Corrected Cloudinary Logic
+# =========================
+# CLOUDINARY CONFIG
+# =========================
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dwccyjh8z',
     'API_KEY': '978525184535127',
     'API_SECRET': 'fC4CakJMbY5a5YY29wluEauaOwk',
     'SECURE': True,
+    # Letting the backend determine the type is usually safer for mixed media
 }
+
 
 # =========================
 # AUTH & REDIRECTS
