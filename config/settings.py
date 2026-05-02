@@ -8,9 +8,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =========================
 # SECURITY
 # =========================
-
-
-import os
 SECRET_KEY = os.environ.get('SECRET_KEY', 'a-safe-fallback-for-local-only')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
@@ -50,7 +47,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-   
 
     'core', 
 ]
@@ -109,45 +105,21 @@ DATABASES = {
 # =========================
 # STATIC & MEDIA FILES
 # =========================
-
-
-
-# =========================
-# STATIC & MEDIA FILES
-# =========================
-
-
-
-# Where Django will collect all static files
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# The URL to use when referring to static files
-STATIC_URL = '/static/'
-
-
+# ✅ Updated to ensure it looks in the root static folder
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# ✅ FIX: Changed "CompressedManifestStaticFilesStorage" to "CompressedStaticFilesStorage"
-
-
-# NEW SETTING
-# settings.py
-
-# settings.py
-
+# Modern Django 4.2+ Storage Configuration
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        # ✅ CHANGE THIS: Use the basic storage to skip compression checks
         "BACKEND": "whitenoise.storage.StaticFilesStorage",
     },
 }
-
-# Update the legacy setting too if you have it
-STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
-
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -161,10 +133,6 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': 'fC4CakJMbY5a5YY29wluEauaOwk',
 }
 
-# Add this to help Cloudinary differentiate between images and audio
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-
 # =========================
 # AUTH & REDIRECTS
 # =========================
@@ -172,6 +140,7 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
+# Updated allauth settings to resolve deprecation warnings
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -202,8 +171,9 @@ RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHv
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
+# =========================
+# LOGGING (Prevents NameError: logger in views)
+# =========================
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
