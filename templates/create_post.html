@@ -5,7 +5,7 @@
 <title>Create Post</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background: linear-gradient(rgba(0,128,0,0.5), rgba(255,255,255,0.5));
         display: flex;
         justify-content: center;
@@ -15,97 +15,118 @@
     }
 
     .container {
-        width: 90%;
+        width: 95%;
         max-width: 500px;
-        padding: 20px;
+        padding: 25px;
         border-radius: 20px;
-        background: rgba(255,255,255,0.7);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
         animation: fadeIn 0.7s ease;
     }
 
     h2 {
         text-align: center;
-        color: green;
+        color: #2d5a27;
+        margin-top: 0;
     }
 
     textarea {
         width: 100%;
         height: 120px;
-        padding: 10px;
+        padding: 12px;
         border-radius: 15px;
-        border: 1px solid green;
+        border: 2px solid #a8cba4;
         resize: none;
         outline: none;
-        margin-bottom: 10px;
+        font-size: 16px;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+        border-color: green;
     }
 
     .counter {
         text-align: right;
         font-size: 12px;
         color: green;
-        margin-bottom: 10px;
+        margin-top: 5px;
     }
 
     .upload-section {
         display: flex;
-        justify-content: space-between;
+        gap: 10px;
         margin: 15px 0;
     }
 
     .icon-box {
         flex: 1;
-        margin: 5px;
-        padding: 15px;
-        border-radius: 15px;
-        border: 1px solid green;
+        padding: 15px 10px;
+        border-radius: 12px;
+        border: 2px dashed green;
         text-align: center;
         cursor: pointer;
-        transition: 0.3s;
+        transition: all 0.3s;
         color: green;
+        font-weight: bold;
+        background: rgba(255,255,255,0.5);
     }
 
     .icon-box:hover {
         background: green;
         color: white;
-        transform: scale(1.05);
     }
 
     .file-status {
-        font-size: 11px;
-        color: #555;
+        font-size: 13px;
+        color: #2d5a27;
         text-align: center;
-        margin-top: -5px;
-        margin-bottom: 10px;
-        display: none; 
+        margin: 10px 0;
+        font-weight: 500;
+        display: none;
+        padding: 5px;
+        background: #e8f5e9;
+        border-radius: 8px;
     }
 
     input[type="file"] {
         display: none;
     }
 
-    button {
+    #submitBtn {
         width: 100%;
-        padding: 12px;
-        border-radius: 20px;
+        padding: 15px;
+        border-radius: 25px;
         border: none;
         background: green;
         color: white;
+        font-size: 18px;
+        font-weight: bold;
         cursor: pointer;
-        transition: 0.3s;
+        transition: background 0.3s, transform 0.2s;
+        margin-top: 10px;
     }
 
-    button:hover {
-        background: darkgreen;
-        transform: scale(1.05);
+    #submitBtn:hover {
+        background: #004d00;
+        transform: translateY(-2px);
+    }
+
+    #submitBtn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
     }
 
     .error-msg {
-        color: red;
+        background: #ffebee;
+        color: #c62828;
+        padding: 10px;
+        border-radius: 10px;
         text-align: center;
-        font-size: 14px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ffcdd2;
     }
 
     @keyframes fadeIn {
@@ -117,17 +138,20 @@
 <body>
 
 <div class="container">
-    <h2>Create a Post Now</h2>
+    <h2>Create Post</h2>
 
     {% if error %}
-        <div class="error-msg">{{ error }}</div>
+        <div class="error-msg">
+            <strong>Upload Error:</strong><br>
+            {{ error }}
+        </div>
     {% endif %}
 
     <form id="postForm" action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <textarea id="title" name="title" placeholder="Write your post (max 350 words)" required></textarea>
-        <div class="counter" id="counter">0 / 350</div>
+        <textarea id="title" name="title" placeholder="Describe your story..." required></textarea>
+        <div class="counter" id="counter">0 / 350 words</div>
 
         <!-- AUDIO SECTION -->
         <div class="upload-section">
@@ -135,7 +159,7 @@
                 📁 Select Audio
             </div>
             <div class="icon-box" id="recordBtn" onclick="startRecording()">
-                🎤 Record Voice
+                🎤 Record 5s
             </div>
         </div>
         <div id="audioStatus" class="file-status"></div>
@@ -143,15 +167,15 @@
 
         <!-- IMAGE SECTION -->
         <div class="upload-section">
-            <div class="icon-box" onclick="document.getElementById('imageInput').click()">
-                🖼 Select audio story cover
+            <div class="icon-box" onclick="document.getElementById('imageInput').click()" style="border-style: solid;">
+                🖼 Set Cover Image
             </div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <!-- REMOVED 'required' to prevent silent browser blocking -->
-        <input type="file" id="imageInput" name="image" accept="image/*" required>
+        <!-- CRITICAL: Removed 'required' here. Validation is handled by JS below -->
+        <input type="file" id="imageInput" name="image" accept="image/*">
 
-        <button type="submit" id="submitBtn">Post</button>
+        <button type="submit" id="submitBtn">Post to Feed</button>
     </form>
 </div>
 
@@ -161,23 +185,24 @@
     const audioInput = document.getElementById('audioInput');
     const imageInput = document.getElementById('imageInput');
     const postForm = document.getElementById('postForm');
+    const submitBtn = document.getElementById('submitBtn');
 
-    // Word counter logic
+    // Word counter
     textarea.addEventListener('input', () => {
         const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
         if (words.length > 350) {
             const trimmed = textarea.value.split(/\s+/).slice(0, 350).join(' ');
             textarea.value = trimmed;
         }
-        counter.textContent = words.length + " / 350";
+        counter.textContent = `${words.length} / 350 words`;
     });
 
-    // Visual feedback
+    // File selection UI updates
     audioInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
             const status = document.getElementById('audioStatus');
             status.style.display = 'block';
-            status.textContent = "✅ Audio: " + this.files[0].name;
+            status.innerHTML = "🎵 Audio: " + this.files[0].name;
         }
     });
 
@@ -185,15 +210,20 @@
         if (this.files && this.files[0]) {
             const status = document.getElementById('imageStatus');
             status.style.display = 'block';
-            status.textContent = "✅ Image: " + this.files[0].name;
+            status.innerHTML = "📸 Image: " + this.files[0].name;
         }
     });
 
-    // Voice Recording logic
+    // Voice Recording
     let mediaRecorder;
     let audioChunks = [];
 
     function startRecording() {
+        if (!navigator.mediaDevices) {
+            alert("Your browser doesn't support audio recording.");
+            return;
+        }
+
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
                 mediaRecorder = new MediaRecorder(stream);
@@ -202,58 +232,60 @@
                 
                 const recordBtn = document.getElementById('recordBtn');
                 recordBtn.textContent = "🔴 Recording...";
-                recordBtn.style.background = "red";
-                recordBtn.style.color = "white";
-
-                mediaRecorder.ondataavailable = e => {
-                    audioChunks.push(e.data);
-                };
+                recordBtn.style.background = "#ffcdd2";
 
                 setTimeout(() => {
-                    mediaRecorder.stop();
-                    stream.getTracks().forEach(track => track.stop());
+                    if(mediaRecorder.state === "recording") {
+                        mediaRecorder.stop();
+                        stream.getTracks().forEach(track => track.stop());
+                    }
                 }, 5000); 
 
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                    const file = new File([audioBlob], "recorded_audio.mp3", {type: 'audio/mpeg'});
+                    const file = new File([audioBlob], "recording.mp3", {type: 'audio/mpeg'});
 
                     const container = new DataTransfer();
                     container.items.add(file);
                     audioInput.files = container.files;
 
-                    recordBtn.textContent = "🎤 Record Voice";
-                    recordBtn.style.background = "transparent";
-                    recordBtn.style.color = "green";
+                    recordBtn.textContent = "🎤 Record 5s";
+                    recordBtn.style.background = "rgba(255,255,255,0.5)";
 
                     const status = document.getElementById('audioStatus');
                     status.style.display = 'block';
-                    status.textContent = "✅ Voice recorded successfully (5s)";
+                    status.innerHTML = "✅ Voice clip ready!";
                 };
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
             })
-            .catch(() => alert('Microphone access denied or not supported.'));
+            .catch(err => {
+                console.error(err);
+                alert('Mic access denied.');
+            });
     }
 
-    // FINAL VALIDATION - Stops silent failures
+    // FORM SUBMISSION & VALIDATION
     postForm.addEventListener('submit', function(e) {
-        const titleVal = textarea.value.trim();
         const hasImage = imageInput.files && imageInput.files.length > 0;
+        const titleText = textarea.value.trim();
 
-        if (!titleVal) {
+        if (!titleText) {
             e.preventDefault();
-            alert("Please write something in the post field.");
+            alert("Please write a story or title.");
             return;
         }
 
         if (!hasImage) {
             e.preventDefault();
-            alert("Please select an image cover. This is required.");
+            alert("Please select a cover image. This is required for your post.");
             return;
         }
 
-        // Change button text to show it is working
-        document.getElementById('submitBtn').textContent = "Uploading... Please wait";
-        document.getElementById('submitBtn').style.opacity = "0.5";
+        // Visual feedback during Cloudinary upload
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending to Cloudinary...";
+        submitBtn.style.background = "#555";
     });
 </script>
 
