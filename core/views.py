@@ -1,4 +1,5 @@
-
+import logging
+logger = logging.getLogger(__name__)
 
 import time
 import random
@@ -540,13 +541,12 @@ def search(request):
     })
 
 
-
 import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post
 
-# Define the logger so the NameError stops happening
+# Define the logger so it doesn't crash
 logger = logging.getLogger(__name__)
 
 @login_required 
@@ -556,13 +556,18 @@ def create_post(request):
         audio = request.FILES.get('audio')
         image = request.FILES.get('image')
 
-        # CRITICAL FIX: If no image is uploaded, Cloudinary will error out.
-        # We check for it here and return a friendly message instead of a 500 error.
+        # Debugging: See what files actually reached the server
+        print(f"DEBUG: Title received: {title}")
+        print(f"DEBUG: Image received: {image}")
+        if image:
+            print(f"DEBUG: Image Size: {image.size} bytes")
+
         if not image:
-            return render(request, 'create_post.html', {'error': 'Please select a cover image.'})
+            return render(request, 'create_post.html', {'error': 'No image file selected.'})
 
         try:
-            Post.objects.create(
+            # Try to save to Cloudinary
+            new_post = Post.objects.create(
                 user=request.user,
                 title=title,
                 audio=audio,
@@ -571,11 +576,18 @@ def create_post(request):
             return redirect('feed')
             
         except Exception as e:
-            # Print to Render logs
-            print(f"DATABASE/CLOUDINARY ERROR: {e}") 
-            # Now logger.error works because we defined it above!
+            # Now 'logger' is defined, so this won't crash the site anymore!
             logger.error(f"Post creation failed: {e}")
-            return render(request, 'create_post.html', {'error': f"Upload failed: {str(e)}"})
+            
+            # This error message will now show up on your website page
+            error_message = "Cloudinary rejected the image. Try a different .jpg or .png file."
+            if "Invalid image file" in str(e):
+                error_message = "The image file format is invalid or corrupted. Please try another photo."
+            
+            return render(request, 'create_post.html', {
+                'error': error_message,
+                'debug_info': str(e)
+            })
 
     return render(request, 'create_post.html')
 
