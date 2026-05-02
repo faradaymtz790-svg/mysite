@@ -129,8 +129,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # =========================
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dwccyjh8z',
-    'API_KEY': '978525184535127',
-    'API_SECRET': 'fC4CakJMbY5a5YY29wluEauaOwk',
+    'API_KEY': '233172939168811',
+    'API_SECRET': 'tdiadSXLc_OwPYACh287YfR9LEk',
 }
 
 # =========================
