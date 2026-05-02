@@ -541,9 +541,15 @@ def search(request):
 
 
 
+import logging
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Post
 
+# Initialize the logger so the 'NameError' disappears
+logger = logging.getLogger(__name__)
 
-@login_required # Prevents 500 errors if request.user is Anonymous
+@login_required 
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
@@ -551,7 +557,6 @@ def create_post(request):
         image = request.FILES.get('image')
 
         try:
-            # ✅ Create post
             Post.objects.create(
                 user=request.user,
                 title=title,
@@ -561,12 +566,15 @@ def create_post(request):
             return redirect('feed')
             
         except Exception as e:
-            # This prints the REAL error to your Render Dashboard Logs
+            # Now logger.error won't crash the server!
             print(f"DATABASE ERROR: {e}") 
             logger.error(f"Post creation failed: {e}")
-            return render(request, 'create_post.html', {'error': 'Could not save post. Check logs.'})
+            # Pass the ACTUAL error 'e' to the template so you can see it on the screen
+            return render(request, 'create_post.html', {'error': f"Cloudinary/DB Error: {e}"})
 
     return render(request, 'create_post.html')
+
+
 
 from django.http import JsonResponse
 from PIL import Image
