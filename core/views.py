@@ -542,25 +542,31 @@ def search(request):
 
 
 
+
+@login_required # Prevents 500 errors if request.user is Anonymous
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
         audio = request.FILES.get('audio')
         image = request.FILES.get('image')
 
-        # ✅ Create post
-        Post.objects.create(
-            user=request.user,
-            title=title,
-            audio=audio,
-            image=image
-        )
-
-        # ✅ Redirect after posting
-        return redirect('feed')
+        try:
+            # ✅ Create post
+            Post.objects.create(
+                user=request.user,
+                title=title,
+                audio=audio,
+                image=image
+            )
+            return redirect('feed')
+            
+        except Exception as e:
+            # This prints the REAL error to your Render Dashboard Logs
+            print(f"DATABASE ERROR: {e}") 
+            logger.error(f"Post creation failed: {e}")
+            return render(request, 'create_post.html', {'error': 'Could not save post. Check logs.'})
 
     return render(request, 'create_post.html')
-
 
 from django.http import JsonResponse
 from PIL import Image

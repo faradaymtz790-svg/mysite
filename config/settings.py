@@ -155,14 +155,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # =========================
 # CLOUDINARY CONFIG
 # =========================
-
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dwccyjh8z',
     'API_KEY': '978525184535127',
     'API_SECRET': 'fC4CakJMbY5a5YY29wluEauaOwk',
-    'SECURE': True,
-    # Letting the backend determine the type is usually safer for mixed media
 }
+
+# Add this to help Cloudinary differentiate between images and audio
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # =========================

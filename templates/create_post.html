@@ -73,6 +73,16 @@
         transform: scale(1.05);
     }
 
+    /* Status indicator for hidden inputs */
+    .file-status {
+        font-size: 11px;
+        color: #555;
+        text-align: center;
+        margin-top: -5px;
+        margin-bottom: 10px;
+        display: none; /* Shown via JS */
+    }
+
     input[type="file"] {
         display: none;
     }
@@ -104,13 +114,14 @@
 <div class="container">
     <h2>Create a Post Now</h2>
 
-    <form method="POST" enctype="multipart/form-data">
+    <!-- Ensure action points to your view and method is POST -->
+    <form action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <textarea id="title" name="title" placeholder="Write your post (max 350 words)"></textarea>
+        <textarea id="title" name="title" placeholder="Write your post (max 350 words)" required></textarea>
         <div class="counter" id="counter">0 / 350</div>
 
-        <!-- AUDIO -->
+        <!-- AUDIO SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('audioInput').click()">
                 📁 Select Audio
@@ -119,18 +130,18 @@
                 🎤 Record Voice
             </div>
         </div>
-
+        <div id="audioStatus" class="file-status">✅ Audio selected</div>
         <input type="file" id="audioInput" name="audio" accept="audio/*">
 
-        <!-- IMAGE -->
+        <!-- IMAGE SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">
                 🖼 Select audio story cover
             </div>
         </div>
-
+        <div id="imageStatus" class="file-status">✅ Image selected</div>
         <input type="file" id="imageInput" name="image" accept="image/*">
-    <a href="{% url 'create_post' %}"></a>
+
         <button type="submit">Post</button>
     </form>
 </div>
@@ -138,16 +149,34 @@
 <script>
     const textarea = document.getElementById('title');
     const counter = document.getElementById('counter');
+    const audioInput = document.getElementById('audioInput');
+    const imageInput = document.getElementById('imageInput');
 
+    // Word counter logic
     textarea.addEventListener('input', () => {
-        const words = textarea.value.split(/\s+/).filter(w => w.length > 0);
+        const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
         if (words.length > 350) {
             textarea.value = words.slice(0, 350).join(' ');
         }
         counter.textContent = words.length + " / 350";
     });
 
-    // Voice Recording (basic)
+    // Visual feedback when files are selected
+    audioInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            document.getElementById('audioStatus').style.display = 'block';
+            document.getElementById('audioStatus').textContent = "✅ Audio: " + this.files[0].name;
+        }
+    });
+
+    imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            document.getElementById('imageStatus').style.display = 'block';
+            document.getElementById('imageStatus').textContent = "✅ Image: " + this.files[0].name;
+        }
+    });
+
+    // Voice Recording logic
     let mediaRecorder;
     let audioChunks = [];
 
@@ -157,6 +186,8 @@
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.start();
                 audioChunks = [];
+                
+                alert('Recording started (5 seconds)...');
 
                 mediaRecorder.ondataavailable = e => {
                     audioChunks.push(e.data);
@@ -164,20 +195,22 @@
 
                 setTimeout(() => {
                     mediaRecorder.stop();
-                }, 5000); // 5 seconds recording
+                    stream.getTracks().forEach(track => track.stop()); // Stop the mic
+                }, 5000); 
 
                 mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                    const file = new File([audioBlob], "recorded.mp3");
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                    const file = new File([audioBlob], "recorded_audio.mp3", {type: 'audio/mpeg'});
 
                     const container = new DataTransfer();
                     container.items.add(file);
-                    document.getElementById('audioInput').files = container.files;
+                    audioInput.files = container.files;
 
-                    alert('Voice recorded successfully');
+                    document.getElementById('audioStatus').style.display = 'block';
+                    document.getElementById('audioStatus').textContent = "✅ Voice recorded successfully";
                 };
             })
-            .catch(() => alert('Microphone access denied'));
+            .catch(() => alert('Microphone access denied or not supported.'));
     }
 </script>
 

@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User
 
-
+from cloudinary.models import CloudinaryField
 # --- Profile ---
 
 from django.db import models
@@ -37,29 +37,35 @@ class Profile(models.Model):
 
 # --- Post ---
 # --- Post ---
+
+
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.TextField(max_length=1000)
-    audio = models.FileField(upload_to='audio/', blank=True, null=True)
+    
+    # Update this field to handle Audio correctly
+    audio = models.FileField(
+        upload_to='audio/', 
+        blank=True, 
+        null=True,
+        # This helps the storage backend identify it's not an image
+    )
+    
+    # ImageField is usually fine with the default Cloudinary setup
     image = models.ImageField(upload_to='post_covers/', blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
-
-    # ... other fields ...
     listeners_count = models.PositiveIntegerField(default=0)
     replays_count = models.PositiveIntegerField(default=0)
-
-    # FIXED: Make sure there are exactly 4 spaces before 'played_by'
     played_by = models.ManyToManyField(User, related_name="played_posts", blank=True)
 
-    # ✅ Use custom through model
     likes = models.ManyToManyField(
         User,
         related_name='liked_posts',
         blank=True,
         through='PostLikes'
     )
-
-
 # --- PostLikes (M2M table) ---
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
