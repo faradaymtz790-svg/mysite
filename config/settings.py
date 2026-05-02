@@ -132,16 +132,21 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # NEW SETTING
 # settings.py
+
+# settings.py
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        # ✅ CHANGE THIS: Use the basic storage to skip compression checks
+        "BACKEND": "whitenoise.storage.StaticFilesStorage",
     },
 }
 
-
+# Update the legacy setting too if you have it
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
 
 MEDIA_URL = '/media/'
