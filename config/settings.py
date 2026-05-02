@@ -131,16 +131,15 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
 # NEW SETTING
+# settings.py
 STORAGES = {
-    # ...
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
-
-
-# ✅ FIX: Update the legacy variable as well
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 
 
