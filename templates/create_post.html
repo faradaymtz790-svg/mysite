@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-  <html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}"></html>  
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
 <head>
 <meta charset="UTF-8">
 <title>Create Post</title>
@@ -73,14 +72,13 @@
         transform: scale(1.05);
     }
 
-    /* Status indicator for hidden inputs */
     .file-status {
         font-size: 11px;
         color: #555;
         text-align: center;
         margin-top: -5px;
         margin-bottom: 10px;
-        display: none; /* Shown via JS */
+        display: none; 
     }
 
     input[type="file"] {
@@ -103,6 +101,13 @@
         transform: scale(1.05);
     }
 
+    .error-msg {
+        color: red;
+        text-align: center;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
     @keyframes fadeIn {
         from {opacity:0; transform: translateY(20px);} 
         to {opacity:1; transform: translateY(0);} 
@@ -114,8 +119,11 @@
 <div class="container">
     <h2>Create a Post Now</h2>
 
-    <!-- Ensure action points to your view and method is POST -->
-    <form action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data">
+    {% if error %}
+        <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form id="postForm" action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
         <textarea id="title" name="title" placeholder="Write your post (max 350 words)" required></textarea>
@@ -126,11 +134,11 @@
             <div class="icon-box" onclick="document.getElementById('audioInput').click()">
                 📁 Select Audio
             </div>
-            <div class="icon-box" onclick="startRecording()">
+            <div class="icon-box" id="recordBtn" onclick="startRecording()">
                 🎤 Record Voice
             </div>
         </div>
-        <div id="audioStatus" class="file-status">✅ Audio selected</div>
+        <div id="audioStatus" class="file-status"></div>
         <input type="file" id="audioInput" name="audio" accept="audio/*">
 
         <!-- IMAGE SECTION -->
@@ -139,10 +147,11 @@
                 🖼 Select audio story cover
             </div>
         </div>
-        <div id="imageStatus" class="file-status">✅ Image selected</div>
+        <div id="imageStatus" class="file-status"></div>
+        <!-- REMOVED 'required' to prevent silent browser blocking -->
         <input type="file" id="imageInput" name="image" accept="image/*" required>
 
-        <button type="submit">Post</button>
+        <button type="submit" id="submitBtn">Post</button>
     </form>
 </div>
 
@@ -151,28 +160,32 @@
     const counter = document.getElementById('counter');
     const audioInput = document.getElementById('audioInput');
     const imageInput = document.getElementById('imageInput');
+    const postForm = document.getElementById('postForm');
 
     // Word counter logic
     textarea.addEventListener('input', () => {
         const words = textarea.value.trim().split(/\s+/).filter(w => w.length > 0);
         if (words.length > 350) {
-            textarea.value = words.slice(0, 350).join(' ');
+            const trimmed = textarea.value.split(/\s+/).slice(0, 350).join(' ');
+            textarea.value = trimmed;
         }
         counter.textContent = words.length + " / 350";
     });
 
-    // Visual feedback when files are selected
+    // Visual feedback
     audioInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
-            document.getElementById('audioStatus').style.display = 'block';
-            document.getElementById('audioStatus').textContent = "✅ Audio: " + this.files[0].name;
+            const status = document.getElementById('audioStatus');
+            status.style.display = 'block';
+            status.textContent = "✅ Audio: " + this.files[0].name;
         }
     });
 
     imageInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
-            document.getElementById('imageStatus').style.display = 'block';
-            document.getElementById('imageStatus').textContent = "✅ Image: " + this.files[0].name;
+            const status = document.getElementById('imageStatus');
+            status.style.display = 'block';
+            status.textContent = "✅ Image: " + this.files[0].name;
         }
     });
 
@@ -187,7 +200,10 @@
                 mediaRecorder.start();
                 audioChunks = [];
                 
-                alert('Recording started (5 seconds)...');
+                const recordBtn = document.getElementById('recordBtn');
+                recordBtn.textContent = "🔴 Recording...";
+                recordBtn.style.background = "red";
+                recordBtn.style.color = "white";
 
                 mediaRecorder.ondataavailable = e => {
                     audioChunks.push(e.data);
@@ -195,7 +211,7 @@
 
                 setTimeout(() => {
                     mediaRecorder.stop();
-                    stream.getTracks().forEach(track => track.stop()); // Stop the mic
+                    stream.getTracks().forEach(track => track.stop());
                 }, 5000); 
 
                 mediaRecorder.onstop = () => {
@@ -206,12 +222,39 @@
                     container.items.add(file);
                     audioInput.files = container.files;
 
-                    document.getElementById('audioStatus').style.display = 'block';
-                    document.getElementById('audioStatus').textContent = "✅ Voice recorded successfully";
+                    recordBtn.textContent = "🎤 Record Voice";
+                    recordBtn.style.background = "transparent";
+                    recordBtn.style.color = "green";
+
+                    const status = document.getElementById('audioStatus');
+                    status.style.display = 'block';
+                    status.textContent = "✅ Voice recorded successfully (5s)";
                 };
             })
             .catch(() => alert('Microphone access denied or not supported.'));
     }
+
+    // FINAL VALIDATION - Stops silent failures
+    postForm.addEventListener('submit', function(e) {
+        const titleVal = textarea.value.trim();
+        const hasImage = imageInput.files && imageInput.files.length > 0;
+
+        if (!titleVal) {
+            e.preventDefault();
+            alert("Please write something in the post field.");
+            return;
+        }
+
+        if (!hasImage) {
+            e.preventDefault();
+            alert("Please select an image cover. This is required.");
+            return;
+        }
+
+        // Change button text to show it is working
+        document.getElementById('submitBtn').textContent = "Uploading... Please wait";
+        document.getElementById('submitBtn').style.opacity = "0.5";
+    });
 </script>
 
 </body>

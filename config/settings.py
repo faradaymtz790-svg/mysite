@@ -187,3 +187,5 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+APPEND_SLASH = True
