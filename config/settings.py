@@ -8,9 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =========================
 # SECURITY
 # =========================
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-development-only-key')
 
-# Set DEBUG to False in Render environment variable
+
+import os
+SECRET_KEY = os.environ.get('SECRET_KEY', 'a-safe-fallback-for-local-only')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'mysite1-9fu9.onrender.com']
@@ -108,23 +109,41 @@ DATABASES = {
 # =========================
 # STATIC & MEDIA FILES
 # =========================
-STATIC_URL = '/static/'
+
+
+
+# =========================
+# STATIC & MEDIA FILES
+# =========================
+
+
+
+# Where Django will collect all static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# The URL to use when referring to static files
+STATIC_URL = '/static/'
+
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# ✅ Optimized Storage: WhiteNoise for CSS/JS, Cloudinary for Media (Audio/Images)
+# ✅ FIX: Changed "CompressedManifestStaticFilesStorage" to "CompressedStaticFilesStorage"
+
+
+# NEW SETTING
 STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
+    # ...
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
-# Compatibility for older Django versions
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# ✅ FIX: Update the legacy variable as well
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
