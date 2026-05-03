@@ -124,27 +124,28 @@ STORAGES = {
 }
 
 # =========================
-# CLOUDINARY (FIXED & SAFE)
+# CLOUDINARY (SAFE - NO CRASH)
 # =========================
-required_envs = [
-    "CLOUDINARY_CLOUD_NAME",
-    "CLOUDINARY_API_KEY",
-    "CLOUDINARY_API_SECRET",
-]
 
-for var in required_envs:
-    if not os.environ.get(var):
-        raise RuntimeError(f"Missing environment variable: {var}")
+CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ['CLOUDINARY_CLOUD_NAME'],
-    'API_KEY': os.environ['CLOUDINARY_API_KEY'],
-    'API_SECRET': os.environ['CLOUDINARY_API_SECRET'],
-    'RESOURCE_TYPES': ['image', 'video', 'raw'],
-}
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+        'API_KEY': CLOUDINARY_API_KEY,
+        'API_SECRET': CLOUDINARY_API_SECRET,
+        'RESOURCE_TYPES': ['image', 'video', 'raw'],
+    }
+else:
+    # Prevent Django crash in local development
+    CLOUDINARY_STORAGE = {}
+
+    print("⚠️ Cloudinary environment variables not set. Using local media fallback.")
 
 # =========================
-# AUTH SETTINGS (CLEANED)
+# AUTH SETTINGS
 # =========================
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
