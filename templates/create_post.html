@@ -304,6 +304,32 @@
         submitBtn.textContent = "Sending to Cloudinary...";
         submitBtn.style.background = "#555";
     });
+
+
+    imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        const file = this.files[0];
+
+        // 🔥 CRITICAL FIX
+        if (file.size === 0) {
+            alert("Image is empty or corrupted.");
+            this.value = "";
+            return;
+        }
+
+        // 🔥 FORCE VALID MIME TYPES
+        if (!file.type.startsWith("image/")) {
+            alert("Invalid image file.");
+            this.value = "";
+            return;
+        }
+
+        const status = document.getElementById('imageStatus');
+        status.style.display = 'block';
+        status.innerHTML = "📸 Image: " + file.name;
+    }
+});
+
 </script>
 
 </body>

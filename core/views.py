@@ -559,6 +559,11 @@ from django.contrib.auth.decorators import login_required
 from .models import Post
 
 
+import cloudinary.uploader
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Post
+
 
 @login_required
 def create_post(request):
@@ -567,49 +572,43 @@ def create_post(request):
         image_file = request.FILES.get('image')
         audio_file = request.FILES.get('audio')
 
-        # ✅ Basic validation
         if not title or not image_file:
             return render(request, 'create_post.html', {
-                'error': 'Title and Cover Image are required.',
-                'title': title
+                'error': 'Title and Cover Image are required.'
             })
 
-        # 🔍 DEBUG (very useful)
-        print("------ DEBUG START ------")
-        print("IMAGE:", image_file)
-        print("TYPE:", type(image_file))
-        print("CONTENT TYPE:", image_file.content_type)
-        print("SIZE:", image_file.size)
-        print("-------------------------")
+        # 🚨 HARD VALIDATION
+        if image_file.size == 0:
+            return render(request, 'create_post.html', {
+                'error': 'Image file is empty or corrupted.'
+            })
 
         try:
-            # ✅ Upload Image (FIXED)
+            # 🔥 FORCE CLEAN FILE STREAM (important fix)
+            image_file.seek(0)
+
             img_result = cloudinary.uploader.upload(
                 image_file,
-                resource_type="auto",   # 🔥 FIX HERE
-                folder="user_posts/images"
+                resource_type="auto",
+                folder="user_posts/images",
+                use_filename=True
             )
 
             image_url = img_result.get('secure_url')
 
-            if not image_url:
-                raise Exception("Image upload failed (no URL returned)")
-
-            # ✅ Upload Audio (optional + safer)
+            # AUDIO (optional)
             audio_url = None
-            if audio_file:
-                print("AUDIO:", audio_file)
-                print("AUDIO TYPE:", audio_file.content_type)
+            if audio_file and audio_file.size > 0:
+                audio_file.seek(0)
 
                 audio_result = cloudinary.uploader.upload(
                     audio_file,
-                    resource_type="auto",   # 🔥 FIX HERE TOO
+                    resource_type="auto",
                     folder="user_posts/audio"
                 )
 
                 audio_url = audio_result.get('secure_url')
 
-            # ✅ Save to Database
             Post.objects.create(
                 user=request.user,
                 title=title,
@@ -617,15 +616,12 @@ def create_post(request):
                 audio=audio_url
             )
 
-            print("✅ POST CREATED SUCCESSFULLY")
             return redirect('feed')
 
         except Exception as e:
-            print("❌ UPLOAD ERROR:", str(e))
-
+            print("UPLOAD ERROR:", e)
             return render(request, 'create_post.html', {
-                'error': f"Upload failed: {str(e)}",
-                'title': title
+                'error': f"Upload failed: {str(e)}"
             })
 
     return render(request, 'create_post.html')
