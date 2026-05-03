@@ -5,7 +5,8 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ✅ BASE_DIR points to the root (where manage.py lives)
+# config/settings.py -> .parent (config/) -> .parent (Root/)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =========================
@@ -14,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'a-safe-fallback-for-local-only')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ✅ Added wildcard for all Render subdomains to prevent host errors
+# ✅ Wildcard allows any Render subdomain
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 INTERNAL_IPS = ["127.0.0.1"]
@@ -23,7 +24,6 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
-    # ✅ Safer wildcard for local and production dev
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
         "https://*.onrender.com",
@@ -61,7 +61,7 @@ SITE_ID = 1
 # =========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ High priority for static assets
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ High priority
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,7 +96,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # =========================
-# DATABASE (Persistent Fix)
+# DATABASE
 # =========================
 DATABASES = {
     'default': dj_database_url.config(
@@ -109,19 +109,19 @@ DATABASES = {
 # STATIC & MEDIA FILES
 # =========================
 STATIC_URL = '/static/'
+
+# ✅ This is where collectstatic will gather files on Render
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ Ensures Django looks in the root static folder for your js/css
+# ✅ This is where you store your mylogo.png and js/serviceworker.js
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Modern Django 4.2+ Storage Configuration
-# ✅ Integrated Media and Staticfiles storage correctly
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.StaticFilesStorage", # Optimized for Render
+        "BACKEND": "whitenoise.storage.StaticFilesStorage", 
     },
 }
 
@@ -131,12 +131,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # =========================
 # CLOUDINARY CONFIG
 # =========================
-# ✅ Consolidated credentials to use Environment Variables
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dwccyjh8z'), 
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    # ✅ 'video' and 'raw' are required for audio (.mp3) uploads in Logsphere
+    # ✅ Vital for Logsphere audio (.mp3) posts
     'RESOURCE_TYPES': ['image', 'video', 'raw'], 
 }
 
@@ -187,9 +186,9 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
-    },
+    }, 
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG', # Useful for seeing why Cloudinary/Static might fail
+        'level': 'DEBUG',
     },
 }
