@@ -553,8 +553,7 @@ logger = logging.getLogger(__name__)
 # Add this import at the top
 
 
-import cloudinary.uploader
-import os
+
 
 @login_required 
 def create_post(request):
@@ -563,43 +562,42 @@ def create_post(request):
         audio_file = request.FILES.get('audio')
         image_file = request.FILES.get('image')
 
-        # 1. VALIDATE IMAGE (jpg, png, jpeg only)
-        if image_file:
-            ext = os.path.splitext(image_file.name)[1].lower()
-            if ext not in ['.jpg', '.jpeg', '.png']:
-                return render(request, 'create_post.html', {'error': 'Images must be JPG or PNG.'})
-
         try:
-            # 2. UPLOAD IMAGE
-            img_url = ""
-            if image_file:
-                img_result = cloudinary.uploader.upload(image_file, resource_type="image")
-                img_url = img_result['secure_url']
+            # 1. Upload the image - explicitly as 'image'
+            img_result = cloudinary.uploader.upload(
+                image_file, 
+                resource_type="image",
+                folder="posts/images"
+            )
             
-            # 3. UPLOAD AUDIO (Auto-detects mp3, mp4, wav, m4a, webm)
+            # 2. Upload the audio - explicitly as 'video' (Cloudinary's requirement for audio)
             audio_url = ""
             if audio_file:
                 audio_result = cloudinary.uploader.upload(
                     audio_file, 
-                    resource_type="auto" # 'auto' is key for voice recorders & mp4
+                    resource_type="video", # This is the fix for mp3/voice recorder
+                    folder="posts/audio"
                 )
                 audio_url = audio_result['secure_url']
 
-            # 4. SAVE TO DB
-            Post.objects.create(
+            # 3. Save to DB using the SECURE_URL strings
+            # This bypasses the Model's own upload logic
+            new_post = Post(
                 user=request.user,
                 title=title,
-                audio=audio_url,
-                image=img_url
+                image=img_result['secure_url'],
+                audio=audio_url
             )
+            new_post.save()
+            
             return redirect('feed')
             
         except Exception as e:
-            print(f"CLOUDINARY ERROR: {e}")
-            return render(request, 'create_post.html', {'error': f"Upload failed: {e}"})
+            # This will show the real error in your logs
+            print(f"CRITICAL UPLOAD ERROR: {str(e)}")
+            return render(request, 'create_post.html', {'error': f"Cloudinary says: {str(e)}"})
 
     return render(request, 'create_post.html')
-
 
 
 from django.http import JsonResponse
