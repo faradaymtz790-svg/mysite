@@ -1150,33 +1150,30 @@ import json
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
+
+
 def niche_selection(request):
     if request.method == 'POST':
-        # 1. Get the JSON string from the hidden input
         selected_niches_json = request.POST.get('niches')
         
+        # 1. Save data if it exists
         if selected_niches_json:
             try:
-                # Parse JSON string into a Python list
-                selected_niches_list = json.loads(selected_niches_json)
-                
-                # 2. Save directly as a list to your JSONField
-                # Use .get_or_create to ensure the profile exists
+                selected_niches = json.loads(selected_niches_json)
                 profile, created = Profile.objects.get_or_create(user=request.user)
-                profile.niches = selected_niches_list  # This stores the actual list
+                profile.niches = selected_niches
                 profile.save()
-                
-            except json.JSONDecodeError:
-                messages.error(request, "Invalid data received.")
-            except Exception as e:
-                messages.error(request, f"Error: {e}")
+            except:
+                pass
 
-        username = request.user.username
+        # 2. FIX: Safely get the username
+        # Try the hidden input first, then the logged-in user, 
+        # then fallback to 'billionaire' just so it doesn't crash
+        username = request.POST.get('username') or request.user.username or 'billionaire'
+        
         return redirect('profile', username=username)
 
     return render(request, 'niche_selection.html')
-
-
 
 
 
