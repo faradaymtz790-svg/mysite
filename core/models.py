@@ -39,21 +39,24 @@ class Profile(models.Model):
 # --- Post ---
 
 
-
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.TextField(max_length=1000)
     
-    # Update this field to handle Audio correctly
-    audio = models.FileField(
-        upload_to='audio/', 
+    # 1. Use CloudinaryField for audio (Correctly set to resource_type='video')
+    audio = CloudinaryField(
+        'audio', 
+        resource_type='video', 
         blank=True, 
-        null=True,
-        # This helps the storage backend identify it's not an image
+        null=True
     )
     
-    # ImageField is usually fine with the default Cloudinary setup
-    image = models.ImageField(upload_to='post_covers/', blank=True, null=True)
+    # 2. Use ONLY CloudinaryField for the image (Remove the ImageField below)
+    image = CloudinaryField(
+        'image', 
+        blank=True, 
+        null=True
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     listeners_count = models.PositiveIntegerField(default=0)
@@ -66,6 +69,12 @@ class Post(models.Model):
         blank=True,
         through='PostLikes'
     )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title[:20]}"
+
+
+
 # --- PostLikes (M2M table) ---
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
