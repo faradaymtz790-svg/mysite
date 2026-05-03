@@ -572,41 +572,39 @@ def create_post(request):
         image_file = request.FILES.get('image')
         audio_file = request.FILES.get('audio')
 
-        if not title or not image_file:
+        # ✅ ADD YOUR VALIDATION HERE (RIGHT PLACE)
+        if not image_file:
             return render(request, 'create_post.html', {
-                'error': 'Title and Cover Image are required.'
+                'error': 'No image selected.'
             })
 
-        # 🚨 HARD VALIDATION
         if image_file.size == 0:
             return render(request, 'create_post.html', {
-                'error': 'Image file is empty or corrupted.'
+                'error': 'Image is empty. Please reselect.'
             })
 
-        try:
-            # 🔥 FORCE CLEAN FILE STREAM (important fix)
-            image_file.seek(0)
+        if not image_file.content_type.startswith('image/'):
+            return render(request, 'create_post.html', {
+                'error': 'Invalid image format.'
+            })
 
+        # 👇 THEN continue with upload
+        try:
             img_result = cloudinary.uploader.upload(
                 image_file,
                 resource_type="auto",
-                folder="user_posts/images",
-                use_filename=True
+                folder="user_posts/images"
             )
 
             image_url = img_result.get('secure_url')
 
-            # AUDIO (optional)
             audio_url = None
-            if audio_file and audio_file.size > 0:
-                audio_file.seek(0)
-
+            if audio_file:
                 audio_result = cloudinary.uploader.upload(
                     audio_file,
                     resource_type="auto",
                     folder="user_posts/audio"
                 )
-
                 audio_url = audio_result.get('secure_url')
 
             Post.objects.create(
@@ -621,10 +619,11 @@ def create_post(request):
         except Exception as e:
             print("UPLOAD ERROR:", e)
             return render(request, 'create_post.html', {
-                'error': f"Upload failed: {str(e)}"
+                'error': str(e)
             })
 
     return render(request, 'create_post.html')
+
 
 
 from django.http import JsonResponse

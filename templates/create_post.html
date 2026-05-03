@@ -306,27 +306,40 @@
     });
 
 
-    imageInput.addEventListener('change', function() {
+  postForm.addEventListener('submit', function(e) {
+    const file = imageInput.files[0];
+
+    if (!file || file.size === 0) {
+        e.preventDefault();
+        alert("Invalid or empty image file. Please reselect.");
+        imageInput.value = "";   // 🔥 FORCE RESET
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Uploading...";
+});
+
+
+imageInput.addEventListener('change', function() {
     if (this.files && this.files[0]) {
         const file = this.files[0];
 
-        // 🔥 CRITICAL FIX
-        if (file.size === 0) {
-            alert("Image is empty or corrupted.");
-            this.value = "";
-            return;
-        }
-
-        // 🔥 FORCE VALID MIME TYPES
-        if (!file.type.startsWith("image/")) {
-            alert("Invalid image file.");
-            this.value = "";
+        // 🔥 HARD VALIDATION
+        if (file.size === 0 || !file.type.startsWith("image/")) {
+            alert("Invalid image. Please choose another file.");
+            this.value = "";   // 🔥 RESET
             return;
         }
 
         const status = document.getElementById('imageStatus');
         status.style.display = 'block';
         status.innerHTML = "📸 Image: " + file.name;
+
+        // 🔥 CLONE FILE (fix stale reference bug)
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        this.files = dt.files;
     }
 });
 
