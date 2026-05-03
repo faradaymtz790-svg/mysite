@@ -553,49 +553,56 @@ logger = logging.getLogger(__name__)
 # Add this import at the top
 
 
+import cloudinary.uploader
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Post
 
-
-@login_required 
+@login_required
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
         audio_file = request.FILES.get('audio')
         image_file = request.FILES.get('image')
 
+        if not title or not image_file:
+            return render(request, 'create_post.html', {'error': 'Title and Cover Image are required.'})
+
         try:
-            # 1. Upload the image - explicitly as 'image'
+            # 1. Upload Image
             img_result = cloudinary.uploader.upload(
                 image_file, 
                 resource_type="image",
-                folder="posts/images"
+                folder="user_posts/images" # Changed from logsphere to generic
             )
-            
-            # 2. Upload the audio - explicitly as 'video' (Cloudinary's requirement for audio)
-            audio_url = ""
+            image_url = img_result.get('secure_url')
+
+            # 2. Upload Audio
+            audio_url = None
             if audio_file:
                 audio_result = cloudinary.uploader.upload(
                     audio_file, 
-                    resource_type="video", # This is the fix for mp3/voice recorder
-                    folder="posts/audio"
+                    resource_type="video", 
+                    folder="user_posts/audio" # Changed from logsphere to generic
                 )
-                audio_url = audio_result['secure_url']
+                audio_url = audio_result.get('secure_url')
 
-            # 3. Save to DB using the SECURE_URL strings
-            # This bypasses the Model's own upload logic
-            new_post = Post(
+            # 3. Save to Database
+            Post.objects.create(
                 user=request.user,
                 title=title,
-                image=img_result['secure_url'],
+                image=image_url,
                 audio=audio_url
             )
-            new_post.save()
             
             return redirect('feed')
-            
+
         except Exception as e:
-            # This will show the real error in your logs
-            print(f"CRITICAL UPLOAD ERROR: {str(e)}")
-            return render(request, 'create_post.html', {'error': f"Cloudinary says: {str(e)}"})
+            print(f"UPLOAD ERROR: {str(e)}")
+            return render(request, 'create_post.html', {
+                'error': f"Upload failed: {str(e)}",
+                'title': title 
+            })
 
     return render(request, 'create_post.html')
 
