@@ -104,10 +104,16 @@ DATABASES = {
 # =========================
 # STATIC & MEDIA FILES
 # =========================
+
+
+# =========================
+# STATIC & MEDIA FILES
+# =========================
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+# Keep the modern way for Django 6.0
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -117,11 +123,14 @@ STORAGES = {
     },
 }
 
-# ✅ CRITICAL: Bridge for django-cloudinary-storage compatibility
+# ✅ THE CRITICAL FIX: Direct assignment for third-party package compatibility
+# This MUST be a top-level variable in settings.py
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 
 # =========================
 # CLOUDINARY CONFIG
