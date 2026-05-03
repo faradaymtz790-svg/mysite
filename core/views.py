@@ -560,35 +560,37 @@ from django.contrib.auth.decorators import login_required
 from .models import Post
 
 
-
 @login_required
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        
-        # Look for the URL string sent by JavaScript
-        image_url = request.POST.get('image_url')
-        audio_url = request.POST.get('audio_url')
+        image_file = request.FILES.get('image')
+        audio_file = request.FILES.get('audio')
 
-        if not image_url:
+        # Basic Validation
+        if not image_file:
             return render(request, 'create_post.html', {'error': 'No image selected.'})
 
         try:
+            # Django handles the upload directly
+            img_result = cloudinary.uploader.upload(image_file, folder="user_posts/images")
+            image_url = img_result.get('secure_url')
+
+            audio_url = None
+            if audio_file:
+                aud_result = cloudinary.uploader.upload(audio_file, resource_type="auto", folder="user_posts/audio")
+                audio_url = aud_result.get('secure_url')
+
             Post.objects.create(
                 user=request.user,
                 title=title,
-                image=image_url, 
+                image=image_url,
                 audio=audio_url
             )
-            # If it's the JS fetch request, we return a success response
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                from django.http import HttpResponse
-                return HttpResponse(status=200)
-            
             return redirect('feed')
 
         except Exception as e:
-            return render(request, 'create_post.html', {'error': str(e)})
+            return render(request, 'create_post.html', {'error': f"Upload failed: {str(e)}"})
 
     return render(request, 'create_post.html')
 
