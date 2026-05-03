@@ -1151,39 +1151,36 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 
 
+import json
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Profile
 
+@login_required  # This prevents the 'AnonymousUser' error
 def niche_selection(request):
     if request.method == 'POST':
-        selected_niches_json = request.POST.get('niches')
+        # 1. Get the data from the form
+        selected_niches_raw = request.POST.get('niches')
         
-        # 1. Save data if it exists
-        if selected_niches_json:
+        if selected_niches_raw:
             try:
-                selected_niches = json.loads(selected_niches_json)
+                # Convert the string from the frontend into a Python list
+                niches_list = json.loads(selected_niches_raw)
+                
+                # Update or Create the profile for the logged-in user
                 profile, created = Profile.objects.get_or_create(user=request.user)
-                profile.niches = selected_niches
+                profile.niches = niches_list
                 profile.save()
-            except:
-                pass
+            except json.JSONDecodeError:
+                # Handle case where 'niches' data is formatted incorrectly
+                pass 
 
-        # 2. FIX: Safely get the username
-        # Try the hidden input first, then the logged-in user, 
-        # then fallback to 'billionaire' just so it doesn't crash
-        username = request.POST.get('username') or request.user.username or 'billionaire'
-        
-        return redirect('profile', username=username)
+        # 2. Redirect using the authenticated user's session data
+        # This fixes the 'NoReverseMatch' error by ensuring username is never empty
+        return redirect('profile', username=request.user.username)
 
+    # For a GET request, just show the page
     return render(request, 'niche_selection.html')
-
-
-
-
-
-
-# core/views.py
-from django_ratelimit.decorators import ratelimit
-
-
 
 import time
 import hashlib
