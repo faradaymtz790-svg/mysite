@@ -560,65 +560,37 @@ from django.contrib.auth.decorators import login_required
 from .models import Post
 
 
+
 @login_required
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        image_file = request.FILES.get('image')
-        audio_file = request.FILES.get('audio')
+        
+        # Look for the URL string sent by JavaScript
+        image_url = request.POST.get('image_url')
+        audio_url = request.POST.get('audio_url')
 
-        # ✅ ADD YOUR VALIDATION HERE (RIGHT PLACE)
-        if not image_file:
-            return render(request, 'create_post.html', {
-                'error': 'No image selected.'
-            })
+        if not image_url:
+            return render(request, 'create_post.html', {'error': 'No image selected.'})
 
-        if image_file.size == 0:
-            return render(request, 'create_post.html', {
-                'error': 'Image is empty. Please reselect.'
-            })
-
-        if not image_file.content_type.startswith('image/'):
-            return render(request, 'create_post.html', {
-                'error': 'Invalid image format.'
-            })
-
-        # 👇 THEN continue with upload
         try:
-            img_result = cloudinary.uploader.upload(
-                image_file,
-                resource_type="auto",
-                folder="user_posts/images"
-            )
-
-            image_url = img_result.get('secure_url')
-
-            audio_url = None
-            if audio_file:
-                audio_result = cloudinary.uploader.upload(
-                    audio_file,
-                    resource_type="auto",
-                    folder="user_posts/audio"
-                )
-                audio_url = audio_result.get('secure_url')
-
             Post.objects.create(
                 user=request.user,
                 title=title,
-                image=image_url,
+                image=image_url, 
                 audio=audio_url
             )
-
+            # If it's the JS fetch request, we return a success response
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                from django.http import HttpResponse
+                return HttpResponse(status=200)
+            
             return redirect('feed')
 
         except Exception as e:
-            print("UPLOAD ERROR:", e)
-            return render(request, 'create_post.html', {
-                'error': str(e)
-            })
+            return render(request, 'create_post.html', {'error': str(e)})
 
     return render(request, 'create_post.html')
-
 
 
 from django.http import JsonResponse

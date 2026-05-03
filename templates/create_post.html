@@ -126,14 +126,15 @@
 <div class="container">
     <h2>Create Post</h2>
 
+    <div id="jsError" class="error-msg" style="display:none;"></div>
+
     {% if error %}
         <div class="error-msg">
             {{ error }}
         </div>
     {% endif %}
 
-    <!-- FIXED: Added id="postForm" -->
-    <form id="postForm" method="POST" action="/create_post/" enctype="multipart/form-data">
+    <form id="postForm" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
         <textarea id="title" name="title" placeholder="Describe your story..." required></textarea>
@@ -145,14 +146,13 @@
             <div class="icon-box" id="recordBtn" onclick="startRecording()">🎤 Record 5s</div>
         </div>
         <div id="audioStatus" class="file-status"></div>
-        <input type="file" id="audioInput" name="audio" accept="audio/*,video/mp4,video/webm">
+        <input type="file" id="audioInput" name="audio" accept="audio/*">
 
         <!-- IMAGE -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">🖼 Set Cover Image</div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <!-- FIXED: Added name="image" -->
         <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png">
 
         <button type="submit" id="submitBtn">Post to Feed</button>
@@ -166,14 +166,13 @@ const audioInput = document.getElementById('audioInput');
 const imageInput = document.getElementById('imageInput');
 const postForm = document.getElementById('postForm');
 const submitBtn = document.getElementById('submitBtn');
+const jsError = document.getElementById('jsError');
 
-/* ---------------- WORD COUNTER ---------------- */
 textarea.addEventListener('input', () => {
     const words = textarea.value.trim().split(/\s+/).filter(w => w);
     counter.textContent = `${words.length} / 350 words`;
 });
 
-/* ---------------- AUDIO UI ---------------- */
 audioInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('audioStatus').style.display = 'block';
@@ -181,19 +180,11 @@ audioInput.addEventListener('change', function () {
     }
 });
 
-/* ---------------- IMAGE UI ---------------- */
 imageInput.addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-
-    if (file.size === 0) {
-        alert("Invalid image");
-        this.value = "";
-        return;
+    if (this.files[0]) {
+        document.getElementById('imageStatus').style.display = 'block';
+        document.getElementById('imageStatus').innerText = "📸 " + this.files[0].name;
     }
-
-    document.getElementById('imageStatus').style.display = 'block';
-    document.getElementById('imageStatus').innerText = "📸 " + file.name;
 });
 
 /* ---------------- RECORDING ---------------- */
@@ -206,51 +197,99 @@ function startRecording() {
         mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
         chunks = [];
-
         document.getElementById('recordBtn').innerText = "Recording...";
-
         setTimeout(() => mediaRecorder.stop(), 5000);
-
         mediaRecorder.ondataavailable = e => chunks.push(e.data);
-
         mediaRecorder.onstop = () => {
             const blob = new Blob(chunks, { type: "audio/webm" });
             const file = new File([blob], "voice.webm", { type: blob.type });
-
             const dt = new DataTransfer();
             dt.items.add(file);
             audioInput.files = dt.files;
-
             document.getElementById('recordBtn').innerText = "🎤 Record 5s";
             document.getElementById('audioStatus').style.display = 'block';
             document.getElementById('audioStatus').innerText = "✅ Voice ready";
         };
-    }).catch(err => {
-        alert("Microphone access denied or not found.");
     });
 }
 
-/* ---------------- FINAL SUBMIT (MATCHED TO DJANGO VIEW) ---------------- */
-postForm.addEventListener("submit", async function (e) {
-    // We are letting the standard form submission handle it to ensure Django receives request.FILES
-    // If you want to use the JavaScript 'fetch' instead, ensure your Django view is set to return JSON.
-    
-    const file = imageInput.files[0];
+/* ---------------- CLOUDINARY HELPER ---------------- */
+async function uploadToCloudinary(file, type) {
+    const sigRes = await fetch("/cloudinary-signature/");
+    const sig = await sigRes.json();
 
-    if (!file) {
-        e.preventDefault();
-        alert("Please select an image");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("api_key", sig.api_key);
+    formData.append("timestamp", sig.timestamp);
+    formData.append("signature", sig.signature);
+    formData.append("folder", type === 'image' ? "user_posts/images" : "user_posts/audio");
+
+    const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/${type}/upload`,
+        { method: "POST", body: formData }
+    );
+    return await res.json();
+}
+
+/* ---------------- FINAL SUBMIT ---------------- */
+postForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    jsError.style.display = 'none';
+
+    const imgFile = imageInput.files[0];
+    const audFile = audioInput.files[0];
+
+    if (!imgFile) {
+        alert("Please select a cover image");
         return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "Processing...";
-    
-    // The form will now submit naturally to /create_post/ 
-    // and Django will catch 'image' and 'audio' in request.FILES.
+    submitBtn.innerText = "Uploading to Cloud...";
+
+    try {
+        // 1. Upload Image
+        const cloudImg = await uploadToCloudinary(imgFile, 'image');
+        if (!cloudImg.secure_url) throw new Error("Image upload failed");
+
+        // 2. Upload Audio if exists
+        let cloudAudUrl = null;
+        if (audFile) {
+            const cloudAud = await uploadToCloudinary(audFile, 'video'); // Cloudinary uses 'video' for audio
+            cloudAudUrl = cloudAud.secure_url;
+        }
+
+        // 3. Send URLs to Django
+        submitBtn.innerText = "Saving Post...";
+        const djangoData = new FormData();
+        djangoData.append("title", textarea.value);
+        djangoData.append("image_url", cloudImg.secure_url); // Sent as string
+        if (cloudAudUrl) djangoData.append("audio_url", cloudAudUrl);
+
+        const res = await fetch("", {
+            method: "POST",
+            body: djangoData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (res.ok) {
+            window.location.href = "/feed/";
+        } else {
+            throw new Error("Server failed to save post.");
+        }
+
+    } catch (err) {
+        console.error(err);
+        jsError.innerText = err.message;
+        jsError.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Post to Feed";
+    }
 });
-
 </script>
-
 </body>
 </html>
