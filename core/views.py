@@ -1145,34 +1145,41 @@ def login_view(request):
 
 
 
+
 import json
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from django.contrib import messages
 
 def niche_selection(request):
     if request.method == 'POST':
         # 1. Get the JSON string from the hidden input
         selected_niches_json = request.POST.get('niches')
         
-        # 2. Parse the JSON back into a Python list
         if selected_niches_json:
             try:
-                selected_niches = json.loads(selected_niches_json)
-                # Here you can save 'selected_niches' to your User Profile model
-                # Example: request.user.profile.interests = selected_niches
-                # request.user.profile.save()
+                # Parse JSON string into a Python list
+                selected_niches_list = json.loads(selected_niches_json)
+                
+                # 2. Save directly as a list to your JSONField
+                # Use .get_or_create to ensure the profile exists
+                profile, created = Profile.objects.get_or_create(user=request.user)
+                profile.niches = selected_niches_list  # This stores the actual list
+                profile.save()
+                
             except json.JSONDecodeError:
-                pass
+                messages.error(request, "Invalid data received.")
+            except Exception as e:
+                messages.error(request, f"Error: {e}")
 
-        # 3. Redirect to the profile page
-        # Assuming your URL pattern is path('profile/<str:username>/', ...)
-        # We use the username passed in the hidden input or from request.user
-        username = request.POST.get('username') or request.user.username
-        
+        username = request.user.username
         return redirect('profile', username=username)
 
-    # For GET requests (initial load)
     return render(request, 'niche_selection.html')
+
+
+
+
+
 
 
 
