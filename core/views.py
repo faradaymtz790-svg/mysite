@@ -21,7 +21,7 @@ from .models import Post, Follow, Comment, Notification, PostLikes
 from .forms import CommentForm
 
 
-
+import cloudinary.uploader
 
 
 # This line must be at the very far left (no spaces)
@@ -549,48 +549,46 @@ from .models import Post
 # Define the logger so it doesn't crash
 logger = logging.getLogger(__name__)
 
+
+# Add this import at the top
+
 @login_required 
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        audio = request.FILES.get('audio')
-        image = request.FILES.get('image')
+        audio_file = request.FILES.get('audio')
+        image_file = request.FILES.get('image')
 
-        # Debugging: See what files actually reached the server
-        print(f"DEBUG: Title received: {title}")
-        print(f"DEBUG: Image received: {image}")
-        if image:
-            print(f"DEBUG: Image Size: {image.size} bytes")
-
-        if not image:
+        if not image_file:
             return render(request, 'create_post.html', {'error': 'No image file selected.'})
 
         try:
-            # Try to save to Cloudinary
+            # Manually upload the image
+            img_upload = cloudinary.uploader.upload(image_file)
+            
+            # Manually upload the audio (explicitly setting resource_type)
+            audio_url = None
+            if audio_file:
+                audio_upload = cloudinary.uploader.upload(
+                    audio_file, 
+                    resource_type="video"
+                )
+                audio_url = audio_upload['public_id']
+
+            # Now save to the database using the uploaded IDs
             new_post = Post.objects.create(
                 user=request.user,
                 title=title,
-                audio=audio,
-                image=image
+                audio=audio_url,
+                image=img_upload['public_id']
             )
             return redirect('feed')
             
         except Exception as e:
-            # Now 'logger' is defined, so this won't crash the site anymore!
-            logger.error(f"Post creation failed: {e}")
-            
-            # This error message will now show up on your website page
-            error_message = "Cloudinary rejected the image. Try a different .jpg or .png file."
-            if "Invalid image file" in str(e):
-                error_message = "The image file format is invalid or corrupted. Please try another photo."
-            
-            return render(request, 'create_post.html', {
-                'error': error_message,
-                'debug_info': str(e)
-            })
+            logger.error(f"Upload failed: {e}")
+            return render(request, 'create_post.html', {'error': str(e)})
 
     return render(request, 'create_post.html')
-
 
 
 from django.http import JsonResponse

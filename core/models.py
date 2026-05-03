@@ -39,11 +39,11 @@ class Profile(models.Model):
 # --- Post ---
 
 
+
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    title = models.TextField(max_length=1000)
+    # ... other fields ...
     
-    # 1. Use CloudinaryField for audio (Correctly set to resource_type='video')
+    # Must specify resource_type='video' for audio files
     audio = CloudinaryField(
         'audio', 
         resource_type='video', 
@@ -51,13 +51,13 @@ class Post(models.Model):
         null=True
     )
     
-    # 2. Use ONLY CloudinaryField for the image (Remove the ImageField below)
+    # Standard image field
     image = CloudinaryField(
         'image', 
         blank=True, 
         null=True
     )
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     listeners_count = models.PositiveIntegerField(default=0)
     replays_count = models.PositiveIntegerField(default=0)
