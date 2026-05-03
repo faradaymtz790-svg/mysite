@@ -186,6 +186,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =========================
 # LOGGING (Prevents NameError: logger in views)
+
+
+# Add this so Cloudinary doesn't freak out when it sees a .mp3/audio file
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dwccyjh8z', # From your logs
+    'API_KEY': 'YOUR_API_KEY',
+    'API_SECRET': 'YOUR_API_SECRET',
+    'RESOURCE_TYPES': ['image', 'video', 'raw'], 
+}
+
+
 # =========================
 LOGGING = {
     'version': 1,

@@ -552,6 +552,10 @@ logger = logging.getLogger(__name__)
 
 # Add this import at the top
 
+
+import cloudinary.uploader
+import os
+
 @login_required 
 def create_post(request):
     if request.method == "POST":
@@ -559,36 +563,43 @@ def create_post(request):
         audio_file = request.FILES.get('audio')
         image_file = request.FILES.get('image')
 
-        if not image_file:
-            return render(request, 'create_post.html', {'error': 'No image file selected.'})
+        # 1. VALIDATE IMAGE (jpg, png, jpeg only)
+        if image_file:
+            ext = os.path.splitext(image_file.name)[1].lower()
+            if ext not in ['.jpg', '.jpeg', '.png']:
+                return render(request, 'create_post.html', {'error': 'Images must be JPG or PNG.'})
 
         try:
-            # Manually upload the image
-            img_upload = cloudinary.uploader.upload(image_file)
+            # 2. UPLOAD IMAGE
+            img_url = ""
+            if image_file:
+                img_result = cloudinary.uploader.upload(image_file, resource_type="image")
+                img_url = img_result['secure_url']
             
-            # Manually upload the audio (explicitly setting resource_type)
-            audio_url = None
+            # 3. UPLOAD AUDIO (Auto-detects mp3, mp4, wav, m4a, webm)
+            audio_url = ""
             if audio_file:
-                audio_upload = cloudinary.uploader.upload(
+                audio_result = cloudinary.uploader.upload(
                     audio_file, 
-                    resource_type="video"
+                    resource_type="auto" # 'auto' is key for voice recorders & mp4
                 )
-                audio_url = audio_upload['public_id']
+                audio_url = audio_result['secure_url']
 
-            # Now save to the database using the uploaded IDs
-            new_post = Post.objects.create(
+            # 4. SAVE TO DB
+            Post.objects.create(
                 user=request.user,
                 title=title,
                 audio=audio_url,
-                image=img_upload['public_id']
+                image=img_url
             )
             return redirect('feed')
             
         except Exception as e:
-            logger.error(f"Upload failed: {e}")
-            return render(request, 'create_post.html', {'error': str(e)})
+            print(f"CLOUDINARY ERROR: {e}")
+            return render(request, 'create_post.html', {'error': f"Upload failed: {e}"})
 
     return render(request, 'create_post.html')
+
 
 
 from django.http import JsonResponse

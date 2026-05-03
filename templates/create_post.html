@@ -163,7 +163,8 @@
             </div>
         </div>
         <div id="audioStatus" class="file-status"></div>
-        <input type="file" id="audioInput" name="audio" accept="audio/*">
+        <!-- Broad accept for audio to include mobile formats -->
+        <input type="file" id="audioInput" name="audio" accept="audio/*,video/mp4,video/webm">
 
         <!-- IMAGE SECTION -->
         <div class="upload-section">
@@ -172,8 +173,8 @@
             </div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <!-- CRITICAL: Removed 'required' here. Validation is handled by JS below -->
-        <input type="file" id="imageInput" name="image" accept="image/*">
+        <!-- Restricted to the specific image types you requested -->
+        <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png">
 
         <button type="submit" id="submitBtn">Post to Feed</button>
     </form>
@@ -208,9 +209,20 @@
 
     imageInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
+            const file = this.files[0];
             const status = document.getElementById('imageStatus');
+            const ext = file.name.split('.').pop().toLowerCase();
+            
+            // Front-end validation for image types
+            if(!['jpg', 'jpeg', 'png'].includes(ext)) {
+                alert("Only JPG, JPEG, and PNG are allowed for cover images.");
+                this.value = "";
+                status.style.display = 'none';
+                return;
+            }
+
             status.style.display = 'block';
-            status.innerHTML = "📸 Image: " + this.files[0].name;
+            status.innerHTML = "📸 Image: " + file.name;
         }
     });
 
@@ -226,6 +238,9 @@
 
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
+                // Determine the best supported mimeType for the browser
+                const mimeType = MediaRecorder.isTypeSupported('audio/mpeg') ? 'audio/mpeg' : 'audio/webm';
+                
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.start();
                 audioChunks = [];
@@ -242,8 +257,10 @@
                 }, 5000); 
 
                 mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                    const file = new File([audioBlob], "recording.mp3", {type: 'audio/mpeg'});
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    // Use .mp3 extension as a generic container that Cloudinary handles well with resource_type: "auto"
+                    const fileName = mimeType === 'audio/mpeg' ? "recording.mp3" : "recording.webm";
+                    const file = new File([audioBlob], fileName, {type: mimeType});
 
                     const container = new DataTransfer();
                     container.items.add(file);
@@ -261,7 +278,7 @@
             })
             .catch(err => {
                 console.error(err);
-                alert('Mic access denied.');
+                alert('Mic access denied or not found.');
             });
     }
 
