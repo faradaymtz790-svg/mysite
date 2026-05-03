@@ -40,10 +40,23 @@ class Profile(models.Model):
 
 
 
+from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
+from cloudinary.models import CloudinaryField
+
 class Post(models.Model):
-    # ... other fields ...
+    # ✅ Essential: Links the post to the user who created it
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='posts'
+    )
     
-    # Must specify resource_type='video' for audio files
+    # ✅ Essential: Referenced in your __str__ method
+    title = models.CharField(max_length=255, default="Untitled Log")
+
+    # Cloudinary fields for Logsphere's audio/image features
     audio = CloudinaryField(
         'audio', 
         resource_type='video', 
@@ -51,7 +64,6 @@ class Post(models.Model):
         null=True
     )
     
-    # Standard image field
     image = CloudinaryField(
         'image', 
         blank=True, 
@@ -61,7 +73,13 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     listeners_count = models.PositiveIntegerField(default=0)
     replays_count = models.PositiveIntegerField(default=0)
-    played_by = models.ManyToManyField(User, related_name="played_posts", blank=True)
+    
+    # Relationships
+    played_by = models.ManyToManyField(
+        User, 
+        related_name="played_posts", 
+        blank=True
+    )
 
     likes = models.ManyToManyField(
         User,
