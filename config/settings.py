@@ -6,7 +6,6 @@ import cloudinary.uploader
 import cloudinary.api
 
 # ✅ BASE_DIR points to the root (where manage.py lives)
-# config/settings.py -> .parent (config/) -> .parent (Root/)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # =========================
@@ -15,10 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'a-safe-fallback-for-local-only')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ✅ Wildcard allows any Render subdomain
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
-
-INTERNAL_IPS = ["127.0.0.1"]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -36,7 +32,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # =========================
 INSTALLED_APPS = [
     'cloudinary_storage',  
-    'whitenoise.runserver_nostatic',          # ✅ MUST be above staticfiles
+    'whitenoise.runserver_nostatic',          
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -61,7 +57,7 @@ SITE_ID = 1
 # =========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ High priority
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -109,11 +105,7 @@ DATABASES = {
 # STATIC & MEDIA FILES
 # =========================
 STATIC_URL = '/static/'
-
-# ✅ This is where collectstatic will gather files on Render
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# ✅ This is where you store your mylogo.png and js/serviceworker.js
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 STORAGES = {
@@ -125,6 +117,9 @@ STORAGES = {
     },
 }
 
+# ✅ CRITICAL: Bridge for django-cloudinary-storage compatibility
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -135,7 +130,6 @@ CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dwccyjh8z'), 
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    # ✅ Vital for Logsphere audio (.mp3) posts
     'RESOURCE_TYPES': ['image', 'video', 'raw'], 
 }
 
