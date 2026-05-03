@@ -1178,3 +1178,24 @@ def niche_selection(request):
 
 # core/views.py
 from django_ratelimit.decorators import ratelimit
+
+
+
+import time
+import hashlib
+import hmac
+from django.http import JsonResponse
+from django.conf import settings
+
+def cloudinary_signature(request):
+    timestamp = int(time.time())
+
+    params_to_sign = f"timestamp={timestamp}{settings.CLOUDINARY_API_SECRET}"
+    signature = hashlib.sha1(params_to_sign.encode('utf-8')).hexdigest()
+
+    return JsonResponse({
+        "timestamp": timestamp,
+        "signature": signature,
+        "api_key": settings.CLOUDINARY_API_KEY,
+        "cloud_name": settings.CLOUDINARY_CLOUD_NAME
+    })
