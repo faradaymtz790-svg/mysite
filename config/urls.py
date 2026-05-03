@@ -3,13 +3,26 @@ from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView # Added TemplateView
 from core import views 
 from core.views import my_profile_redirect
 
-# 🔹 NON-language URLs
+# 🔹 NON-language URLs (Add PWA files here)
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    
+    # 📱 PWA / Static Assets (accessible at the root)
+    path('serviceworker.js', TemplateView.as_view(
+        template_name="serviceworker.js", 
+        content_type='application/javascript'
+    ), name='serviceworker'),
+    
+    path('manifest.json', TemplateView.as_view(
+        template_name="manifest.json", 
+        content_type='application/json'
+    ), name='manifest'),
+
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
 ]
 
 # 🔹 LANGUAGE URLs
@@ -70,7 +83,7 @@ urlpatterns += i18n_patterns(
     prefix_default_language=False  
 )
 
-# 🔹 MEDIA FILES (Only served by Django in Local Dev)
+# 🔹 MEDIA FILES
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

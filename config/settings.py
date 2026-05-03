@@ -1,23 +1,9 @@
 import os
 from pathlib import Path
 import dj_database_url
-
-import os
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
-
-# Cloudinary Configuration using Environment Variables
-cloudinary.config( 
-    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'), 
-    api_key = os.environ.get('CLOUDINARY_API_KEY'), 
-    api_secret = os.environ.get('CLOUDINARY_API_SECRET'),
-    secure = True
-)
-
-# Tell Django to use Cloudinary for Media Files
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,19 +14,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'a-safe-fallback-for-local-only')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com', 'mysite1-9fu9.onrender.com']
+# ✅ Added wildcard for all Render subdomains to prevent host errors
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
+INTERNAL_IPS = ["127.0.0.1"]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
 else:
+    # ✅ Safer wildcard for local and production dev
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
-        "https://mysite1-9fu9.onrender.com",
+        "https://*.onrender.com",
     ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -75,7 +61,7 @@ SITE_ID = 1
 # =========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ✅ High priority for static assets
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -125,16 +111,17 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ Updated to ensure it looks in the root static folder
+# ✅ Ensures Django looks in the root static folder for your js/css
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Modern Django 4.2+ Storage Configuration
+# ✅ Integrated Media and Staticfiles storage correctly
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.StaticFilesStorage", # Optimized for Render
     },
 }
 
@@ -144,7 +131,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # =========================
 # CLOUDINARY CONFIG
 # =========================
-
+# ✅ Consolidated credentials to use Environment Variables
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dwccyjh8z'), 
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    # ✅ 'video' and 'raw' are required for audio (.mp3) uploads in Logsphere
+    'RESOURCE_TYPES': ['image', 'video', 'raw'], 
+}
 
 # =========================
 # AUTH & REDIRECTS
@@ -153,7 +147,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Updated allauth settings to resolve deprecation warnings
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -185,18 +178,7 @@ RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeiG7QsAAAAAHv
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =========================
-# LOGGING (Prevents NameError: logger in views)
-
-
-# Add this so Cloudinary doesn't freak out when it sees a .mp3/audio file
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dwccyjh8z', # From your logs
-    'API_KEY': 'YOUR_API_KEY',
-    'API_SECRET': 'YOUR_API_SECRET',
-    'RESOURCE_TYPES': ['image', 'video', 'raw'], 
-}
-
-
+# LOGGING
 # =========================
 LOGGING = {
     'version': 1,
@@ -208,8 +190,6 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'DEBUG', # Useful for seeing why Cloudinary/Static might fail
     },
 }
-
-APPEND_SLASH = True
