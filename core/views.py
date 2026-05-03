@@ -558,50 +558,74 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post
 
+
+
 @login_required
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        audio_file = request.FILES.get('audio')
         image_file = request.FILES.get('image')
+        audio_file = request.FILES.get('audio')
 
+        # ✅ Basic validation
         if not title or not image_file:
-            return render(request, 'create_post.html', {'error': 'Title and Cover Image are required.'})
+            return render(request, 'create_post.html', {
+                'error': 'Title and Cover Image are required.',
+                'title': title
+            })
+
+        # 🔍 DEBUG (very useful)
+        print("------ DEBUG START ------")
+        print("IMAGE:", image_file)
+        print("TYPE:", type(image_file))
+        print("CONTENT TYPE:", image_file.content_type)
+        print("SIZE:", image_file.size)
+        print("-------------------------")
 
         try:
-            # 1. Upload Image
+            # ✅ Upload Image (FIXED)
             img_result = cloudinary.uploader.upload(
-                image_file, 
-                resource_type="image",
-                folder="user_posts/images" # Changed from logsphere to generic
+                image_file,
+                resource_type="auto",   # 🔥 FIX HERE
+                folder="user_posts/images"
             )
+
             image_url = img_result.get('secure_url')
 
-            # 2. Upload Audio
+            if not image_url:
+                raise Exception("Image upload failed (no URL returned)")
+
+            # ✅ Upload Audio (optional + safer)
             audio_url = None
             if audio_file:
+                print("AUDIO:", audio_file)
+                print("AUDIO TYPE:", audio_file.content_type)
+
                 audio_result = cloudinary.uploader.upload(
-                    audio_file, 
-                    resource_type="video", 
-                    folder="user_posts/audio" # Changed from logsphere to generic
+                    audio_file,
+                    resource_type="auto",   # 🔥 FIX HERE TOO
+                    folder="user_posts/audio"
                 )
+
                 audio_url = audio_result.get('secure_url')
 
-            # 3. Save to Database
+            # ✅ Save to Database
             Post.objects.create(
                 user=request.user,
                 title=title,
                 image=image_url,
                 audio=audio_url
             )
-            
+
+            print("✅ POST CREATED SUCCESSFULLY")
             return redirect('feed')
 
         except Exception as e:
-            print(f"UPLOAD ERROR: {str(e)}")
+            print("❌ UPLOAD ERROR:", str(e))
+
             return render(request, 'create_post.html', {
                 'error': f"Upload failed: {str(e)}",
-                'title': title 
+                'title': title
             })
 
     return render(request, 'create_post.html')
