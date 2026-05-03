@@ -101,6 +101,11 @@
         cursor: pointer;
     }
 
+    #submitBtn:disabled {
+        background: #a8cba4;
+        cursor: not-allowed;
+    }
+
     .error-msg {
         background: #ffebee;
         color: #c62828;
@@ -126,7 +131,9 @@
             {{ error }}
         </div>
     {% endif %}
-<form method="POST" enctype="multipart/form-data">
+
+    <!-- FIXED: Added id="postForm" -->
+    <form id="postForm" method="POST" action="/create_post/" enctype="multipart/form-data">
         {% csrf_token %}
 
         <textarea id="title" name="title" placeholder="Describe your story..." required></textarea>
@@ -145,7 +152,8 @@
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">🖼 Set Cover Image</div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <input type="file" id="imageInput" accept=".jpg,.jpeg,.png">
+        <!-- FIXED: Added name="image" -->
+        <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png">
 
         <button type="submit" id="submitBtn">Post to Feed</button>
     </form>
@@ -169,8 +177,7 @@ textarea.addEventListener('input', () => {
 audioInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('audioStatus').style.display = 'block';
-        document.getElementById('audioStatus').innerText =
-            "🎵 " + this.files[0].name;
+        document.getElementById('audioStatus').innerText = "🎵 " + this.files[0].name;
     }
 });
 
@@ -186,8 +193,7 @@ imageInput.addEventListener('change', function () {
     }
 
     document.getElementById('imageStatus').style.display = 'block';
-    document.getElementById('imageStatus').innerText =
-        "📸 " + file.name;
+    document.getElementById('imageStatus').innerText = "📸 " + file.name;
 });
 
 /* ---------------- RECORDING ---------------- */
@@ -201,6 +207,8 @@ function startRecording() {
         mediaRecorder.start();
         chunks = [];
 
+        document.getElementById('recordBtn').innerText = "Recording...";
+
         setTimeout(() => mediaRecorder.stop(), 5000);
 
         mediaRecorder.ondataavailable = e => chunks.push(e.data);
@@ -213,79 +221,33 @@ function startRecording() {
             dt.items.add(file);
             audioInput.files = dt.files;
 
+            document.getElementById('recordBtn').innerText = "🎤 Record 5s";
             document.getElementById('audioStatus').style.display = 'block';
             document.getElementById('audioStatus').innerText = "✅ Voice ready";
         };
+    }).catch(err => {
+        alert("Microphone access denied or not found.");
     });
 }
 
-/* ---------------- CLOUDINARY UPLOAD ---------------- */
-async function uploadToCloudinary(file) {
-
-    const sigRes = await fetch("/cloudinary-signature/");
-    const sig = await sigRes.json();
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("api_key", sig.api_key);
-    formData.append("timestamp", sig.timestamp);
-    formData.append("signature", sig.signature);
-    formData.append("folder", "user_posts/images");
-
-    const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
-        {
-            method: "POST",
-            body: formData
-        }
-    );
-
-    return await res.json();
-}
-
-/* ---------------- FINAL SUBMIT (FIXED - ONLY ONE) ---------------- */
+/* ---------------- FINAL SUBMIT (MATCHED TO DJANGO VIEW) ---------------- */
 postForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
+    // We are letting the standard form submission handle it to ensure Django receives request.FILES
+    // If you want to use the JavaScript 'fetch' instead, ensure your Django view is set to return JSON.
+    
     const file = imageInput.files[0];
 
     if (!file) {
-        alert("Please select image");
+        e.preventDefault();
+        alert("Please select an image");
         return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "Uploading...";
-
-    try {
-        // upload image first
-        const cloud = await uploadToCloudinary(file);
-
-        if (!cloud.secure_url) throw new Error("Upload failed");
-
-        // send to Django
-        const formData = new FormData();
-        formData.append("title", textarea.value);
-        formData.append("image_url", cloud.secure_url);
-
-        const res = await fetch("", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}"
-            }
-        });
-
-        if (res.ok) {
-            window.location.href = "/feed/";
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("Upload failed");
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Post to Feed";
-    }
+    submitBtn.innerText = "Processing...";
+    
+    // The form will now submit naturally to /create_post/ 
+    // and Django will catch 'image' and 'audio' in request.FILES.
 });
 
 </script>

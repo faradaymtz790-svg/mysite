@@ -553,11 +553,6 @@ logger = logging.getLogger(__name__)
 # Add this import at the top
 
 
-import cloudinary.uploader
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Post
-
 
 import cloudinary.uploader
 from django.shortcuts import render, redirect
