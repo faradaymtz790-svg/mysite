@@ -106,7 +106,7 @@
 {% csrf_token %} <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
+    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
@@ -117,7 +117,7 @@
             </button>
         {% endif %}
         
-        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
+        <img src="{% if profile.image %}{{ profile.image  }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
         
         <div class="info-section">
             <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
