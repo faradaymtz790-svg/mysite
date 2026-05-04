@@ -83,10 +83,27 @@ LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
 # STATIC & MEDIA
-STATIC_URL = '/static/'
+
+
+
+# BASE_DIR should point to the root (where manage.py is)
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 1. Tell Django where to find your files during development
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'), 
+]
+
+# 2. Tell Django where to put files for production (Render)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# 3. Ensure the URL is simple
+STATIC_URL = '/static/'
+
+# 4. Use WhiteNoise to serve the files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
