@@ -559,31 +559,26 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post
 
-@login_required
 def create_post(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         title = request.POST.get('title')
-        # Change this: We are getting a URL string from JS, not a FILE
+        # We get the URL strings sent by the JavaScript FormData
         image_url = request.POST.get('image_url') 
         audio_url = request.POST.get('audio_url')
 
         if not image_url:
+            # This is the error you are seeing. 
+            # It triggers if 'image_url' is missing from the POST data.
             return render(request, 'create_post.html', {'error': 'No image selected.'})
 
-        try:
-            Post.objects.create(
-                user=request.user,
-                title=title,
-                image=image_url, # Django-Cloudinary-Storage accepts the URL string here
-                audio=audio_url
-            )
-            return redirect('feed')
-        except Exception as e:
-            return render(request, 'create_post.html', {'error': str(e)})
-
+        Post.objects.create(
+            user=request.user,
+            title=title,
+            image=image_url, # Cloudinary storage accepts the URL string
+            audio=audio_url
+        )
+        return redirect('feed')
     return render(request, 'create_post.html')
-
-
 
 from django.http import JsonResponse
 from PIL import Image
@@ -1141,21 +1136,22 @@ def niche_selection(request):
     # For a GET request, just show the page
     return render(request, 'niche_selection.html')
 
+
 import time
-import hashlib
-import hmac
-from django.http import JsonResponse
-from django.conf import settings
+import cloudinary.utils
 
 def cloudinary_signature(request):
-    timestamp = int(time.time())
-
-    params_to_sign = f"timestamp={timestamp}{settings.CLOUDINARY_API_SECRET}"
-    signature = hashlib.sha1(params_to_sign.encode('utf-8')).hexdigest()
-
+    params = {
+        "timestamp": int(time.time()),
+        "folder": "user_posts",
+    }
+    signature = cloudinary.utils.api_sign_request(
+        params, 
+        os.environ.get('CLOUDINARY_API_SECRET')
+    )
     return JsonResponse({
-        "timestamp": timestamp,
         "signature": signature,
-        "api_key": settings.CLOUDINARY_API_KEY,
-        "cloud_name": settings.CLOUDINARY_CLOUD_NAME
+        "timestamp": params["timestamp"],
+        "api_key": os.environ.get('CLOUDINARY_API_KEY'),
+        "cloud_name": os.environ.get('CLOUDINARY_CLOUD_NAME'),
     })

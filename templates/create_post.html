@@ -170,7 +170,7 @@ async function startRecording() {
 /* ---------------- CLOUDINARY UPLOAD ---------------- */
 async function uploadToCloudinary(file) {
     // 1. Get Signature
-    const sigRes = await fetch("/cloudinary-signature/");
+    const sigRes = await fetch("{% url 'cloudinary_signature' %}");
     if (!sigRes.ok) throw new Error("Failed to get Cloudinary signature.");
     const sig = await sigRes.json();
 
