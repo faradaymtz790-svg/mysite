@@ -2,23 +2,27 @@ import os
 from pathlib import Path
 import dj_database_url
 
+# BASE_DIR should point to the root (where manage.py is)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
 ALLOWED_HOSTS = ['*']
+# Essential for Render to allow form submissions (like creating a post)
+CSRF_TRUSTED_ORIGINS = ['https://mysite-1-jhw2.onrender.com']
 
 INSTALLED_APPS = [
-    'cloudinary_storage', 
+    'cloudinary_storage', # Must be at the top
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary', # Required for Cloudinary storage to work
     'django.contrib.staticfiles',
     
     # Third-party
-    'cloudinary',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -69,9 +73,7 @@ DATABASES = {
     )
 }
 
-# --- THE FIX FOR THE AUTH ERROR ---
-# We force Django to only recognize the standard ModelBackend.
-# This prevents the "Multiple Backends" error during login.
+# AUTHENTICATION
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -83,28 +85,14 @@ LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
 # STATIC & MEDIA
-
-
-
-# BASE_DIR should point to the root (where manage.py is)
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# 1. Tell Django where to find your files during development
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'), 
-]
-
-# 2. Tell Django where to put files for production (Render)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# 3. Ensure the URL is simple
-STATIC_URL = '/static/'
-
-# 4. Use WhiteNoise to serve the files
+# Use WhiteNoise for production static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-
+# CLOUDINARY
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
