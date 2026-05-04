@@ -45,52 +45,24 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from cloudinary.models import CloudinaryField
 
+
 class Post(models.Model):
-    # ✅ Essential: Links the post to the user who created it
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        related_name='posts'
-    )
-    
-    # ✅ Essential: Referenced in your __str__ method
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255, default="Untitled Log")
 
-    # Cloudinary fields for Logsphere's audio/image features
-    audio = CloudinaryField(
-        'audio', 
-        resource_type='video', 
-        blank=True, 
-        null=True
-    )
-    
-    image = CloudinaryField(
-        'image', 
-        blank=True, 
-        null=True
-    )
+    # Change these to CharField to store the URL strings from your JS
+    audio = models.CharField(max_length=500, blank=True, null=True)
+    image = models.CharField(max_length=500, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     listeners_count = models.PositiveIntegerField(default=0)
     replays_count = models.PositiveIntegerField(default=0)
     
-    # Relationships
-    played_by = models.ManyToManyField(
-        User, 
-        related_name="played_posts", 
-        blank=True
-    )
-
-    likes = models.ManyToManyField(
-        User,
-        related_name='liked_posts',
-        blank=True,
-        through='PostLikes'
-    )
+    played_by = models.ManyToManyField(User, related_name="played_posts", blank=True)
+    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True, through='PostLikes')
 
     def __str__(self):
         return f"{self.user.username} - {self.title[:20]}"
-
 
 
 # --- PostLikes (M2M table) ---
