@@ -1141,30 +1141,3 @@ def niche_selection(request):
     # For a GET request, just show the page
     return render(request, 'niche_selection.html')
 
-# core/views.py
-import time
-import cloudinary.utils
-from django.http import JsonResponse
-from django.conf import settings
-
-def cloudinary_signature(request):
-    timestamp = int(time.time())
-    
-    # Generate the signature using Cloudinary's helper
-    # We include 'folder' because your JS uses it
-    params = {
-        "timestamp": timestamp,
-        "folder": "user_posts",
-    }
-    
-    signature = cloudinary.utils.api_sign_request(
-        params, 
-        settings.CLOUDINARY_STORAGE['API_SECRET']
-    )
-
-    return JsonResponse({
-        "signature": signature,
-        "timestamp": timestamp,
-        "api_key": settings.CLOUDINARY_STORAGE['API_KEY'],
-        "cloud_name": settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
-    })
