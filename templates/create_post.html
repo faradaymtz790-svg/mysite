@@ -1,124 +1,74 @@
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
 <head>
-<meta charset="UTF-8">
-<title>Create Post</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post | Logsphere</title>
 
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(rgba(0,128,0,0.5), rgba(255,255,255,0.5));
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-    }
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(0,128,0,0.5), rgba(255,255,255,0.5));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-    .container {
-        width: 95%;
-        max-width: 500px;
-        padding: 25px;
-        border-radius: 20px;
-        background: rgba(255,255,255,0.85);
-        backdrop-filter: blur(15px);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-        animation: fadeIn 0.7s ease;
-    }
+        .container {
+            width: 95%;
+            max-width: 500px;
+            padding: 25px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
 
-    h2 {
-        text-align: center;
-        color: #2d5a27;
-        margin-top: 0;
-    }
+        h2 { text-align: center; color: #2d5a27; margin-top: 0; }
 
-    textarea {
-        width: 100%;
-        height: 120px;
-        padding: 12px;
-        border-radius: 15px;
-        border: 2px solid #a8cba4;
-        resize: none;
-        outline: none;
-        font-size: 16px;
-        box-sizing: border-box;
-    }
+        textarea {
+            width: 100%; height: 120px; padding: 12px;
+            border-radius: 15px; border: 2px solid #a8cba4;
+            resize: none; outline: none; font-size: 16px;
+            box-sizing: border-box;
+        }
 
-    .counter {
-        text-align: right;
-        font-size: 12px;
-        color: green;
-        margin-top: 5px;
-    }
+        .counter { text-align: right; font-size: 12px; color: green; margin-top: 5px; }
 
-    .upload-section {
-        display: flex;
-        gap: 10px;
-        margin: 15px 0;
-    }
+        .upload-section { display: flex; gap: 10px; margin: 15px 0; }
 
-    .icon-box {
-        flex: 1;
-        padding: 15px 10px;
-        border-radius: 12px;
-        border: 2px dashed green;
-        text-align: center;
-        cursor: pointer;
-        color: green;
-        font-weight: bold;
-        background: rgba(255,255,255,0.5);
-    }
+        .icon-box {
+            flex: 1; padding: 15px 10px; border-radius: 12px;
+            border: 2px dashed green; text-align: center;
+            cursor: pointer; color: green; font-weight: bold;
+            background: rgba(255,255,255,0.5); transition: 0.3s;
+        }
 
-    .icon-box:hover {
-        background: green;
-        color: white;
-    }
+        .icon-box:hover { background: green; color: white; }
 
-    .file-status {
-        font-size: 13px;
-        color: #2d5a27;
-        text-align: center;
-        margin: 10px 0;
-        display: none;
-        padding: 5px;
-        background: #e8f5e9;
-        border-radius: 8px;
-    }
+        .file-status {
+            font-size: 13px; color: #2d5a27; text-align: center;
+            margin: 10px 0; display: none; padding: 8px;
+            background: #e8f5e9; border-radius: 8px;
+        }
 
-    input[type="file"] {
-        display: none;
-    }
+        input[type="file"] { display: none; }
 
-    #submitBtn {
-        width: 100%;
-        padding: 15px;
-        border-radius: 25px;
-        border: none;
-        background: green;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-    }
+        #submitBtn {
+            width: 100%; padding: 15px; border-radius: 25px;
+            border: none; background: green; color: white;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+        }
 
-    #submitBtn:disabled {
-        background: #a8cba4;
-        cursor: not-allowed;
-    }
+        #submitBtn:disabled { background: #a8cba4; cursor: not-allowed; }
 
-    .error-msg {
-        background: #ffebee;
-        color: #c62828;
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-    }
-
-    @keyframes fadeIn {
-        from {opacity:0; transform: translateY(20px);}
-        to {opacity:1; transform: translateY(0);}
-    }
-</style>
+        .error-msg {
+            background: #ffebee; color: #c62828;
+            padding: 10px; border-radius: 10px; margin-bottom: 15px;
+        }
+    </style>
 </head>
 
 <body>
@@ -129,31 +79,29 @@
     <div id="jsError" class="error-msg" style="display:none;"></div>
 
     {% if error %}
-        <div class="error-msg">
-            {{ error }}
-        </div>
+        <div class="error-msg">{{ error }}</div>
     {% endif %}
 
-    <form id="postForm" method="POST" enctype="multipart/form-data">
+    <form id="postForm" method="POST">
         {% csrf_token %}
 
         <textarea id="title" name="title" placeholder="Describe your story..." required></textarea>
         <div class="counter" id="counter">0 / 350 words</div>
 
-        <!-- AUDIO -->
+        <!-- AUDIO SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('audioInput').click()">📁 Select Audio</div>
             <div class="icon-box" id="recordBtn" onclick="startRecording()">🎤 Record 5s</div>
         </div>
         <div id="audioStatus" class="file-status"></div>
-        <input type="file" id="audioInput" name="audio" accept="audio/*">
+        <input type="file" id="audioInput" accept="audio/*">
 
-        <!-- IMAGE -->
+        <!-- IMAGE SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">🖼 Set Cover Image</div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png">
+        <input type="file" id="imageInput" accept=".jpg,.jpeg,.png">
 
         <button type="submit" id="submitBtn">Post to Feed</button>
     </form>
@@ -168,9 +116,18 @@ const postForm = document.getElementById('postForm');
 const submitBtn = document.getElementById('submitBtn');
 const jsError = document.getElementById('jsError');
 
+// Word counter
 textarea.addEventListener('input', () => {
     const words = textarea.value.trim().split(/\s+/).filter(w => w);
     counter.textContent = `${words.length} / 350 words`;
+});
+
+// UI Updates
+imageInput.addEventListener('change', function () {
+    if (this.files[0]) {
+        document.getElementById('imageStatus').style.display = 'block';
+        document.getElementById('imageStatus').innerText = "📸 " + this.files[0].name;
+    }
 });
 
 audioInput.addEventListener('change', function () {
@@ -180,59 +137,63 @@ audioInput.addEventListener('change', function () {
     }
 });
 
-imageInput.addEventListener('change', function () {
-    if (this.files[0]) {
-        document.getElementById('imageStatus').style.display = 'block';
-        document.getElementById('imageStatus').innerText = "📸 " + this.files[0].name;
-    }
-});
-
-/* ---------------- RECORDING ---------------- */
+/* ---------------- AUDIO RECORDING ---------------- */
 let mediaRecorder;
 let chunks = [];
 
-function startRecording() {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(stream => {
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
         chunks = [];
         document.getElementById('recordBtn').innerText = "Recording...";
+        
         setTimeout(() => mediaRecorder.stop(), 5000);
+
         mediaRecorder.ondataavailable = e => chunks.push(e.data);
         mediaRecorder.onstop = () => {
             const blob = new Blob(chunks, { type: "audio/webm" });
-            const file = new File([blob], "voice.webm", { type: blob.type });
+            const file = new File([blob], "voice.webm", { type: "audio/webm" });
             const dt = new DataTransfer();
             dt.items.add(file);
             audioInput.files = dt.files;
             document.getElementById('recordBtn').innerText = "🎤 Record 5s";
             document.getElementById('audioStatus').style.display = 'block';
-            document.getElementById('audioStatus').innerText = "✅ Voice ready";
+            document.getElementById('audioStatus').innerText = "✅ Voice note recorded";
         };
-    });
+    } catch (err) {
+        alert("Microphone access denied or not available.");
+    }
 }
 
-/* ---------------- CLOUDINARY HELPER ---------------- */
-async function uploadToCloudinary(file, type) {
+/* ---------------- CLOUDINARY UPLOAD ---------------- */
+async function uploadToCloudinary(file) {
+    // 1. Get Signature
     const sigRes = await fetch("/cloudinary-signature/");
+    if (!sigRes.ok) throw new Error("Failed to get Cloudinary signature.");
     const sig = await sigRes.json();
 
+    // 2. Prepare Form Data
     const formData = new FormData();
     formData.append("file", file);
     formData.append("api_key", sig.api_key);
     formData.append("timestamp", sig.timestamp);
     formData.append("signature", sig.signature);
-    formData.append("folder", type === 'image' ? "user_posts/images" : "user_posts/audio");
+    // Use 'auto' to handle both image and audio seamlessly
+    formData.append("folder", "user_posts"); 
 
     const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/${type}/upload`,
+        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/auto/upload`,
         { method: "POST", body: formData }
     );
-    return await res.json();
+    
+    const data = await res.json();
+    if (!data.secure_url) throw new Error(data.error?.message || "Upload failed");
+    return data.secure_url;
 }
 
-/* ---------------- FINAL SUBMIT ---------------- */
+/* ---------------- FORM SUBMISSION ---------------- */
 postForm.addEventListener("submit", async function (e) {
     e.preventDefault();
     jsError.style.display = 'none';
@@ -241,31 +202,30 @@ postForm.addEventListener("submit", async function (e) {
     const audFile = audioInput.files[0];
 
     if (!imgFile) {
-        alert("Please select a cover image");
+        alert("A cover image is required.");
         return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "Uploading to Cloud...";
+    submitBtn.innerText = "Uploading Media...";
 
     try {
-        // 1. Upload Image
-        const cloudImg = await uploadToCloudinary(imgFile, 'image');
-        if (!cloudImg.secure_url) throw new Error("Image upload failed");
+        // Upload image first
+        const imageUrl = await uploadToCloudinary(imgFile);
 
-        // 2. Upload Audio if exists
-        let cloudAudUrl = null;
+        // Upload audio if it exists
+        let audioUrl = null;
         if (audFile) {
-            const cloudAud = await uploadToCloudinary(audFile, 'video'); // Cloudinary uses 'video' for audio
-            cloudAudUrl = cloudAud.secure_url;
+            submitBtn.innerText = "Uploading Audio...";
+            audioUrl = await uploadToCloudinary(audFile);
         }
 
-        // 3. Send URLs to Django
+        // Final POST to Django
         submitBtn.innerText = "Saving Post...";
         const djangoData = new FormData();
         djangoData.append("title", textarea.value);
-        djangoData.append("image_url", cloudImg.secure_url); // Sent as string
-        if (cloudAudUrl) djangoData.append("audio_url", cloudAudUrl);
+        djangoData.append("image_url", imageUrl);
+        if (audioUrl) djangoData.append("audio_url", audioUrl);
 
         const res = await fetch("", {
             method: "POST",
@@ -279,12 +239,12 @@ postForm.addEventListener("submit", async function (e) {
         if (res.ok) {
             window.location.href = "/feed/";
         } else {
-            throw new Error("Server failed to save post.");
+            throw new Error("Server rejected the final post.");
         }
 
     } catch (err) {
         console.error(err);
-        jsError.innerText = err.message;
+        jsError.innerText = "Error: " + err.message;
         jsError.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.innerText = "Post to Feed";

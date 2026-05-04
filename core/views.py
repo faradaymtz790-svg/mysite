@@ -559,40 +559,30 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post
 
-
 @login_required
 def create_post(request):
     if request.method == "POST":
         title = request.POST.get('title')
-        image_file = request.FILES.get('image')
-        audio_file = request.FILES.get('audio')
+        # Change this: We are getting a URL string from JS, not a FILE
+        image_url = request.POST.get('image_url') 
+        audio_url = request.POST.get('audio_url')
 
-        # Basic Validation
-        if not image_file:
+        if not image_url:
             return render(request, 'create_post.html', {'error': 'No image selected.'})
 
         try:
-            # Django handles the upload directly
-            img_result = cloudinary.uploader.upload(image_file, folder="user_posts/images")
-            image_url = img_result.get('secure_url')
-
-            audio_url = None
-            if audio_file:
-                aud_result = cloudinary.uploader.upload(audio_file, resource_type="auto", folder="user_posts/audio")
-                audio_url = aud_result.get('secure_url')
-
             Post.objects.create(
                 user=request.user,
                 title=title,
-                image=image_url,
+                image=image_url, # Django-Cloudinary-Storage accepts the URL string here
                 audio=audio_url
             )
             return redirect('feed')
-
         except Exception as e:
-            return render(request, 'create_post.html', {'error': f"Upload failed: {str(e)}"})
+            return render(request, 'create_post.html', {'error': str(e)})
 
     return render(request, 'create_post.html')
+
 
 
 from django.http import JsonResponse
