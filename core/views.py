@@ -559,26 +559,31 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Post
 
+
 def create_post(request):
     if request.method == 'POST':
         title = request.POST.get('title')
-        # We get the URL strings sent by the JavaScript FormData
-        image_url = request.POST.get('image_url') 
-        audio_url = request.POST.get('audio_url')
+        image_file = request.FILES.get('image') # Look for the actual FILE
+        audio_file = request.FILES.get('audio')
 
-        if not image_url:
-            # This is the error you are seeing. 
-            # It triggers if 'image_url' is missing from the POST data.
-            return render(request, 'create_post.html', {'error': 'No image selected.'})
+        if not image_file:
+            return render(request, 'create_post.html', {'error': 'Please select an image.'})
 
-        Post.objects.create(
-            user=request.user,
-            title=title,
-            image=image_url, # Cloudinary storage accepts the URL string
-            audio=audio_url
-        )
-        return redirect('feed')
+        try:
+            # Django handles the Cloudinary upload automatically here
+            new_post = Post(
+                user=request.user,
+                title=title,
+                image=image_file,
+                audio=audio_file
+            )
+            new_post.save()
+            return redirect('feed')
+        except Exception as e:
+            return render(request, 'create_post.html', {'error': f"Upload failed: {str(e)}"})
+
     return render(request, 'create_post.html')
+
 
 from django.http import JsonResponse
 from PIL import Image

@@ -1,19 +1,19 @@
-
 import os
 from pathlib import Path
 import dj_database_url
 
 # 1. BASE DIRECTORY
+# This assumes settings.py is inside config/
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. SECURITY (Keep your secret key in Environment Variables on Render!)
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-default-local-key-for-dev')
+# 2. SECURITY
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['*'] # Update this to your specific .onrender.com domain for better security
+ALLOWED_HOSTS = ['*'] 
 
 # 3. APPLICATION DEFINITION
 INSTALLED_APPS = [
-    'cloudinary_storage',  # MUST stay above staticfiles
+    'cloudinary_storage', # Must be above staticfiles
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,20 +21,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third-party apps
+    # Third-party
     'cloudinary',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'rosetta',
+    'whitenoise.runserver_nostatic',
     
-    # Your internal apps
-    'core', # Ensure this matches your app name
+    # Your Apps
+    'core',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # MUST be below SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Below SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -44,7 +45,8 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'mysite.urls'
+# CRITICAL FIX: Point to 'config' folder
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -62,9 +64,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mysite.wsgi.application'
+# CRITICAL FIX: Point to 'config' folder
+WSGI_APPLICATION = 'config.wsgi.application'
 
-# 4. DATABASE (Uses PostgreSQL on Render)
+# 4. DATABASE (PostgreSQL on Render)
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
@@ -73,20 +76,12 @@ DATABASES = {
 }
 
 # 5. AUTHENTICATION & ALLAUTH (Fixed Deprecations)
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 SITE_ID = 1
-# Updated settings to remove warnings
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
@@ -94,15 +89,15 @@ ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# 6. STATIC & MEDIA FILES (Cloudinary & WhiteNoise)
+# 6. STATIC & MEDIA FILES
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Points to your 'mysite/static'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Points to project-level static/
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise for Static
+# WhiteNoise Storage
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Cloudinary for Media
+# Cloudinary Storage
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
