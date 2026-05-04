@@ -3,7 +3,6 @@ from pathlib import Path
 import dj_database_url
 
 # 1. BASE DIRECTORY
-# This assumes settings.py is inside config/
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 2. SECURITY
@@ -13,7 +12,7 @@ ALLOWED_HOSTS = ['*']
 
 # 3. APPLICATION DEFINITION
 INSTALLED_APPS = [
-    'cloudinary_storage', # Must be above staticfiles
+    'cloudinary_storage', # MUST be above staticfiles
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,7 +34,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Below SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -45,7 +44,6 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-# CRITICAL FIX: Point to 'config' folder
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -64,10 +62,10 @@ TEMPLATES = [
     },
 ]
 
-# CRITICAL FIX: Point to 'config' folder
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# 4. DATABASE (PostgreSQL on Render)
+# 4. DATABASE (PostgreSQL for Render)
+# Uses a dummy engine locally if DATABASE_URL is missing to prevent crash
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
@@ -75,29 +73,29 @@ DATABASES = {
     )
 }
 
-# 5. AUTHENTICATION & ALLAUTH (Fixed Deprecations)
+# 5. AUTHENTICATION & ALLAUTH (CLEANED UP)
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 SITE_ID = 1
-ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Set to 'mandatory' if you have SMTP set up
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
 # 6. STATIC & MEDIA FILES
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Points to project-level static/
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise Storage
+# WhiteNoise for CSS/JS
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Cloudinary Storage
+# Cloudinary for User Uploads (Images/Audio)
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
