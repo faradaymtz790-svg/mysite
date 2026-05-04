@@ -2,18 +2,14 @@ import os
 from pathlib import Path
 import dj_database_url
 
-# 1. BASE DIRECTORY
-# Points to the root folder (where manage.py is)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['*'] 
+ALLOWED_HOSTS = ['*']
 
-# 3. APPLICATION DEFINITION
 INSTALLED_APPS = [
-    'cloudinary_storage', # Must stay at the very top
+    'cloudinary_storage', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,7 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # For static files on Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -65,7 +61,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# 4. DATABASE (PostgreSQL on Render)
+# DATABASE
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
@@ -73,9 +69,9 @@ DATABASES = {
     )
 }
 
-# 5. AUTHENTICATION (The "Foolishness" Fix)
-# By listing only one backend here, we prevent the "Multiple Backends" error 
-# unless you specifically need allauth features.
+# --- THE FIX FOR THE AUTH ERROR ---
+# We force Django to only recognize the standard ModelBackend.
+# This prevents the "Multiple Backends" error during login.
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -83,19 +79,15 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# 6. STATIC & MEDIA FILES
+# STATIC & MEDIA
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
-# WhiteNoise Storage for CSS/JS
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Cloudinary Storage for Media (Images/Audio)
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
@@ -103,14 +95,12 @@ CLOUDINARY_STORAGE = {
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# 7. INTERNATIONALIZATION (Supporting your languages)
+# LANGUAGES
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Add Swahili and French as requested previously
 LANGUAGES = [
     ('en', 'English'),
     ('sw', 'Swahili'),
