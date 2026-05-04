@@ -169,9 +169,9 @@ async function startRecording() {
 
 /* ---------------- CLOUDINARY UPLOAD ---------------- */
 async function uploadToCloudinary(file) {
-    // 1. Get Signature
+    // 1. Get Signature from your Django view
     const sigRes = await fetch("{% url 'cloudinary_signature' %}");
-    if (!sigRes.ok) throw new Error("Failed to get Cloudinary signature.");
+    if (!sigRes.ok) throw new Error("Failed to get Cloudinary signature. Verify your signature view is set up.");
     const sig = await sigRes.json();
 
     // 2. Prepare Form Data
@@ -180,7 +180,8 @@ async function uploadToCloudinary(file) {
     formData.append("api_key", sig.api_key);
     formData.append("timestamp", sig.timestamp);
     formData.append("signature", sig.signature);
-    // Use 'auto' to handle both image and audio seamlessly
+    
+    // This MUST match the folder used in the Python signature generation
     formData.append("folder", "user_posts"); 
 
     const res = await fetch(
@@ -214,7 +215,7 @@ postForm.addEventListener("submit", async function (e) {
         const imageUrl = await uploadToCloudinary(imgFile);
 
         // Upload audio if it exists
-        let audioUrl = null;
+        let audioUrl = "";
         if (audFile) {
             submitBtn.innerText = "Uploading Audio...";
             audioUrl = await uploadToCloudinary(audFile);
@@ -224,10 +225,10 @@ postForm.addEventListener("submit", async function (e) {
         submitBtn.innerText = "Saving Post...";
         const djangoData = new FormData();
         djangoData.append("title", textarea.value);
-        djangoData.append("image_url", imageUrl);
-        if (audioUrl) djangoData.append("audio_url", audioUrl);
+        djangoData.append("image", imageUrl); // Sending URL string to CharField
+        if (audioUrl) djangoData.append("audio", audioUrl); // Sending URL string to CharField
 
-        const res = await fetch("", {
+        const res = await fetch("{% url 'create_post' %}", {
             method: "POST",
             body: djangoData,
             headers: {
@@ -237,9 +238,10 @@ postForm.addEventListener("submit", async function (e) {
         });
 
         if (res.ok) {
-            window.location.href = "/feed/";
+            window.location.href = "{% url 'feed' %}";
         } else {
-            throw new Error("Server rejected the final post.");
+            const errorData = await res.json();
+            throw new Error(errorData.error || "Server rejected the final post.");
         }
 
     } catch (err) {

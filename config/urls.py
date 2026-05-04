@@ -31,7 +31,9 @@ urlpatterns += i18n_patterns(
     path('rosetta/', include('rosetta.urls')),
     path('accounts/', include('allauth.urls')),
 
-    path("cloudinary-signature/", views.cloudinary_signature, name="cloudinary_signature"),
+  
+
+     path('cloudinary-signature/', cloudinary_signature, name='cloudinary_signature'),
 
     # Root redirects to signup
     path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
