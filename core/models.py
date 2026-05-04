@@ -14,11 +14,22 @@ from django.db import models
 from django.conf import settings  # <--- THIS IS REQUIRED
 from django.contrib.auth.models import User
 
+
+
 class Profile(models.Model):
-    # Now that settings is imported, this line will work
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    image = models.ImageField(upload_to='profiles/', default='default.png')
-    cover_photo = models.ImageField(upload_to='covers/', default='cover.jpg')
+    
+    # CHANGED: ImageField to CharField to store the full Cloudinary URL
+    # We use a full URL as the default so it always has something to show
+    image = models.CharField(
+        max_length=500, 
+        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/default.png'
+    )
+    cover_photo = models.CharField(
+        max_length=500, 
+        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/cover.jpg'
+    )
+    
     bio = models.TextField(max_length=250, blank=True)
     location = models.CharField(max_length=100, blank=True)
     links = models.URLField(blank=True)
