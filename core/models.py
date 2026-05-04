@@ -15,19 +15,21 @@ from django.conf import settings  # <--- THIS IS REQUIRED
 from django.contrib.auth.models import User
 
 
+from django.db import models
+from django.conf import settings
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     
-    # CHANGED: ImageField to CharField to store the full Cloudinary URL
-    # We use a full URL as the default so it always has something to show
+    # Store full Cloudinary URLs. 
+    # IMPORTANT: Replace 'your-cloud-name' with your actual Cloudinary name.
     image = models.CharField(
         max_length=500, 
-        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/default.png'
+        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/default_avatar.png'
     )
     cover_photo = models.CharField(
         max_length=500, 
-        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/cover.jpg'
+        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/default_cover.jpg'
     )
     
     bio = models.TextField(max_length=250, blank=True)
@@ -43,6 +45,16 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
+    def save(self, *args, **kwargs):
+        # 1. FIX THE SPACE ISSUE: Automatically clean the username
+        # This converts "in pocket" to "in_pocket" to fix the %20 URL error.
+        if self.user.username:
+            new_username = self.user.username.strip().replace(' ', '_')
+            if self.user.username != new_username:
+                self.user.username = new_username
+                self.user.save()
+        
+        super().save(*args, **kwargs)
 # ... Your Report model remains below ...
 
 
@@ -57,13 +69,15 @@ from django.conf import settings
 from cloudinary.models import CloudinaryField
 
 
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255, default="Untitled Log")
 
-    # Change these to CharField to store the URL strings from your JS
-    audio = models.CharField(max_length=500, blank=True, null=True)
-    image = models.CharField(max_length=500, blank=True, null=True)
+    # Use CloudinaryField instead of CharField
+    # 'auto' resource_type allows Cloudinary to detect if it's an image or audio
+    image = CloudinaryField('image', null=True, blank=True)
+    audio = CloudinaryField('auto', resource_type='auto', null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     listeners_count = models.PositiveIntegerField(default=0)
