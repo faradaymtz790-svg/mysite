@@ -92,13 +92,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Use WhiteNoise for production static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# CLOUDINARY
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    'SECURE': True,  # <--- Add this line here
 }
+
+# Ensure this is also set to tell Django to use Cloudinary for media
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+
 
 # LANGUAGES
 LANGUAGE_CODE = 'en-us'
