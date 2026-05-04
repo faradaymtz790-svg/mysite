@@ -82,7 +82,8 @@
         <div class="error-msg">{{ error }}</div>
     {% endif %}
 
-    <form id="postForm" method="POST">
+    <!-- Added enctype for file handling -->
+    <form id="postForm" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
         <textarea id="title" name="title" placeholder="Describe your story..." required></textarea>
@@ -94,14 +95,16 @@
             <div class="icon-box" id="recordBtn" onclick="startRecording()">🎤 Record 5s</div>
         </div>
         <div id="audioStatus" class="file-status"></div>
-        <input type="file" id="audioInput" accept="audio/*">
+        <!-- Added name="audio" for Django -->
+        <input type="file" id="audioInput" name="audio" accept="audio/*">
 
         <!-- IMAGE SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">🖼 Set Cover Image</div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <input type="file" id="imageInput" accept=".jpg,.jpeg,.png">
+        <!-- Added name="image" for Django -->
+        <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png">
 
         <button type="submit" id="submitBtn">Post to Feed</button>
     </form>
@@ -167,70 +170,26 @@ async function startRecording() {
     }
 }
 
-/* ---------------- CLOUDINARY UPLOAD ---------------- */
-async function uploadToCloudinary(file) {
-    // 1. Get Signature from your Django view
-    const sigRes = await fetch("{% url 'cloudinary_signature' %}");
-    if (!sigRes.ok) throw new Error("Failed to get Cloudinary signature. Verify your signature view is set up.");
-    const sig = await sigRes.json();
-
-    // 2. Prepare Form Data
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("api_key", sig.api_key);
-    formData.append("timestamp", sig.timestamp);
-    formData.append("signature", sig.signature);
-    
-    // This MUST match the folder used in the Python signature generation
-    formData.append("folder", "user_posts"); 
-
-    const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/auto/upload`,
-        { method: "POST", body: formData }
-    );
-    
-    const data = await res.json();
-    if (!data.secure_url) throw new Error(data.error?.message || "Upload failed");
-    return data.secure_url;
-}
-
 /* ---------------- FORM SUBMISSION ---------------- */
 postForm.addEventListener("submit", async function (e) {
     e.preventDefault();
     jsError.style.display = 'none';
 
-    const imgFile = imageInput.files[0];
-    const audFile = audioInput.files[0];
-
-    if (!imgFile) {
+    if (!imageInput.files[0]) {
         alert("A cover image is required.");
         return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "Uploading Media...";
+    submitBtn.innerText = "Processing & Uploading...";
 
     try {
-        // Upload image first
-        const imageUrl = await uploadToCloudinary(imgFile);
-
-        // Upload audio if it exists
-        let audioUrl = "";
-        if (audFile) {
-            submitBtn.innerText = "Uploading Audio...";
-            audioUrl = await uploadToCloudinary(audFile);
-        }
-
-        // Final POST to Django
-        submitBtn.innerText = "Saving Post...";
-        const djangoData = new FormData();
-        djangoData.append("title", textarea.value);
-        djangoData.append("image", imageUrl); // Sending URL string to CharField
-        if (audioUrl) djangoData.append("audio", audioUrl); // Sending URL string to CharField
+        // We use FormData to wrap the entire form, including files
+        const formData = new FormData(postForm);
 
         const res = await fetch("{% url 'create_post' %}", {
             method: "POST",
-            body: djangoData,
+            body: formData,
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",
                 "X-Requested-With": "XMLHttpRequest"
@@ -241,12 +200,12 @@ postForm.addEventListener("submit", async function (e) {
             window.location.href = "{% url 'feed' %}";
         } else {
             const errorData = await res.json();
-            throw new Error(errorData.error || "Server rejected the final post.");
+            throw new Error(errorData.error || "Server error occurred.");
         }
 
     } catch (err) {
         console.error(err);
-        jsError.innerText = "Error: " + err.message;
+        jsError.innerText = err.message;
         jsError.style.display = 'block';
         submitBtn.disabled = false;
         submitBtn.innerText = "Post to Feed";

@@ -560,17 +560,23 @@ from django.contrib.auth.decorators import login_required
 from .models import Post
 
 
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from .models import Post
+
 def create_post(request):
     if request.method == 'POST':
         title = request.POST.get('title')
-        image_file = request.FILES.get('image') # Look for the actual FILE
+        image_file = request.FILES.get('image')
         audio_file = request.FILES.get('audio')
 
         if not image_file:
+            # If AJAX, return JSON. If standard form, return HTML.
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'error': 'Please select an image.'}, status=400)
             return render(request, 'create_post.html', {'error': 'Please select an image.'})
 
         try:
-            # Django handles the Cloudinary upload automatically here
             new_post = Post(
                 user=request.user,
                 title=title,
@@ -578,8 +584,14 @@ def create_post(request):
                 audio=audio_file
             )
             new_post.save()
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success'})
             return redirect('feed')
+
         except Exception as e:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'error': str(e)}, status=500)
             return render(request, 'create_post.html', {'error': f"Upload failed: {str(e)}"})
 
     return render(request, 'create_post.html')
