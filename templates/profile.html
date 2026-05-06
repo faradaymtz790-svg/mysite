@@ -191,7 +191,7 @@
             </div>
             <div title="Unique Listeners">🎧 <span id="unique-listeners-{{post.id}}" style="font-weight: 700;">{{ post.listeners_count }}</span></div>
             <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count }}</span></div>
-            <a href="{% url 'comments' post.id %}" style="text-decoration: none; color: inherit;">💬 <span style="font-weight: 700;">{{ post.comments.count }}</span></a>
+            <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">💬 <span style="font-weight: 700;">{{ post.comments.count }}</span></a>
         </div>
     </div>
     {% endfor %}
