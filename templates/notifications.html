@@ -5,6 +5,7 @@
     /* Modern Color Palette & Typography */
     :root {
         --primary-green: #00a86b;
+        --primary-light: rgba(0, 168, 107, 0.1);
         --surface-white: #ffffff;
         --bg-soft: #f8faf9;
         --text-main: #1a1f1d;
@@ -46,6 +47,27 @@
         color: var(--text-main); 
         font-weight: 800; 
         letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Green Unread Counter */
+    .unread-count-badge {
+        background: var(--primary-green);
+        color: white;
+        font-size: 14px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 168, 107, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 168, 107, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 168, 107, 0); }
     }
 
     .notif-wrapper { 
@@ -58,7 +80,7 @@
         align-items: center; 
         padding: 20px 32px; 
         border-bottom: 1px solid #f8fafc; 
-        transition: background 0.3s ease;
+        transition: all 0.2s ease;
         position: relative;
     }
 
@@ -66,21 +88,21 @@
 
     /* Unread Indicator Bar */
     .notification-item.unread { 
-        background-color: rgba(0, 168, 107, 0.02); 
+        background-color: rgba(0, 168, 107, 0.03); 
     }
     .notification-item.unread::before {
         content: "";
         position: absolute;
         left: 0;
-        top: 15%;
-        bottom: 15%;
+        top: 0;
+        bottom: 0;
         width: 4px;
         background: var(--primary-green);
-        border-radius: 0 4px 4px 0;
     }
 
     .notification-item:hover { 
         background-color: #fcfdfe; 
+        transform: translateX(4px);
     }
 
     .profile-pic-container { 
@@ -111,7 +133,7 @@
         color: var(--primary-green); 
         text-decoration: none; 
         font-weight: 600; 
-        background: rgba(0, 168, 107, 0.08); 
+        background: var(--primary-light); 
         padding: 3px 8px; 
         border-radius: 8px; 
         font-size: 13px;
@@ -137,12 +159,12 @@
     }
 
     .unread-dot { 
-        width: 8px; 
-        height: 8px; 
+        width: 10px; 
+        height: 10px; 
         background-color: var(--primary-green); 
         border-radius: 50%; 
         margin-left: 15px;
-        box-shadow: 0 0 10px rgba(0, 168, 107, 0.4);
+        flex-shrink: 0;
     }
 
     .empty-state { 
@@ -153,7 +175,12 @@
 
 <div class="notifications-container">
     <div class="notif-header">
-        <h2>Notifications</h2>
+        <h2>
+            Notifications 
+            {% if unread_count > 0 %}
+                <span class="unread-count-badge">{{ unread_count }}</span>
+            {% endif %}
+        </h2>
     </div>
 
     {% for notification in notifications %}
@@ -198,7 +225,6 @@
                             {{ notification.text }}
                         {% endif %}
                     </p>
-                    {# UPDATED FIELD NAME BELOW #}
                     <span class="notif-time">{{ notification.timestamp|timesince }} ago</span>
                 </div>
 
