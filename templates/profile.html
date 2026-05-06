@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ profile.user.username|capfirst }} | PROFILE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary-green:#00a86b;
@@ -29,10 +28,10 @@
             overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px;
         }
 
-        .cover { height: 250px; background: #d0f0d8; position: relative; }
+        .cover { height: 250px; background: #d0f0d8; }
         .cover img { width: 100%; height: 100%; object-fit: cover; }
 
-        .profile-header-main { padding: 20px 5%; position: relative; }
+        .profile-header-main { padding: 20px 5%; }
         
         .badge-verified {
             display: inline-flex; align-items: center; justify-content: center;
@@ -43,7 +42,6 @@
         .avatar-main {
             width: 130px; height: 130px; border-radius: 50%; border: 5px solid white;
             margin-top: -85px; background: white; object-fit: cover; display: block; 
-            position: relative; z-index: 5;
         }
 
         .info-section { margin-top: 15px; text-transform: capitalize; }
@@ -55,34 +53,24 @@
         .stat-link { text-decoration: none; color: var(--text-main); font-size: 15px; cursor: pointer; text-transform: capitalize; }
         .stat-link b { font-size: 18px; }
 
-        .btn-edit, .follow-btn { 
+        .btn-edit, .btn-follow { 
             background: var(--primary-green); color: white; border: none; padding: 12px 25px;
             border-radius: 30px; font-weight: 700; cursor: pointer; float: right; margin-top: 10px;
             text-transform: capitalize; transition: 0.3s;
         }
 
-        .follow-btn.following { background: #efefef; color: var(--text-main); border: 1px solid var(--border-color); }
+        .btn-unfollow {
+            background: rgba(0,0,0,0.05); color: var(--text-main); border: 1px solid var(--border-color);
+            padding: 12px 25px; border-radius: 30px; font-weight: 700; cursor: pointer;
+            float: right; margin-top: 10px; text-transform: capitalize; transition: 0.3s;
+        }
 
-        /* POSTS */
-        .post { background:white; border-radius:24px; margin-bottom:35px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.08); width: 100%; position: relative; }
-        .post-header { padding:15px; display:flex; justify-content:space-between; align-items: center; }
+        .post { background:white; border-radius:24px; margin-bottom:35px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.08); width: 100%; }
+        .post-header { padding:15px; display:flex; justify-content:space-between; align-items: flex-start; }
         .user-meta { display:flex; gap:10px; }
-        .post-avatar { width:40px; height:40px; border-radius:50%; object-fit: cover; }
+        .post-avatar { width:40px; height:40px; border-radius:50%; }
+        .db-post-title { text-decoration: underline; color: green; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;}
         
-        /* 3-DOTS MENU */
-        .post-options { position: relative; }
-        .dots-trigger { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; padding: 5px; }
-        .options-dropdown { 
-            display: none; position: absolute; right: 0; top: 30px; 
-            background: white; border: 1px solid var(--border-color); 
-            border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 100; min-width: 140px;
-        }
-        .options-dropdown button { 
-            width: 100%; text-align: left; padding: 12px 15px; border: none; 
-            background: none; cursor: pointer; font-family: inherit; font-size: 14px;
-        }
-        .options-dropdown button:hover { background: var(--bg-color); }
-
         .audio-visual-container { height:320px; position:relative; background-size:cover; background-position:center; background-color: #222; overflow:hidden; }
         .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
         .v-bar { flex:1; height:5px; border-radius:3px; transition:0.05s; }
@@ -90,9 +78,15 @@
         .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 20px; left: 20px; z-index: 10; }
 
         .post-actions-row { display: flex; align-items: center; gap: 25px; padding: 15px 20px; background: rgba(0, 0, 0, 0.02); }
-        
+        .heart-btn { background:none; border:none; font-size:22px; cursor:pointer; color: #ccc; transition: 0.3s; }
+        .heart-btn.is-liked { color: var(--primary-green); transform: scale(1.1); }
+        .heart-btn:disabled { opacity: 0.5; cursor: wait; }
+
         #editModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-body { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+        .modal-body { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 500px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; text-transform: capitalize; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
         
         .fab-add-post {
             position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
@@ -100,36 +94,41 @@
             display: flex; align-items: center; justify-content: center;
             text-decoration: none; font-size: 35px; font-weight: bold;
             box-shadow: 0 10px 25px rgba(0, 168, 107, 0.3); z-index: 9999;
+            transition: transform 0.2s ease, background-color 0.2s;
         }
+        .fab-add-post:hover { transform: scale(1.1); background-color: #008f5b; }
+
+        .follow-btn.following {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+
     </style>
 </head>
 <body>
 
 {% include 'navbar.html' %}
-{% csrf_token %} 
 
 <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <!-- Cover Photo Fix -->
-    <div class="cover">
-        {% if profile.cover_photo %}
-            <img src="{{ profile.cover_photo.url }}" alt="Cover">
-        {% else %}
-            <div style="width:100%; height:100%; background:#d0f0d8;"></div>
-        {% endif %}
-    </div>
+    <!-- FIX: Added check for absolute media pathing -->
+    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
             <button class="btn-edit" onclick="openModal()">Edit Profile</button>
         {% elif request.user.is_authenticated %}
-            <button class="follow-btn {% if is_following %}following{% endif %}" data-user-id="{{ viewed_user.id }}">
+            <!-- FIX: Follow buttons now use consistent data attributes for JS -->
+            <button type="button" 
+                    id="follow-btn-main" 
+                    class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" 
+                    data-user-id="{{ profile.user.id }}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
         
-        <!-- Profile Image Fix -->
         <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
         
         <div class="info-section">
@@ -149,7 +148,8 @@
 
         <div class="stats-bar">
             <a href="{% url 'following_list' user_id=profile.user.id %}" class="stat-link"><b>{{ following_count }}</b> Following</a>
-            <a href="{% url 'followers_list' user_id=profile.user.id %}" class="stat-link"><b id="follower-count-{{ viewed_user.id }}">{{ followers_count }}</b> Followers</a>
+            <!-- FIX: Added ID for dynamic updates -->
+            <a href="{% url 'followers_list' user_id=profile.user.id %}" class="stat-link"><b id="follower-count-{{ profile.user.id }}">{{ followers_count }}</b> Followers</a>
             <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
         </div>
     </div>
@@ -168,22 +168,14 @@
                         <span class="badge-verified" style="width: 12px; height: 12px; font-size: 8px;">✓</span>
                     </div>
                     <div style="font-size:12px;color:gray;">{{ post.created_at|timesince }} ago</div>
+                    <div style="margin-top: 5px; font-size: 13px;">POST TITLE: <span class="db-post-title">{{ post.title }}</span></div>
                 </div>
             </div>
-
-            <!-- THREE DOTS MENU -->
-            <div class="post-options">
-                <button class="dots-trigger" onclick="toggleDropdown('dropdown-{{ post.id }}')">⋮</button>
-                <div class="options-dropdown" id="dropdown-{{ post.id }}">
-                    {% if request.user == profile.user %}
-                        <button onclick="deletePost({{post.id}})" style="color: red;"><i class="fas fa-trash"></i> Delete Post</button>
-                    {% endif %}
-                    <button onclick="copyLink('{{ post.id }}')"><i class="fas fa-link"></i> Copy Link</button>
-                </div>
-            </div>
+            {% if request.user == profile.user %}
+            <span onclick="deletePost({{post.id}})" style="cursor:pointer" title="Delete Post">🗑️</span>
+            {% endif %}
         </div>
 
-        <!-- POST CONTENT (Visualizer) -->
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             {% if post.audio %}
@@ -193,40 +185,29 @@
         </div>
 
         <div class="post-actions-row">
-            <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" id="heart-{{ post.id }}" onclick="handleLike(this, '{{ post.id }}')">❤</button>
-            <span id="like-count-{{ post.id }}" style="font-weight: 700;">{{ post.likes.count }}</span>
-            
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" id="heart-{{ post.id }}" onclick="handleLike(this, '{{ post.id }}')">❤</button>
+                <span id="like-count-{{ post.id }}" style="font-weight: 700;">{{ post.likes.count }}</span>
+            </div>
             <div title="Unique Listeners">🎧 <span id="unique-listeners-{{post.id}}" style="font-weight: 700;">{{ post.listeners_count }}</span></div>
-            <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">
-                💬 <span style="font-weight: 700;">{{ post.comments.count }}</span>
-            </a>
+            <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count }}</span></div>
+            <a href="{% url 'comments' post.id %}" style="text-decoration: none; color: inherit;">💬 <span style="font-weight: 700;">{{ post.comments.count }}</span></a>
         </div>
     </div>
     {% endfor %}
 </div>
 
-<!-- MODAL SECTION -->
 <div id="editModal">
     <div class="modal-body">
-        <h2 style="color:var(--primary-green); margin-top: 0;">Edit Profile</h2>
-        <form id="profileUpdateForm">
+        <h2 style="color:var(--primary-green);">Edit Profile</h2>
+        <form id="profileUpdateForm" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="hidden" name="image" id="hidden_image" value="{{ profile.image.url|default:'' }}">
-            <input type="hidden" name="cover_photo" id="hidden_cover" value="{{ profile.cover_photo.url|default:'' }}">
-
-            <div class="form-group">
-                <label>Profile Image</label>
-                <input type="file" accept="image/*" onchange="handleFileUpload(this, 'hidden_image')">
-            </div>
-            <div class="form-group">
-                <label>Cover Photo</label>
-                <input type="file" accept="image/*" onchange="handleFileUpload(this, 'hidden_cover')">
-            </div>
-            <div class="form-group"><label>Bio</label><textarea name="bio" rows="3">{{ profile.bio }}</textarea></div>
+            <div class="form-group"><label>Profile Image</label><input type="file" name="image" accept="image/*"></div>
+            <div class="form-group"><label>Cover Photo</label><input type="file" name="cover_photo" accept="image/*"></div>
+            <div class="form-group"><label>Bio</label><textarea name="bio" rows="4">{{ profile.bio }}</textarea></div>
             <div class="form-group"><label>Location</label><input type="text" name="location" value="{{ profile.location }}"></div>
             <div class="form-group"><label>Link</label><input type="url" name="links" value="{{ profile.links }}"></div>
-            
-            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top: 20px;">
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
                 <button type="button" class="btn-edit" style="background:#666" onclick="closeModal()">Cancel</button>
                 <button type="submit" class="btn-edit" id="saveBtn">Save Changes</button>
             </div>
@@ -235,91 +216,61 @@
 </div>
 
 <script>
-    function getCSRFToken() { return document.querySelector('[name=csrfmiddlewaretoken]').value; }
+    let activeAudio = null;
 
-    // Toggle Post Dropdown
-    function toggleDropdown(id) {
-        document.querySelectorAll('.options-dropdown').forEach(d => {
-            if(d.id !== id) d.style.display = 'none';
-        });
-        const el = document.getElementById(id);
-        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    // Helper to get CSRF token from document
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
 
-    // Close dropdowns on outside click
-    window.onclick = function(e) {
-        if (!e.target.matches('.dots-trigger')) {
-            document.querySelectorAll('.options-dropdown').forEach(d => d.style.display = 'none');
-        }
-    }
+    function openModal() { document.getElementById('editModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
-    // CLOUDINARY UPLOAD
-    async function handleFileUpload(input, hiddenId) {
-        const file = input.files[0];
-        if(!file) return;
-
-        const btn = document.getElementById('saveBtn');
+    function handleLike(btn, postId) {
         btn.disabled = true;
-        btn.innerText = "Uploading...";
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'plugbar_upload'); 
-
-        try {
-            const res = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            if(data.secure_url) {
-                document.getElementById(hiddenId).value = data.secure_url;
-                btn.innerText = "Upload Complete";
-            }
-        } catch (e) { alert("Upload failed"); } 
-        finally { btn.disabled = false; btn.innerText = "Save Changes"; }
+        fetch(`/like-post/${postId}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() }
+        })
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById(`like-count-${postId}`).innerText = d.count;
+            if(d.liked) btn.classList.add('is-liked');
+            else btn.classList.remove('is-liked');
+            btn.disabled = false;
+        });
     }
 
-    // SUBMIT PROFILE
-    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const fd = new FormData(this);
-        const res = await fetch("{% url 'update_profile' %}", {
-            method: 'POST',
-            body: fd,
-            headers: { 'X-CSRFToken': getCSRFToken() }
-        });
-        const d = await res.json();
-        if(d.success) window.location.reload();
-        else alert("Update failed");
-    };
+    function stopVisualizer(id) {
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
+        const btn = document.getElementById('playBtn' + id);
+        if(btn) btn.innerHTML = "▶";
+    }
 
-    // FOLLOW LOGIC
-    document.querySelector('.follow-btn')?.addEventListener('click', function() {
-        const userId = this.getAttribute('data-user-id');
-        const btn = this;
-        fetch(`/follow/${userId}/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': getCSRFToken() }
-        }).then(r => r.json()).then(data => {
-            if (data.status === 'followed') {
-                btn.classList.add('following');
-                btn.querySelector('.btn-text').innerText = 'Following';
-            } else {
-                btn.classList.remove('following');
-                btn.querySelector('.btn-text').innerText = '+ Follow';
-            }
-            document.getElementById(`follower-count-${userId}`).innerText = data.followers_count;
-        });
-    });
-
-    // AUDIO & VISUALIZER (Original Logic Preserved)
     function togglePlay(id) {
         let audio = document.getElementById("audio" + id),
             btn = document.getElementById("playBtn" + id),
             bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
+            // FIX: Added leading slash to API calls to prevent recursive URLs
+            fetch(`/record-replay/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() }
+            })
+            .then(r => r.json())
+            .then(d => { document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+
+            if (!sessionStorage.getItem(`played_post_${id}`)) {
+                fetch(`/record-listener/${id}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCSRFToken() }
+                })
+                .then(r => r.json())
+                .then(d => { document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
+                sessionStorage.setItem(`played_post_${id}`, "true");
+            }
             audio.play();
             btn.innerHTML = "⏸";
             audio.ontimeupdate = () => {
@@ -334,36 +285,80 @@
         }
     }
 
-    function stopVisualizer(id) {
-        document.querySelectorAll(`#viz${id} .v-bar`).forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
-        document.getElementById('playBtn' + id).innerHTML = "▶";
-    }
-
     function deletePost(id) {
-        if(confirm("Delete this post permanently?")) {
-            fetch(`/delete-post/${id}/`, {
-                method: "POST",
-                headers: { "X-CSRFToken": getCSRFToken() }
-            }).then(r => r.json()).then(d => {
-                if(d.success) document.getElementById(`post-card-${id}`).remove();
-            });
+        if(confirm("Are you sure?")) { 
+            fetch(`/delete-post/${id}/`, { 
+                method: "POST", 
+                headers: { "X-CSRFToken": getCSRFToken() } 
+            }).then(r => r.json()).then(d => { 
+                if(d.success) document.getElementById(`post-card-${id}`).remove(); 
+            }); 
         }
     }
 
-    // Initialize Bars
-    const colors = ['#00a86b', '#0044cc', '#ff69b4', '#ffd700'];
+    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
+        e.preventDefault(); 
+        const btn = document.getElementById('saveBtn'); 
+        btn.disabled = true; 
+        const fd = new FormData(this);
+        // FIX: Ensure the URL matches your update_profile path exactly
+        const res = await fetch("{% url 'update_profile' %}", { 
+            method: 'POST', 
+            body: fd, 
+            headers: { 'X-CSRFToken': getCSRFToken() } 
+        });
+        const d = await res.json(); 
+        if(d.success) window.location.reload(); 
+        else alert("Error updating profile."); 
+        btn.disabled = false;
+    };
+
+    const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
     document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 45; i++) {
-            let b = document.createElement("div");
-            b.className = "v-bar";
+        for(let i=0; i < 45; i++) { 
+            let b = document.createElement("div"); 
+            b.className = "v-bar"; 
             b.style.backgroundColor = colors[i % colors.length];
-            v.appendChild(b);
+            v.appendChild(b); 
         }
     });
 
-    function openModal() { document.getElementById('editModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-    function handleLike(btn, id) { /* Your existing like fetch logic */ }
+    // --- FIX: FOLLOW BUTTON LOGIC ---
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const btn = this;
+            const btnText = btn.querySelector('.btn-text');
+
+            // FIX: Using correct path matching the ID in your logs /follow/<id>/
+            fetch(`/follow/${userId}/`, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': getCSRFToken(), 
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    btn.classList.add('following', 'btn-unfollow');
+                    btn.classList.remove('btn-follow');
+                    if(btnText) btnText.innerHTML = 'Following';
+                } else {
+                    btn.classList.remove('following', 'btn-unfollow');
+                    btn.classList.add('btn-follow');
+                    if(btnText) btnText.innerHTML = '+ Follow';
+                }
+
+                // Update the count badge
+                const countBadge = document.getElementById(`follower-count-${userId}`);
+                if (countBadge) {
+                    countBadge.innerHTML = data.followers_count;
+                }
+            })
+            .catch(err => console.error("Follow error:", err));
+        });
+    });
 </script>
 </body>
 </html>
