@@ -105,7 +105,7 @@
 {% csrf_token %} <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo }}">{% endif %}</div>
+    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
