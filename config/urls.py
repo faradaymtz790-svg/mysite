@@ -35,7 +35,8 @@ urlpatterns += i18n_patterns(
 
     # Root redirects to signup
     path('', RedirectView.as_view(pattern_name='signup', permanent=False)),
-    
+
+    path('', views.home_view, name='home'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     

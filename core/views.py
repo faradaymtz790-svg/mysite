@@ -33,8 +33,8 @@ import cloudinary.uploader
 # =========================
 
 def home_view(request):
-    # This sends anyone who hits the home page directly to signup
-    return redirect('signup')
+    # Just show the page, don't redirect here!
+    return render(request, 'home.html')
 
 def language(request):
     return render(request, 'language.html')
@@ -609,18 +609,20 @@ def update_profile(request):
         p.location = request.POST.get('location')
         p.links = request.POST.get('links')
 
-        # Directly assign the files. 
-        # Cloudinary will handle the "heavy lifting" of storage and compression.
-        if request.FILES.get('image'): 
-            p.image = request.FILES.get('image')
-        if request.FILES.get('cover_photo'): 
-            p.cover_photo = request.FILES.get('cover_photo')
+        # Use the same trick as your Posts:
+        # Get the URL string sent from your JavaScript
+        image_url = request.POST.get('image_url')
+        cover_url = request.POST.get('cover_url')
+
+        if image_url:
+            p.image = image_url
+        if cover_url:
+            p.cover_photo = cover_url
             
         p.save()
         return JsonResponse({'success': True})
         
     return JsonResponse({'success': False})
-
 
 
 from django.shortcuts import get_object_or_404
@@ -1045,24 +1047,31 @@ from .models import Post, Report, Follow
 
 User = get_user_model()
 
-# In core/views.py
+# 
 @login_required
 def feed_view(request):
-    # Get just the IDs as a list of integers
+    # --- START OF REPAIR CODE ---
+    # Find the user with the space issue (like " in pocket")
+    problem_user = User.objects.filter(username__contains=' ').first()
+    if problem_user:
+        # .strip() removes the leading/trailing spaces
+        # .replace(' ', '_') turns middle spaces into underscores
+        problem_user.username = problem_user.username.strip().replace(' ', '_')
+        problem_user.save()
+    # --- END OF REPAIR CODE ---
+
+    # Your existing logic
     blocked_ids = list(request.user.profile.blocked_users.values_list('id', flat=True))
-    
-    # Also get IDs of people who blocked the current user
     blockers_ids = list(User.objects.filter(profile__blocked_users=request.user).values_list('id', flat=True))
-    
-    # Combined list
     excluded_ids = blocked_ids + blockers_ids
     
     posts = Post.objects.exclude(user__id__in=excluded_ids).order_by('-created_at')
     
     return render(request, 'feed.html', {
         'posts': posts,
-        'blocked_ids': excluded_ids # Pass the list to the template
+        'blocked_ids': excluded_ids 
     })
+
 
 # In core/views.py
 from django.shortcuts import redirect

@@ -59,7 +59,6 @@
             text-transform: capitalize; transition: 0.3s;
         }
 
-        /* Styling for when actively following */
         .follow-btn.following {
             background: rgba(0,0,0,0.05);
             color: var(--text-main);
@@ -106,7 +105,7 @@
 {% csrf_token %} <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
+    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
@@ -117,7 +116,7 @@
             </button>
         {% endif %}
         
-        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
+        <img src="{% if profile.image %}{{ profile.image }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
         
         <div class="info-section">
             <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
@@ -148,7 +147,7 @@
     <div class="post" id="post-card-{{ post.id }}">
         <div class="post-header">
             <div class="user-meta">
-                <img class="post-avatar" src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}">
+                <img class="post-avatar" src="{% if profile.image %}{{ profile.image }}{% else %}https://via.placeholder.com/40{% endif %}">
                 <div>
                     <div style="display: flex; align-items: center;">
                         <b>{{ profile.user.username|capfirst }}</b>
@@ -163,10 +162,10 @@
             {% endif %}
         </div>
 
-        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             {% if post.audio %}
-                <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onended="stopVisualizer({{post.id}})"></audio>
+                <audio id="audio{{post.id}}" src="{{ post.audio }}" onended="stopVisualizer({{post.id}})"></audio>
                 <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
             {% endif %}
         </div>
@@ -180,20 +179,31 @@
             <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count }}</span></div>
           
             <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">
-    💬 <span style="font-weight: 700;">{{ post.comments.count }}</span>
-</a>
+                💬 <span style="font-weight: 700;">{{ post.comments.count }}</span>
+            </a>
         </div>
     </div>
     {% endfor %}
 </div>
 
+<!-- UPDATED MODAL SECTION -->
 <div id="editModal">
     <div class="modal-body">
         <h2 style="color:var(--primary-green);">Edit Profile</h2>
-        <form id="profileUpdateForm" enctype="multipart/form-data">
+        <form id="profileUpdateForm">
             {% csrf_token %}
-            <div class="form-group"><label>Profile Image</label><input type="file" name="image" accept="image/*"></div>
-            <div class="form-group"><label>Cover Photo</label><input type="file" name="cover_photo" accept="image/*"></div>
+            <!-- Hidden inputs to store Cloudinary URLs -->
+            <input type="hidden" name="image" id="hidden_image">
+            <input type="hidden" name="cover_photo" id="hidden_cover">
+
+            <div class="form-group">
+                <label>Profile Image</label>
+                <input type="file" id="imgInput" accept="image/*" onchange="handleFileUpload(this, 'hidden_image')">
+            </div>
+            <div class="form-group">
+                <label>Cover Photo</label>
+                <input type="file" id="coverInput" accept="image/*" onchange="handleFileUpload(this, 'hidden_cover')">
+            </div>
             <div class="form-group"><label>Bio</label><textarea name="bio" rows="4">{{ profile.bio }}</textarea></div>
             <div class="form-group"><label>Location</label><input type="text" name="location" value="{{ profile.location }}"></div>
             <div class="form-group"><label>Link</label><input type="url" name="links" value="{{ profile.links }}"></div>
@@ -206,13 +216,61 @@
 </div>
 
 <script>
-    // CSRF Token Helper
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
 
-    let activeAudio = null;
+    // --- NEW: CLOUDINARY UPLOAD LOGIC ---
+    async function handleFileUpload(input, hiddenId) {
+        const file = input.files[0];
+        if(!file) return;
 
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerText = "Uploading Media...";
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'plugbar_upload'); // Ensure this matches your preset
+        formData.append('resource_type', 'auto');
+
+        try {
+            const res = await fetch('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if(data.secure_url) {
+                document.getElementById(hiddenId).value = data.secure_url;
+                btn.innerText = "Upload Ready";
+            }
+        } catch (e) {
+            alert("Upload failed");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Save Changes";
+        }
+    }
+
+    // --- MODIFIED: SUBMIT LOGIC ---
+    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
+        e.preventDefault(); 
+        const btn = document.getElementById('saveBtn'); 
+        btn.disabled = true; 
+        
+        const fd = new FormData(this);
+        const res = await fetch("{% url 'update_profile' %}", { 
+            method: 'POST', 
+            body: fd, 
+            headers: { 'X-CSRFToken': getCSRFToken() } 
+        });
+        const d = await res.json(); 
+        if(d.success) window.location.reload(); 
+        else alert("Error saving profile info"); 
+        btn.disabled = false;
+    };
+
+    // --- KEEPING ALL ORIGINAL FUNCTIONS ---
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
@@ -285,22 +343,6 @@
         }
     }
 
-    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
-        e.preventDefault(); 
-        const btn = document.getElementById('saveBtn'); 
-        btn.disabled = true; 
-        const fd = new FormData(this);
-        const res = await fetch("{% url 'update_profile' %}", { 
-            method: 'POST', 
-            body: fd, 
-            headers: { 'X-CSRFToken': getCSRFToken() } 
-        });
-        const d = await res.json(); 
-        if(d.success) window.location.reload(); 
-        else alert("Error"); 
-        btn.disabled = false;
-    };
-
     const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
     document.querySelectorAll('.visualizer-bars').forEach(v => {
         for(let i=0; i < 45; i++) { 
@@ -311,13 +353,11 @@
         }
     });
 
-    // Follow / Unfollow Logic
     document.querySelectorAll('.follow-btn').forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.getAttribute('data-user-id');
             const btn = this; 
             const btnText = btn.querySelector('.btn-text');
-
             fetch(`/follow/${userId}/`, {
                 method: 'POST',
                 headers: { 
@@ -334,12 +374,8 @@
                     btn.classList.remove('following');
                     btnText.innerHTML = '+ Follow';
                 }
-
-                // Update the count badge globally
                 const countBadge = document.getElementById(`follower-count-${userId}`);
-                if (countBadge) {
-                    countBadge.innerHTML = data.followers_count;
-                }
+                if (countBadge) countBadge.innerHTML = data.followers_count;
             });
         });
     });

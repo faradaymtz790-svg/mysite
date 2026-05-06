@@ -83,7 +83,6 @@
             line-height: 1.4;
         }
 
-        /* --- LOGO CONTAINER --- */
         .logo-container {
             display: flex;
             justify-content: center;
@@ -114,15 +113,24 @@
 </head>
 <body>
 
-<a href="{% url 'account_signup' %}" class="hero-container">
+<a href="{% url 'signup' %}" class="hero-container">
     <h1>plugbar</h1>
     <h2><i><b>Expand skills, get notified and be entertained with your listening networks</b></i></h2>
 
     <div class="logo-container">
-        <!-- Updated to use the static template tag -->
+        <!-- PRO TIP: If the static tag fails on Render, replace the src below 
+             with your direct Cloudinary URL like "https://res.cloudinary.com/..." -->
         <img src="{% static 'mylogo.png' %}" alt="plugbar Logo">
     </div>
 </a>
+
+<!-- THE REDIRECT SCRIPT -->
+<script>
+    // This waits 4 seconds so users can see your logo/theme, then moves to signup
+    setTimeout(function(){
+        window.location.href = "{% url 'signup' %}";
+    }, 4000); 
+</script>
 
 </body>
 </html>
