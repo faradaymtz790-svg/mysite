@@ -124,7 +124,7 @@
             <button type="button" 
                     id="follow-btn-main" 
                     class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" 
-                    data-user-id="{{ profile.user.username}}">
+                    data-username="{{ profile.user.username}}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
