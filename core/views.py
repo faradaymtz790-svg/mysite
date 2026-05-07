@@ -386,21 +386,15 @@ def followers_list(request, user_id):
 
 
 
-
 def following_list(request, user_id):
-    # 1. Get the user whose following list we want to see
     user_profile = get_object_or_404(User, id=user_id)
-    
-    # 2. Get the people they are following
-    # (Adjust 'following' to match your actual related_name in Models)
-    following = user_profile.following.all() 
+    # This reaches into the Follow model to find everyone THIS user follows
+    following = Follow.objects.filter(follower=user_profile) 
 
-    # 3. YOU MUST HAVE THIS RETURN STATEMENT AT THE END:
     return render(request, 'following.html', {
         'user_profile': user_profile,
         'following': following
     })
-
 
  # Redirect back to the same page to see the new comment
   

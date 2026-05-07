@@ -61,8 +61,13 @@ urlpatterns += i18n_patterns(
     path('like-post/<int:post_id>/', views.like_post),
     path('track-listener/<int:post_id>/', views.track_listener),
 # Use 'username' to match your view's argument
-path('follow/<str:username>/', views.follow_user, name='follow_user'),
-path('unfollow/<str:username>/', views.unfollow_user, name='unfollow_user'),
+
+# Change <int:user_id> to <str:username> to match your template logic
+
+
+    path('profile/<int:user_id>/followers/', views.followers_list, name='followers_list'),
+    path('profile/<int:user_id>/following/', views.following_list, name='following_list'),
+
 
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/read/', views.mark_notifications_read, name='mark_read'),
