@@ -124,7 +124,7 @@
             <button type="button" 
                     id="follow-btn-main" 
                     class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" 
-                    data-user-id="{{ profile.user.id }}">
+                    data-user-id="{{ profile.user.username}}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
@@ -329,41 +329,48 @@
     });
 
     // --- FIX: FOLLOW BUTTON LOGIC ---
-    document.querySelectorAll('.follow-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const btn = this;
-            const btnText = btn.querySelector('.btn-text');
+   
+document.querySelectorAll('.follow-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        // 1. Grab the username from the data attribute
+        const username = this.getAttribute('data-username'); 
+        const btn = this;
+        const btnText = btn.querySelector('.btn-text');
 
-            // FIX: Using correct path matching the ID in your logs /follow/<id>/
-            fetch(`/follow/${userId}/`, {
-                method: 'POST',
-                headers: { 
-                    'X-CSRFToken': getCSRFToken(), 
-                    'Content-Type': 'application/json' 
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'followed') {
-                    btn.classList.add('following', 'btn-unfollow');
-                    btn.classList.remove('btn-follow');
-                    if(btnText) btnText.innerHTML = 'Following';
-                } else {
-                    btn.classList.remove('following', 'btn-unfollow');
-                    btn.classList.add('btn-follow');
-                    if(btnText) btnText.innerHTML = '+ Follow';
-                }
+        // 2. Fetch using the username string to match urls.py
+        fetch(`/follow/${username}/`, {
+            method: 'POST',
+            headers: { 
+                'X-CSRFToken': getCSRFToken(), 
+                'Content-Type': 'application/json' 
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('User not found');
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'followed') {
+                btn.classList.add('following', 'btn-unfollow');
+                btn.classList.remove('btn-follow');
+                if(btnText) btnText.innerHTML = 'Following';
+            } else {
+                btn.classList.remove('following', 'btn-unfollow');
+                btn.classList.add('btn-follow');
+                if(btnText) btnText.innerHTML = '+ Follow';
+            }
 
-                // Update the count badge
-                const countBadge = document.getElementById(`follower-count-${userId}`);
-                if (countBadge) {
-                    countBadge.innerHTML = data.followers_count;
-                }
-            })
-            .catch(err => console.error("Follow error:", err));
-        });
+            // 3. Update the count badge using the username ID
+            const countBadge = document.getElementById(`follower-count-${username}`);
+            if (countBadge) {
+                countBadge.innerHTML = data.followers_count;
+            }
+        })
+        .catch(err => console.error("Follow error:", err));
     });
+});
+
+
 </script>
 </body>
 </html>
