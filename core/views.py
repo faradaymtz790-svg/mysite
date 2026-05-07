@@ -337,15 +337,14 @@ User = get_user_model()
 
 
 @login_required
-def follow_user(request, username):  # Changed from user_id
-    target_user = get_object_or_404(User, username=username)  # Lookup by username
+def follow_user(request, username):
+    target_user = get_object_or_404(User, username=username)
 
     # 1. Prevent self-following
     if request.user == target_user:
         return JsonResponse({'error': 'You cannot follow yourself'}, status=400)
 
     # 2. Check for Blocking Relationship
-    # Using username/object filter for consistency
     is_blocked = (
         request.user.profile.blocked_users.filter(username=target_user.username).exists() or
         target_user.profile.blocked_users.filter(username=request.user.username).exists()
@@ -362,11 +361,18 @@ def follow_user(request, username):  # Changed from user_id
 
     if not created:
         follow.delete()
-        following = False
+        status = 'unfollowed' # Changed from 'following = False'
     else:
-        following = True
+        status = 'followed'   # Changed from 'following = True'
 
-    return JsonResponse({'following': following})
+    # 4. CRITICAL: Get the new count to send back to the JavaScript
+    followers_count = Follow.objects.filter(following=target_user).count()
+
+    # 5. Return the keys that the JavaScript is looking for
+    return JsonResponse({
+        'status': status, 
+        'followers_count': followers_count
+    })
 
 
 
