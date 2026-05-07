@@ -147,9 +147,9 @@
         </div>
 
         <div class="stats-bar">
-            <a href="{% url 'following_list' user_id=profile.user.id %}" class="stat-link"><b>{{ following_count }}</b> Following</a>
+            <a href="{% url 'following_list' user_id=profile.user.username %}" class="stat-link"><b>{{ following_count }}</b> Following</a>
             <!-- FIX: Added ID for dynamic updates -->
-            <a href="{% url 'followers_list' user_id=profile.user.id %}" class="stat-link"><b id="follower-count-{{ profile.user.id }}">{{ followers_count }}</b> Followers</a>
+            <a href="{% url 'followers_list' user_id=profile.user.username %}" class="stat-link"><b id="follower-count-{{ profile.user.id }}">{{ followers_count }}</b> Followers</a>
             <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
         </div>
     </div>

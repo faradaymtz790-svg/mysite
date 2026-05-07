@@ -60,8 +60,10 @@ urlpatterns += i18n_patterns(
     path('feed/', views.posts_feed, name='feed'),
     path('like-post/<int:post_id>/', views.like_post),
     path('track-listener/<int:post_id>/', views.track_listener),
-    path('following/<int:user_id>/', views.following_list, name='following_list'),
-    path('followers/<int:user_id>/', views.followers_list, name='followers_list'),
+# Use 'username' to match your view's argument
+path('follow/<str:username>/', views.follow_user, name='follow_user'),
+path('unfollow/<str:username>/', views.unfollow_user, name='unfollow_user'),
+
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/read/', views.mark_notifications_read, name='mark_read'),
     path('like-comment/<int:comment_id>/', views.like_comment, name='like_comment'),
