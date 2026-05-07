@@ -146,13 +146,18 @@
             <div class="blue-link"><a href="{{ profile.links }}" target="_blank">{{ profile.links|default:"No link provided" }}</a></div>
         </div>
 
-        <div class="stats-bar">
-            <a href="{% url 'following_list' user_id=profile.user.username %}" class="stat-link"><b>{{ following_count }}</b> Following</a>
-            <!-- FIX: Added ID for dynamic updates -->
-            <a href="{% url 'followers_list' user_id=profile.user.username %}" class="stat-link"><b id="follower-count-{{ profile.user.username }}">{{ followers_count }}</b> Followers</a>
-            <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
-        </div>
-    </div>
+       <div class="stats-bar">
+    <!-- Changed user_id to username to match your urls.py -->
+    <a href="{% url 'following_list' username=profile.user.username %}" class="stat-link">
+        <b>{{ following_count }}</b> Following
+    </a>
+
+    <a href="{% url 'followers_list' username=profile.user.username %}" class="stat-link">
+        <b id="follower-count-{{ profile.user.username }}">{{ followers_count }}</b> Followers
+    </a>
+
+    <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
+</div>
 </div>
 
 <div class="profile-wrapper" style="background: transparent; box-shadow: none; padding: 0 5%;">
