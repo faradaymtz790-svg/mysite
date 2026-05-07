@@ -53,7 +53,6 @@ urlpatterns += i18n_patterns(
     path('post/<int:pk>/', views.post_detail, name='post_detail'),
     path('notification/<int:notification_id>/click/', views.click_notification, name='click_notification'),
 
-    path('follow/<str:username>/', views.follow_user, name='follow'),
     path('unfollow/<str:username>/', views.unfollow_user, name='unfollow'),
     path('update-profile/', views.update_profile, name='update_profile'),
     path('create_post/', views.create_post, name='create_post'),
@@ -65,9 +64,9 @@ urlpatterns += i18n_patterns(
 # Change <int:user_id> to <str:username> to match your template logic
 
 
-    path('profile/<int:user_id>/followers/', views.followers_list, name='followers_list'),
-    path('profile/<int:user_id>/following/', views.following_list, name='following_list'),
-
+path('follow/<str:username>/', views.follow_user, name='follow_user'),
+path('profile/<str:username>/followers/', views.followers_list, name='followers_list'),
+path('profile/<str:username>/following/', views.following_list, name='following_list'),
 
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/read/', views.mark_notifications_read, name='mark_read'),

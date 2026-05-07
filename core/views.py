@@ -336,19 +336,20 @@ from .models import Follow # Ensure this is your Follow model
 
 User = get_user_model()
 
+
 @login_required
-def follow_user(request, user_id):
-    target_user = get_object_or_404(User, id=user_id)
+def follow_user(request, username):  # Changed from user_id
+    target_user = get_object_or_404(User, username=username)  # Lookup by username
 
     # 1. Prevent self-following
     if request.user == target_user:
         return JsonResponse({'error': 'You cannot follow yourself'}, status=400)
 
     # 2. Check for Blocking Relationship
-    # If the user has blocked the target OR the target has blocked the user
+    # Using username/object filter for consistency
     is_blocked = (
-        request.user.profile.blocked_users.filter(id=target_user.id).exists() or
-        target_user.profile.blocked_users.filter(id=request.user.id).exists()
+        request.user.profile.blocked_users.filter(username=target_user.username).exists() or
+        target_user.profile.blocked_users.filter(username=request.user.username).exists()
     )
     
     if is_blocked:
@@ -367,13 +368,18 @@ def follow_user(request, user_id):
         following = True
 
     return JsonResponse({'following': following})
+
+
+
+
+
  # Assuming your model is named Follow
 
 # Ensure your Follow model is imported
 
-def followers_list(request, user_id):
-    # 1. Get the user object using the ID from the URL
-    profile_user = get_object_or_404(User, id=user_id)
+def followers_list(request, username):
+    # 1. Get the user object using the USERNAME from the URL
+    profile_user = get_object_or_404(User, username=username)
     
     # 2. Filter the Follow model where 'following' is this user
     # This gets everyone who is following this specific user
@@ -385,16 +391,11 @@ def followers_list(request, user_id):
     })
 
 
-
-def following_list(request, user_id):
-    user_profile = get_object_or_404(User, id=user_id)
-    # This reaches into the Follow model to find everyone THIS user follows
-    following = Follow.objects.filter(follower=user_profile) 
-
-    return render(request, 'following.html', {
-        'user_profile': user_profile,
-        'following': following
-    })
+def following_list(request, username):
+    # Lookup by username instead of ID
+    viewed_user = get_object_or_404(User, username=username)
+    following = Follow.objects.filter(follower=viewed_user)
+    return render(request, 'following.html', {'viewed_user': viewed_user, 'following': following})
 
  # Redirect back to the same page to see the new comment
   
