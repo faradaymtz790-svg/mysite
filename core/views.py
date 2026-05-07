@@ -599,31 +599,24 @@ def create_post(request):
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from PIL import Image
 
-import io
 
 @login_required
 def update_profile(request):
     if request.method == 'POST':
         p = request.user.profile
-        
-        # 1. Update text fields
-        # Use the second argument in .get() to keep existing data if the field is empty
         p.bio = request.POST.get('bio', p.bio)
         p.location = request.POST.get('location', p.location)
         p.links = request.POST.get('links', p.links)
 
-        # 2. Handle File Uploads (Actual images)
+        # Check for files
         if 'image' in request.FILES:
             p.image = request.FILES['image']
-            
         if 'cover_photo' in request.FILES:
             p.cover_photo = request.FILES['cover_photo']
             
         p.save()
         return JsonResponse({'success': True})
-        
     return JsonResponse({'success': False}, status=400)
 
 

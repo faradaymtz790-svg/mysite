@@ -302,22 +302,15 @@
     }
 
   
-// 1. Keep your CSRF function as is
-function getCSRFToken() {
-    /* ... your existing code ... */
-}
-
-// 2. The Profile Update Logic
 document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Stop the page from refreshing
+    e.preventDefault();
 
-    const btn = document.getElementById('saveProfileBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Saving...';
-    btn.disabled = true;
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.innerText = "Saving...";
+    saveBtn.disabled = true;
 
-    // Create the FormData object from the form itself
-    // This automatically grabs all inputs including files
+    // 'this' refers to the form. FormData(this) automatically grabs 
+    // the files from <input type="file"> because you have 'name' attributes.
     const formData = new FormData(this);
 
     fetch('/update-profile/', {
@@ -325,26 +318,29 @@ document.getElementById('profileUpdateForm').addEventListener('submit', function
         body: formData,
         headers: {
             'X-CSRFToken': getCSRFToken()
-            // IMPORTANT: Do NOT add 'Content-Type': 'application/json' here.
-            // When sending FormData, the browser needs to set the boundary automatically.
+            // REMEMBER: Do NOT set Content-Type header
         }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.reload(); // Refresh to show new images/bio
+            window.location.reload(); // Reload to show the new images
         } else {
-            alert('Update failed. Please try again.');
+            alert('Error updating profile');
         }
     })
     .catch(error => {
         console.error('Error:', error);
     })
     .finally(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        saveBtn.innerText = "Save Changes";
+        saveBtn.disabled = false;
     });
 });
+
+    // Create the FormData object from the form itself
+    // This automatically grabs all inputs including files
+   
 
     const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
     document.querySelectorAll('.visualizer-bars').forEach(v => {
