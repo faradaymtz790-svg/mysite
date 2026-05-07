@@ -113,18 +113,16 @@
 <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <!-- FIX: Added check for absolute media pathing -->
     <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
             <button class="btn-edit" onclick="openModal()">Edit Profile</button>
         {% elif request.user.is_authenticated %}
-            <!-- FIX: Follow buttons now use consistent data attributes for JS -->
             <button type="button" 
                     id="follow-btn-main" 
                     class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" 
-                    data-username="{{ profile.user.username}}">
+                    data-username="{{ profile.user.username }}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
@@ -147,7 +145,6 @@
         </div>
 
        <div class="stats-bar">
-    <!-- Changed user_id to username to match your urls.py -->
     <a href="{% url 'following_list' username=profile.user.username %}" class="stat-link">
         <b>{{ following_count }}</b> Following
     </a>
@@ -223,7 +220,6 @@
 <script>
     let activeAudio = null;
 
-    // Helper to get CSRF token from document
     function getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
@@ -259,7 +255,6 @@
             bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
-            // FIX: Added leading slash to API calls to prevent recursive URLs
             fetch(`/record-replay/${id}/`, {
                 method: "POST",
                 headers: { "X-CSRFToken": getCSRFToken() }
@@ -306,7 +301,6 @@
         const btn = document.getElementById('saveBtn'); 
         btn.disabled = true; 
         const fd = new FormData(this);
-        // FIX: Ensure the URL matches your update_profile path exactly
         const res = await fetch("{% url 'update_profile' %}", { 
             method: 'POST', 
             body: fd, 
@@ -328,49 +322,47 @@
         }
     });
 
-    // --- FIX: FOLLOW BUTTON LOGIC ---
-   
-document.querySelectorAll('.follow-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        // 1. Grab the username from the data attribute
-        const username = this.getAttribute('data-username'); 
-        const btn = this;
-        const btnText = btn.querySelector('.btn-text');
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const username = this.getAttribute('data-username'); 
+            const btn = this;
+            const btnText = btn.querySelector('.btn-text');
 
-        // 2. Fetch using the username string to match urls.py
-        fetch(`/follow/${username}/`, {
-            method: 'POST',
-            headers: { 
-                'X-CSRFToken': getCSRFToken(), 
-                'Content-Type': 'application/json' 
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('User not found');
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'followed') {
-                btn.classList.add('following', 'btn-unfollow');
-                btn.classList.remove('btn-follow');
-                if(btnText) btnText.innerHTML = 'Following';
-            } else {
-                btn.classList.remove('following', 'btn-unfollow');
-                btn.classList.add('btn-follow');
-                if(btnText) btnText.innerHTML = '+ Follow';
+            if(!username || username === "None") {
+                console.error("Username missing from button attributes.");
+                return;
             }
 
-            // 3. Update the count badge using the username ID
-            const countBadge = document.getElementById(`follower-count-${username}`);
-            if (countBadge) {
-                countBadge.innerHTML = data.followers_count;
-            }
-        })
-        .catch(err => console.error("Follow error:", err));
+            fetch(`/follow/${username}/`, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': getCSRFToken(), 
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('User not found');
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'followed') {
+                    btn.classList.add('following', 'btn-unfollow');
+                    btn.classList.remove('btn-follow');
+                    if(btnText) btnText.innerHTML = 'Following';
+                } else {
+                    btn.classList.remove('following', 'btn-unfollow');
+                    btn.classList.add('btn-follow');
+                    if(btnText) btnText.innerHTML = '+ Follow';
+                }
+
+                const countBadge = document.getElementById(`follower-count-${username}`);
+                if (countBadge) {
+                    countBadge.innerHTML = data.followers_count;
+                }
+            })
+            .catch(err => console.error("Follow error:", err));
+        });
     });
-});
-
-
 </script>
 </body>
 </html>

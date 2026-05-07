@@ -193,11 +193,10 @@ def signup(request):
 # =========================
 
 
-from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from .models import Profile, Post, Follow
 from django.contrib.auth.models import User
-from .models import Post, Profile, Follow  # Added Follow and User imports
 
 def profile_view(request, username=None):
     # 1. Determine which user we are looking at
@@ -212,37 +211,37 @@ def profile_view(request, username=None):
     profile, created = Profile.objects.get_or_create(user=viewed_user)
     
     # 3. Get posts for the viewed user
-    user_posts = Post.objects.filter(user=viewed_user)
+    user_posts = Post.objects.filter(user=viewed_user).order_by('-created_at')
     
     # 4. Calculate totals for replays and listeners
     total_replays = user_posts.aggregate(Sum('replays_count'))['replays_count__sum'] or 0
     total_listeners = user_posts.aggregate(Sum('listeners_count'))['listeners_count__sum'] or 0
 
-    # 5. Check follow status using the Follow model
+    # 5. Check follow status
     is_following = False
     if request.user.is_authenticated and request.user != viewed_user:
-        # We check if a record exists where follower=Me and following=Them
         is_following = Follow.objects.filter(
             follower=request.user, 
             following=viewed_user
         ).exists()
 
-    # 6. Calculate Follower/Following counts from the Follow model
-    # People following this user
+    # 6. Calculate Follower/Following counts
     followers_count = Follow.objects.filter(following=viewed_user).count()
-    # People this user is following
     following_count = Follow.objects.filter(follower=viewed_user).count()
 
-    return render(request, 'profile.html', {
+    # 7. Final Context and Render
+    context = {
         'profile': profile,
         'user_posts': user_posts,
         'total_replays': total_replays,
         'total_listeners': total_listeners,
-        'viewed_user': viewed_user, 
         'is_following': is_following,
-        'followers_count': followers_count, 
+        'followers_count': followers_count,
         'following_count': following_count,
-    })
+    }
+    
+    return render(request, 'profile.html', context)
+
 
 
 
