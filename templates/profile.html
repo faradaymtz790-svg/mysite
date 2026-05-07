@@ -301,22 +301,50 @@
         }
     }
 
-    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
-        e.preventDefault(); 
-        const btn = document.getElementById('saveBtn'); 
-        btn.disabled = true; 
-        const fd = new FormData(this);
-        // FIX: Ensure the URL matches your update_profile path exactly
-        const res = await fetch("{% url 'update_profile' %}", { 
-            method: 'POST', 
-            body: fd, 
-            headers: { 'X-CSRFToken': getCSRFToken() } 
-        });
-        const d = await res.json(); 
-        if(d.success) window.location.reload(); 
-        else alert("Error updating profile."); 
+  
+// 1. Keep your CSRF function as is
+function getCSRFToken() {
+    /* ... your existing code ... */
+}
+
+// 2. The Profile Update Logic
+document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Stop the page from refreshing
+
+    const btn = document.getElementById('saveProfileBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Saving...';
+    btn.disabled = true;
+
+    // Create the FormData object from the form itself
+    // This automatically grabs all inputs including files
+    const formData = new FormData(this);
+
+    fetch('/update-profile/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCSRFToken()
+            // IMPORTANT: Do NOT add 'Content-Type': 'application/json' here.
+            // When sending FormData, the browser needs to set the boundary automatically.
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload(); // Refresh to show new images/bio
+        } else {
+            alert('Update failed. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
         btn.disabled = false;
-    };
+    });
+});
 
     const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
     document.querySelectorAll('.visualizer-bars').forEach(v => {

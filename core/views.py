@@ -598,31 +598,33 @@ def create_post(request):
 
 
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from PIL import Image
-import io
-from django.core.files.base import ContentFile
 
+import io
+
+@login_required
 def update_profile(request):
     if request.method == 'POST':
         p = request.user.profile
-        p.bio = request.POST.get('bio')
-        p.location = request.POST.get('location')
-        p.links = request.POST.get('links')
+        
+        # 1. Update text fields
+        # Use the second argument in .get() to keep existing data if the field is empty
+        p.bio = request.POST.get('bio', p.bio)
+        p.location = request.POST.get('location', p.location)
+        p.links = request.POST.get('links', p.links)
 
-        # Use the same trick as your Posts:
-        # Get the URL string sent from your JavaScript
-        image_url = request.POST.get('image_url')
-        cover_url = request.POST.get('cover_url')
-
-        if image_url:
-            p.image = image_url
-        if cover_url:
-            p.cover_photo = cover_url
+        # 2. Handle File Uploads (Actual images)
+        if 'image' in request.FILES:
+            p.image = request.FILES['image']
+            
+        if 'cover_photo' in request.FILES:
+            p.cover_photo = request.FILES['cover_photo']
             
         p.save()
         return JsonResponse({'success': True})
         
-    return JsonResponse({'success': False})
+    return JsonResponse({'success': False}, status=400)
 
 
 from django.shortcuts import get_object_or_404
