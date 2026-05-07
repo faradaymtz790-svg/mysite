@@ -687,25 +687,6 @@ def toggle_follow(request, user_id):
 
 
 # core/views.py
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import User, Follow  # Ensure Follow is imported
-
-@login_required
-def follow_user(request, username):
-    user_to_follow = get_object_or_404(User, username=username)
-    
-    if user_to_follow != request.user:
-        # get_or_create checks the DB first. 
-        # If the follow exists, it stops. It won't delete or duplicate.
-        Follow.objects.get_or_create(follower=request.user, following=user_to_follow)
-        
-    return redirect('profile', username=username)
-
 
 
 @login_required
