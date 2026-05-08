@@ -600,25 +600,34 @@ def create_post(request):
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
+from django.core.exceptions import ValidationError
+
 @login_required
 def update_profile(request):
     if request.method == "POST":
         profile = request.user.profile
         
-        # Update text fields
+        # 1. Update text fields
         profile.bio = request.POST.get('bio', profile.bio)
         profile.location = request.POST.get('location', profile.location)
         profile.links = request.POST.get('links', profile.links)
 
-        # Update Image Files
+        # 2. Update Image Files
         if 'image' in request.FILES:
             profile.image = request.FILES['image']
         
         if 'cover_photo' in request.FILES:
             profile.cover_photo = request.FILES['cover_photo']
 
-        profile.save()
-        return JsonResponse({'success': True})
+        try:
+            # THIS IS CRITICAL: check for errors before saving
+            profile.full_clean() 
+            profile.save()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            # If it fails, we need to know WHY
+            print(f"SAVE ERROR: {e}") 
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
     
     return JsonResponse({'success': False}, status=400)
 
