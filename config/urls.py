@@ -87,7 +87,7 @@ path('profile/<str:username>/following/', views.following_list, name='following_
     path('settings/invite/', views.invite, name='invite'),
     path('robot-check/', views.robot_check_view, name='robot_check'),
     
-    prefix_default_language=False  
+    prefix_default_language=True
 )
 
 # 🔹 MEDIA FILES

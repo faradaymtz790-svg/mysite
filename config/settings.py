@@ -36,7 +36,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Required before Locale
+    'django.middleware.locale.LocaleMiddleware',            # <--- ADD THIS HERE
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -129,6 +130,8 @@ LANGUAGES = [
     ('de', _('German')),
 ]
 
-
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale/'),
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
