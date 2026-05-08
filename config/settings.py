@@ -111,8 +111,8 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # LANGUAGES
-LANGUAGE_CODE = 'en-us'
-USE_I18N = True
+LANGUAGE_CODE = 'en'
+USE_I18N = False
 USE_L10N = True
 USE_TZ = True
 
