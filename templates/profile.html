@@ -215,7 +215,7 @@
     <div class="modal-body">
         <h2 style="color:var(--primary-green);">Edit Profile</h2>
         
-        <form method="POST" action="{% url 'update_profile' %}" enctype="multipart/form-data">
+        <form id="profileUpdateForm" method="POST" action="{% url 'update_profile' %}" enctype="multipart/form-data">
             {% csrf_token %}
             
             <!-- Current Profile Image Preview -->
@@ -397,12 +397,10 @@ document.getElementById('profileUpdateForm').addEventListener('submit', function
    
 document.querySelectorAll('.follow-btn').forEach(button => {
     button.addEventListener('click', function() {
-        // 1. Grab the username from the data attribute
         const username = this.getAttribute('data-username'); 
         const btn = this;
         const btnText = btn.querySelector('.btn-text');
 
-        // 2. Fetch using the username string to match urls.py
         fetch(`/follow/${username}/`, {
             method: 'POST',
             headers: { 
@@ -410,22 +408,20 @@ document.querySelectorAll('.follow-btn').forEach(button => {
                 'Content-Type': 'application/json' 
             }
         })
-        .then(response => {
-            if (!response.ok) throw new Error('User not found');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
+            // Match the status your view sends back ('followed' or 'unfollowed')
             if (data.status === 'followed') {
-                btn.classList.add('following', 'btn-unfollow');
+                btn.classList.add('btn-unfollow', 'following');
                 btn.classList.remove('btn-follow');
                 if(btnText) btnText.innerHTML = 'Following';
             } else {
-                btn.classList.remove('following', 'btn-unfollow');
+                btn.classList.remove('btn-unfollow', 'following');
                 btn.classList.add('btn-follow');
                 if(btnText) btnText.innerHTML = '+ Follow';
             }
 
-            // 3. Update the count badge using the username ID
+            // Update the follower count on the page
             const countBadge = document.getElementById(`follower-count-${username}`);
             if (countBadge) {
                 countBadge.innerHTML = data.followers_count;
@@ -434,6 +430,9 @@ document.querySelectorAll('.follow-btn').forEach(button => {
         .catch(err => console.error("Follow error:", err));
     });
 });
+
+
+
 function getCSRFToken() {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
