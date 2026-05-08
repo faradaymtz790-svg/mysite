@@ -32,34 +32,44 @@ import cloudinary.uploader
 # BASIC PAGES
 # =========================
 
+@login_required
 def home_view(request):
     # Just show the page, don't redirect here!
     return render(request, 'home.html')
 
+@login_required
 def language(request):
     return render(request, 'language.html')
 
+@login_required
 def privacy(request):
     return render(request, 'privacy.html')
 
+@login_required
 def terms(request):
     return render(request, 'terms.html')
 
+@login_required
 def faqs(request):
     return render(request, 'faqs.html')
 
+@login_required
 def help_page(request):
     return render(request, 'help.html')
 
+@login_required
 def about(request):
     return render(request, 'about.html')
 
+@login_required
 def invite(request):
     return render(request, 'invite_friend.html')
 
+@login_required
 def settings_view(request):
     return render(request, 'settings.html')
 
+@login_required
 def account_view(request):
     return render(request, 'account.html')
 

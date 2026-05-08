@@ -112,10 +112,23 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+from django.utils.translation import gettext_lazy as _
+
 LANGUAGES = [
-    ('en', 'English'),
-    ('sw', 'Swahili'),
-    ('fr', 'French'),
+    ('en', _('English')),
+    ('sw', _('Swahili')),
+    ('fr', _('French')),
+    ('es', _('Spanish')),
+    ('pt', _('Portuguese')),
+    ('ar', _('Arabic')),
+    ('hi', _('Hindi')),
+    ('ko', _('Korean')),
+    ('ru', _('Russian')),
+    ('ja', _('Japanese')),
+    ('th', _('Thai')),
+    ('de', _('German')),
 ]
+
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
