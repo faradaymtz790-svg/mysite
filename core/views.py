@@ -600,23 +600,26 @@ def create_post(request):
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
-
 @login_required
 def update_profile(request):
-    if request.method == 'POST':
-        p = request.user.profile
-        p.bio = request.POST.get('bio', p.bio)
-        p.location = request.POST.get('location', p.location)
-        p.links = request.POST.get('links', p.links)
+    if request.method == "POST":
+        profile = request.user.profile
+        
+        # Update text fields
+        profile.bio = request.POST.get('bio', profile.bio)
+        profile.location = request.POST.get('location', profile.location)
+        profile.links = request.POST.get('links', profile.links)
 
-        # Check for files
+        # Update Image Files
         if 'image' in request.FILES:
-            p.image = request.FILES['image']
+            profile.image = request.FILES['image']
+        
         if 'cover_photo' in request.FILES:
-            p.cover_photo = request.FILES['cover_photo']
-            
-        p.save()
+            profile.cover_photo = request.FILES['cover_photo']
+
+        profile.save()
         return JsonResponse({'success': True})
+    
     return JsonResponse({'success': False}, status=400)
 
 

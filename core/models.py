@@ -7,7 +7,6 @@ from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User
 
-from cloudinary.models import CloudinaryField
 # --- Profile ---
 
 from django.db import models
@@ -18,24 +17,43 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
 
+from django.db import models
+from django.conf import settings
+from cloudinary.models import CloudinaryField
+
+
+
+
+from django.db import models
+from django.conf import settings
+from cloudinary.models import CloudinaryField
+
 class Profile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    
-    # Store full Cloudinary URLs. 
-    # IMPORTANT: Replace 'your-cloud-name' with your actual Cloudinary name.
-    image = models.CharField(
-        max_length=500, 
-        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/default_avatar.png'
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='profile'
     )
-    cover_photo = models.CharField(
-        max_length=500, 
-        default='https://res.cloudinary.com/your-cloud-name/image/upload/v1/default_cover.jpg'
+    
+    # Using CloudinaryField instead of CharField
+    image = CloudinaryField(
+        'image', 
+        folder='profile_pics',
+        null=True, 
+        blank=True
+    )
+    cover_photo = CloudinaryField(
+        'image', 
+        folder='cover_photos',
+        null=True, 
+        blank=True
     )
     
     bio = models.TextField(max_length=250, blank=True)
     location = models.CharField(max_length=100, blank=True)
     links = models.URLField(blank=True)
     niches = models.JSONField(default=list, blank=True)
+    
     blocked_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, 
         related_name='blocked_by', 
@@ -46,15 +64,16 @@ class Profile(models.Model):
         return f"{self.user.username}'s Profile"
 
     def save(self, *args, **kwargs):
-        # 1. FIX THE SPACE ISSUE: Automatically clean the username
-        # This converts "in pocket" to "in_pocket" to fix the %20 URL error.
-        if self.user.username:
+        # Fix space issue in username
+        if self.user and self.user.username:
             new_username = self.user.username.strip().replace(' ', '_')
             if self.user.username != new_username:
                 self.user.username = new_username
-                self.user.save()
+                # Save the user instance specifically
+                self.user.save(update_fields=['username'])
         
         super().save(*args, **kwargs)
+
 # ... Your Report model remains below ...
 
 
@@ -62,11 +81,6 @@ class Profile(models.Model):
 # --- Post ---
 
 
-
-from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
-from cloudinary.models import CloudinaryField
 
 
 
