@@ -208,6 +208,7 @@ from django.db.models import Sum
 from .models import Profile, Post, Follow
 from django.contrib.auth.models import User
 
+@login_required
 def profile_view(request, username=None):
     # 1. Determine which user we are looking at
     if username:
@@ -267,7 +268,7 @@ def profile_view(request, username=None):
 
 
 
-
+@login_required
 def posts_feed(request):
     posts = Post.objects.all().order_by('-created_at')
     return render(request, 'posts_feed.html', {'posts': posts})
@@ -607,38 +608,40 @@ def create_post(request):
     return render(request, 'create_post.html')
 
 
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
-from django.core.exceptions import ValidationError
-
 @login_required
 def update_profile(request):
+    profile = request.user.profile
+    
     if request.method == "POST":
-        profile = request.user.profile
-
         profile.bio = request.POST.get('bio', profile.bio)
         profile.location = request.POST.get('location', profile.location)
         profile.links = request.POST.get('links', profile.links)
 
         image = request.FILES.get('image')
         if image:
-            if profile.image:
-                profile.image.delete(save=False)
+            # Note: Cloudinary handles deletion via the public_id usually, 
+            # but this is fine for standard storage
             profile.image = image
 
         cover = request.FILES.get('cover_photo')
         if cover:
-            if profile.cover_photo:
-                profile.cover_photo.delete(save=False)
             profile.cover_photo = cover
 
         profile.save()
+        
+        # If using AJAX, return JSON
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        
+        # If using a standard form, redirect back to profile
+        return redirect('profile', username=request.user.username)
 
-        return JsonResponse({'success': True})
-
-    return JsonResponse({'success': False}, status=400)
-
+    # Handle GET request: Show the edit form
+    return render(request, 'core/update_profile.html', {'profile': profile})
 
 
 from django.shortcuts import get_object_or_404

@@ -13,7 +13,7 @@ urlpatterns = [
     
     # 📱 PWA / Static Assets (accessible at the root)
     path('serviceworker.js', TemplateView.as_view(
-        template_name="serviceworker.js", 
+        template_name="js/serviceworker.js", 
         content_type='application/javascript'
     ), name='serviceworker'),
     
