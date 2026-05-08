@@ -32,7 +32,6 @@ import cloudinary.uploader
 # BASIC PAGES
 # =========================
 
-@login_required
 def home_view(request):
     # Just show the page, don't redirect here!
     return render(request, 'home.html')
