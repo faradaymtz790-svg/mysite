@@ -22,8 +22,6 @@ from django.conf import settings
 from cloudinary.models import CloudinaryField
 
 
-
-
 from django.db import models
 from django.conf import settings
 from cloudinary.models import CloudinaryField
@@ -35,23 +33,30 @@ class Profile(models.Model):
         related_name='profile'
     )
     
-    # Using CloudinaryField instead of CharField
+    # Cloudinary fields: Removed 'image' label to avoid string length conflicts
+    # Added long max_length to prevent "Value too long" errors during URL storage
     image = CloudinaryField(
-        'image', 
+        resource_type='image',
         folder='profile_pics',
         null=True, 
-        blank=True
+        blank=True,
+        max_length=500 
     )
     cover_photo = CloudinaryField(
-        'image', 
+        resource_type='image',
         folder='cover_photos',
         null=True, 
-        blank=True
+        blank=True,
+        max_length=500
     )
     
-    bio = models.TextField(max_length=250, blank=True)
-    location = models.CharField(max_length=100, blank=True)
-    links = models.URLField(blank=True)
+    # Increased bio and links to allow for long content/URLs
+    bio = models.TextField(max_length=1000, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    
+    # URLField defaults to 200, which is often too short for modern tracking URLs
+    links = models.URLField(max_length=500, blank=True, null=True)
+    
     niches = models.JSONField(default=list, blank=True)
     
     blocked_users = models.ManyToManyField(
@@ -64,15 +69,24 @@ class Profile(models.Model):
         return f"{self.user.username}'s Profile"
 
     def save(self, *args, **kwargs):
-        # Fix space issue in username
+        # 1. Handle username formatting cleanly
         if self.user and self.user.username:
-            new_username = self.user.username.strip().replace(' ', '_')
-            if self.user.username != new_username:
-                self.user.username = new_username
-                # Save the user instance specifically
+            original_username = self.user.username
+            # Strip spaces and replace internal spaces with underscores
+            clean_username = original_username.strip().replace(' ', '_')
+            
+            if original_username != clean_username:
+                self.user.username = clean_username
+                # Use update_fields to minimize DB load and avoid firing all user signals
                 self.user.save(update_fields=['username'])
         
+        # 2. Save the Profile
         super().save(*args, **kwargs)
+
+from django.db import models
+from django.conf import settings
+from cloudinary.models import CloudinaryField
+
 
 # ... Your Report model remains below ...
 
