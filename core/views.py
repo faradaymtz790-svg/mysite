@@ -602,43 +602,34 @@ from django.contrib.auth.decorators import login_required
 
 from django.core.exceptions import ValidationError
 
-
 @login_required
 def update_profile(request):
     if request.method == "POST":
-
-        print("FILES:", request.FILES)
-        print("POST:", request.POST)
-
         profile = request.user.profile
 
         profile.bio = request.POST.get('bio', profile.bio)
         profile.location = request.POST.get('location', profile.location)
         profile.links = request.POST.get('links', profile.links)
 
-        if 'image' in request.FILES:
-            print("IMAGE RECEIVED")
-            profile.image = request.FILES['image']
+        image = request.FILES.get('image')
+        if image:
+            if profile.image:
+                profile.image.delete(save=False)
+            profile.image = image
 
-        if 'cover_photo' in request.FILES:
-            print("COVER RECEIVED")
-            profile.cover_photo = request.FILES['cover_photo']
+        cover = request.FILES.get('cover_photo')
+        if cover:
+            if profile.cover_photo:
+                profile.cover_photo.delete(save=False)
+            profile.cover_photo = cover
 
-        try:
-            profile.save()
+        profile.save()
 
-            print("PROFILE SAVED SUCCESSFULLY")
+        return JsonResponse({'success': True})
 
-            return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
 
-        except Exception as e:
-            print("SAVE ERROR:", e)
 
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            })
-        
 
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
