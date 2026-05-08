@@ -67,11 +67,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # DATABASE
+# DATABASE
+# This will automatically use the Postgres URL on Render
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 # AUTHENTICATION
 AUTHENTICATION_BACKENDS = [
