@@ -26,40 +26,40 @@ from django.db import models
 from django.conf import settings
 from cloudinary.models import CloudinaryField
 
-
 class Profile(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='profile'
     )
-    
-    # Increase max_length to 500 for Cloudinary URLs
+
     image = CloudinaryField(
-        'image', 
+        'image',
         folder='profile_pics',
-        null=True, 
         blank=True,
-        max_length=500 
+        null=True,
+        max_length=1000
     )
+
     cover_photo = CloudinaryField(
-        'image', 
+        'image',
         folder='cover_photos',
-        null=True, 
         blank=True,
-        max_length=500
+        null=True,
+        max_length=1000
     )
-    
-    # TextFields are better for bios; increased URLField limit
+
     bio = models.TextField(max_length=1000, blank=True)
+
     location = models.CharField(max_length=255, blank=True)
-    links = models.URLField(max_length=500, blank=True) 
-    
+
+    links = models.URLField(max_length=1000, blank=True)
+
     niches = models.JSONField(default=list, blank=True)
-    
+
     blocked_users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, 
-        related_name='blocked_by', 
+        settings.AUTH_USER_MODEL,
+        related_name='blocked_by',
         blank=True
     )
 
@@ -69,11 +69,13 @@ class Profile(models.Model):
     def save(self, *args, **kwargs):
         if self.user and self.user.username:
             new_username = self.user.username.strip().replace(' ', '_')
+
             if self.user.username != new_username:
                 self.user.username = new_username
                 self.user.save(update_fields=['username'])
-        
+
         super().save(*args, **kwargs)
+
 
 
 # ... Your Report model remains below ...
