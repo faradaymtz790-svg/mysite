@@ -38,7 +38,7 @@ class Profile(models.Model):
         folder='profile_pics',
         blank=True,
         null=True,
-        max_length=1000
+        max_length=255
     )
 
     cover_photo = CloudinaryField(
@@ -46,14 +46,14 @@ class Profile(models.Model):
         folder='cover_photos',
         blank=True,
         null=True,
-        max_length=1000
+        max_length=255
     )
 
-    bio = models.TextField(max_length=1000, blank=True)
+    bio = models.TextField(max_length=255, blank=True)
 
     location = models.CharField(max_length=255, blank=True)
 
-    links = models.URLField(max_length=1000, blank=True)
+    links = models.URLField(max_length=255, blank=True)
 
     niches = models.JSONField(default=list, blank=True)
 

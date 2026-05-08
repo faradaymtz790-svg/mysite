@@ -147,3 +147,17 @@ LANGUAGE_COOKIE_NAME = 'django_language'
 LANGUAGE_COOKIE_AGE = 31536000  # 1 year in seconds
 LANGUAGE_COOKIE_PATH = '/'      # Makes it available across the whole site
 LANGUAGE_COOKIE_SAMESITE = 'Lax'
+
+
+# --- Scroll to the bottom of settings.py ---
+
+# Authentication Settings (django-allauth)
+SITE_ID = 1
+
+# Update these lines to remove the deprecation warnings:
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+
+# Keep your other existing allauth settings here
+ACCOUNT_EMAIL_VERIFICATION = 'none' 
+# ... etc
