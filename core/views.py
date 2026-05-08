@@ -660,8 +660,6 @@ def delete_post(request, id):
 def settings_view(request):
     return render(request, 'settings.html')
 
-def account_view(request):
-    return render(request, 'Account.html')
 
 # Do this for the rest (language, faqs, etc.)
 
