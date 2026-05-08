@@ -353,7 +353,7 @@ document.getElementById('profileUpdateForm').addEventListener('submit', function
     // the files from <input type="file"> because you have 'name' attributes.
     const formData = new FormData(this);
 
-    fetch('/update-profile/', {
+   fetch("{% url 'update_profile' %}", {
         method: 'POST',
         body: formData,
         headers: {
