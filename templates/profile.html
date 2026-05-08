@@ -213,7 +213,7 @@
 <div id="editModal">
     <div class="modal-body">
         <h2 style="color:var(--primary-green);">Edit Profile</h2>
-        <form id="profileUpdateForm" enctype="multipart/form-data">
+        <form id="profileUpdateForm"  method="POST"  enctype="multipart/form-data">
             {% csrf_token %}
             
             <!-- Current Profile Image Preview -->
