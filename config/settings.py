@@ -138,3 +138,12 @@ LOCALE_PATHS = [
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# settings.py
+
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000  # 1 year in seconds
+LANGUAGE_COOKIE_PATH = '/'      # Makes it available across the whole site
+LANGUAGE_COOKIE_SAMESITE = 'Lax'

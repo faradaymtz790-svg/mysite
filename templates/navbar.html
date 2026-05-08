@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 
 <style>
     /* Import Signature Font */
@@ -20,7 +21,6 @@
         padding: 8px 0 0 0; 
     }
 
-    /* 1. TOP SECTION: Logo (Left), Search (Center), Settings (Right) */
     .nav-top-row {
         display: flex;
         justify-content: space-between;
@@ -36,55 +36,58 @@
         font-weight: 400;
         color: #00a86b;
         text-decoration: none;
-        text-transform: capitalize; 
         flex: 1; 
         line-height: 1;
-        white-space: nowrap;
     }
 
-    .search-wrapper {
-        flex: 2; 
-        max-width: 600px;
-        margin: 0 15px;
-    }
-
-    .search-bar {
+    /* 🌎 LANGUAGE SELECTOR STYLING */
+    .lang-form-nav {
+        margin-right: 12px;
         display: flex;
         align-items: center;
+    }
+
+    .nav-lang-select {
+        border: none;
         background: #f0f2f5;
-        border-radius: 25px;
-        padding: 8px 18px;
+        border-radius: 12px;
+        padding: 5px 10px;
+        font-size: 13px;
+        color: #65676b;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        outline: none;
         transition: 0.3s;
     }
 
-    .search-bar:focus-within {
-        background: #fff;
-        box-shadow: 0 0 0 2px #00a86b;
+    .nav-lang-select:hover {
+        background: #e4e6eb;
+        color: #00a86b;
     }
 
-    .search-bar input {
-        border: none;
-        background: transparent;
-        outline: none;
+    .search-wrapper-form {
+        position: relative; 
+        display: flex; 
+        align-items: center; 
+        max-width: 400px; 
         width: 100%;
-        padding-left: 10px;
-        font-size: 14px;
-        font-family: "Gill Sans", sans-serif;
+        flex: 2;
+        margin: 0 10px;
     }
 
-    /* Settings Icon Alignment */
     .settings-wrapper {
         flex: 1;
         display: flex;
         justify-content: flex-end;
+        align-items: center;
     }
 
     .settings-icon-btn {
         text-decoration: none;
-        font-size: 22px;
+        font-size: 20px;
         background: #f0f2f5;
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -92,13 +95,6 @@
         transition: 0.3s;
     }
 
-    .settings-icon-btn:hover {
-        background: #e4e6eb;
-        transform: rotate(45deg);
-        color: #00a86b;
-    }
-
-    /* 2. BOTTOM SECTION: Nav Items */
     .nav-bottom-row {
         display: flex;
         justify-content: center;
@@ -115,25 +111,11 @@
         padding: 10px 0;
         flex: 1; 
         text-align: center;
-        transition: 0.3s;
         position: relative;
     }
 
-    /* 🟢 GREEN FOCUS/HOVER */
     .nav-link:hover {
         color: #00a86b;
-        background: rgba(0, 168, 107, 0.05);
-        border-radius: 8px;
-    }
-
-    .nav-link:hover::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: #00a86b;
     }
 </style>
 
@@ -143,39 +125,45 @@
         <a href="/" class="nav-logo">Plugbar</a>
 
         <!-- Search Section -->
-        <form action="{% url 'search' %}" method="GET" style="position: relative; display: flex; align-items: center; max-width: 400px; width: 100%;">
-            <input type="text" 
-                   name="q" 
-                   placeholder="Search people or posts..." 
-                   value="{{ request.GET.q }}"
-                   style="width: 100%; padding: 10px 15px 10px 45px; border-radius: 25px; border: 1px solid #ddd; background: #f0f2f5; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif;">
-
-            <div style="position: absolute; left: 15px; display: flex; align-items: center; pointer-events: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #65676b;">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <form action="{% url 'search' %}" method="GET" class="search-wrapper-form">
+            <input type="text" name="q" placeholder="Search..." value="{{ request.GET.q }}"
+                   style="width: 100%; padding: 10px 15px 10px 40px; border-radius: 25px; border: 1px solid #ddd; background: #f0f2f5; outline: none;">
+            <div style="position: absolute; left: 12px; color: #65676b;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
             </div>
-            <button type="submit" style="display: none;">Search</button>
         </form>
 
-        <!-- Settings Section -->
+        <!-- Right Side: Language + Settings -->
         <div class="settings-wrapper">
-            <a href="{% url 'settings' %}" class="settings-icon-btn" title="Settings">
-                ⚙️
-            </a>
+            <!-- Language Picker -->
+            <form action="{% url 'set_language' %}" method="post" class="lang-form-nav">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.get_full_path|safe }}">
+                <select name="language" onchange="this.form.submit()" class="nav-lang-select">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% get_available_languages as LANGUAGES %}
+                    {% for lang_code, lang_name in LANGUAGES %}
+                        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>
+                            {{ lang_code|upper }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <a href="{% url 'settings' %}" class="settings-icon-btn">⚙️</a>
         </div>
     </div>
 
     <!-- Navigation Links -->
     <div class="nav-bottom-row">
         {% if request.user.is_authenticated %}
-            <a href="{% url 'profile' username=request.user.username %}" class="nav-link" title="PROFILE">🏠</a>
+            <a href="{% url 'profile' username=request.user.username %}" class="nav-link">🏠</a>
         {% else %}
-            <a href="{% url 'account_login' %}" class="nav-link" title="LOGIN">🏠</a>
+            <a href="{% url 'account_login' %}" class="nav-link">🏠</a>
         {% endif %}
-
-        <a href="{% url 'feed' %}" class="nav-link" title="FEED">🎧</a>
-        <a href="{% url 'notifications' %}" class="nav-link" title="ALERTS">🔔</a>
+        <a href="{% url 'feed' %}" class="nav-link">🎧</a>
+        <a href="{% url 'notifications' %}" class="nav-link">🔔</a>
     </div>
 </div>

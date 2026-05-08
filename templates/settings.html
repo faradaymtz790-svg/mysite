@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYSITE | Settings</title>
+    <title>Plugbar | {% trans "Settings" %}</title>
     <style>
         :root {
             --primary-green: #00a86b;
@@ -19,9 +20,9 @@
             height: 100%;
             font-family: 'Inter', -apple-system, sans-serif;
             background-color: white;
+            color: var(--text-dark);
         }
 
-        /* 🌿 FULL SCREEN CONTAINER */
         .settings-container {
             width: 100%;
             min-height: 100vh;
@@ -29,7 +30,6 @@
             flex-direction: column;
         }
 
-        /* HEADER */
         .settings-header {
             padding: 20px;
             display: flex;
@@ -46,6 +46,9 @@
             font-size: 24px;
             color: var(--text-dark);
             margin-right: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
 
         .settings-header h1 {
@@ -56,7 +59,6 @@
             letter-spacing: 1px;
         }
 
-        /* MENU LIST */
         .settings-menu {
             display: flex;
             flex-direction: column;
@@ -72,8 +74,13 @@
             color: var(--text-dark);
             border-bottom: 1px solid var(--border-color);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            background: none;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
         }
 
         .menu-left {
@@ -83,7 +90,7 @@
         }
 
         .menu-icon {
-            font-size: 22px;
+            font-size: 20px;
             width: 30px;
             text-align: center;
         }
@@ -93,16 +100,25 @@
             font-weight: 600;
         }
 
+        .current-lang-tag {
+            font-size: 12px;
+            background: var(--bg-light);
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #8e8e8e;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+
         .arrow-right {
             font-size: 14px;
             color: #ccc;
             transition: 0.3s;
         }
 
-        /* 🟢 GREEN HOVER & TOUCH ANIMATION */
         .menu-item:hover {
             background-color: rgba(0, 168, 107, 0.05);
-            padding-left: 30px; /* Slight slide effect */
+            padding-left: 30px;
         }
 
         .menu-item:hover .menu-text, 
@@ -115,13 +131,6 @@
             transform: translateX(5px);
         }
 
-        /* Ripple Effect on Touch */
-        .menu-item:active {
-            background-color: rgba(0, 168, 107, 0.15);
-            transform: scale(0.98);
-        }
-
-        /* SECTION LABELS */
         .section-label {
             padding: 20px 25px 10px;
             font-size: 12px;
@@ -131,10 +140,9 @@
             background-color: var(--bg-light);
         }
 
-        /* LOGOUT BUTTON */
         .logout-btn {
-            margin-top: 20px;
             color: #ff4d4d !important;
+            margin-top: 20px;
         }
         
         .logout-btn:hover {
@@ -143,20 +151,20 @@
     </style>
 </head>
 <body>
-{% csrf_token %}
+
 <div class="settings-container">
     <header class="settings-header">
-        <a href="javascript:history.back()" class="back-btn">⬅</a>
-        <h1>Settings</h1>
+        <button onclick="history.back()" class="back-btn">⬅</button>
+        <h1>{% trans "Settings" %}</h1>
     </header>
 
     <div class="settings-menu">
-        <div class="section-label">Account & Security</div>
+        <div class="section-label">{% trans "Account & Security" %}</div>
         
         <a href="{% url 'account' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">👤</span>
-                <span class="menu-text">Account Information</span>
+                <span class="menu-text">{% trans "Account Information" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
@@ -164,17 +172,19 @@
         <a href="{% url 'language' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">🌐</span>
-                <span class="menu-text">Language</span>
+                <span class="menu-text">{% trans "Language" %}</span>
+                {% get_current_language as CURRENT_LANG %}
+                <span class="current-lang-tag">{{ CURRENT_LANG }}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
 
-        <div class="section-label">Support & Resources</div>
+        <div class="section-label">{% trans "Support & Resources" %}</div>
 
         <a href="{% url 'faqs' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">❓</span>
-                <span class="menu-text">FAQs</span>
+                <span class="menu-text">{% trans "FAQs" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
@@ -182,7 +192,7 @@
         <a href="{% url 'help' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">🆘</span>
-                <span class="menu-text">Help & Contact Us</span>
+                <span class="menu-text">{% trans "Help & Contact Us" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
@@ -190,17 +200,17 @@
         <a href="{% url 'invite' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">📩</span>
-                <span class="menu-text">Invite Friends</span>
+                <span class="menu-text">{% trans "Invite Friends" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
 
-        <div class="section-label">Legal</div>
+        <div class="section-label">{% trans "Legal" %}</div>
 
         <a href="{% url 'terms' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">📜</span>
-                <span class="menu-text">Terms of Use</span>
+                <span class="menu-text">{% trans "Terms of Use" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
@@ -208,7 +218,7 @@
         <a href="{% url 'privacy' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">🔒</span>
-                <span class="menu-text">Privacy Policy</span>
+                <span class="menu-text">{% trans "Privacy Policy" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
@@ -216,17 +226,21 @@
         <a href="{% url 'about' %}" class="menu-item">
             <div class="menu-left">
                 <span class="menu-icon">ℹ️</span>
-                <span class="menu-text">About Us</span>
+                <span class="menu-text">{% trans "About Us" %}</span>
             </div>
             <span class="arrow-right">▶</span>
         </a>
 
-        <a href="{% url 'login' %}" class="menu-item logout-btn">
+        <!-- Logout Form (Safety First) -->
+        <form method="post" action="{% url 'account_logout' %}" id="logout-form" style="display: none;">
+            {% csrf_token %}
+        </form>
+        <button type="button" onclick="document.getElementById('logout-form').submit();" class="menu-item logout-btn">
             <div class="menu-left">
                 <span class="menu-icon">🚪</span>
-                <span class="menu-text">Log Out</span>
+                <span class="menu-text">{% trans "Log Out" %}</span>
             </div>
-        </a>
+        </button>
     </div>
 </div>
 
