@@ -33,7 +33,6 @@ urlpatterns += i18n_patterns(
     # --- PRIMARY NAVIGATION ---
     # The root now points directly to home.html via views.home_view
     path('', views.home_view, name='home'), 
-    path('force-fix-db/', views.force_cleanup_database),
     path('feed/', views.posts_feed, name='feed'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),

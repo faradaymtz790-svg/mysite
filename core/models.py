@@ -22,44 +22,23 @@ from django.conf import settings
 from cloudinary.models import CloudinaryField
 
 
-from django.db import models
-from django.conf import settings
-from cloudinary.models import CloudinaryField
-
 class Profile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='profile'
     )
-
-    image = CloudinaryField(
-        'image',
-        folder='profile_pics',
-        blank=True,
-        null=True,
-        max_length=255
-    )
-
-    cover_photo = CloudinaryField(
-        'image',
-        folder='cover_photos',
-        blank=True,
-        null=True,
-        max_length=255
-    )
-
-    bio = models.TextField(max_length=255, blank=True)
-
+    image = CloudinaryField('image', folder='profile_pics', blank=True, null=True, max_length=500)
+    cover_photo = CloudinaryField('image', folder='cover_photos', blank=True, null=True, max_length=500)
+    
+    bio = models.TextField(blank=True) 
     location = models.CharField(max_length=255, blank=True)
-
-    links = models.URLField(max_length=255, blank=True)
-
+    links = models.URLField(max_length=500, blank=True)
+    
     niches = models.JSONField(default=list, blank=True)
-
     blocked_users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='blocked_by',
+        settings.AUTH_USER_MODEL, 
+        related_name='blocked_by', 
         blank=True
     )
 
@@ -69,11 +48,9 @@ class Profile(models.Model):
     def save(self, *args, **kwargs):
         if self.user and self.user.username:
             new_username = self.user.username.strip().replace(' ', '_')
-
             if self.user.username != new_username:
                 self.user.username = new_username
                 self.user.save(update_fields=['username'])
-
         super().save(*args, **kwargs)
 
 
@@ -223,3 +200,7 @@ class Report(models.Model):
     reason = models.CharField(max_length=20)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+

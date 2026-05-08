@@ -36,3 +36,17 @@ class SignupForm(forms.Form):
     
     # This is the new security field
     captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+
+
+
+from django import forms
+from .models import Profile
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image', 'cover_photo', 'bio', 'location', 'links', 'niches']
+        widgets = {
+            'bio': forms.Textarea(attrs={'class': 'glass-input', 'rows': 3, 'maxlength': '500'}),
+            'links': forms.URLInput(attrs={'class': 'glass-input', 'placeholder': 'https://...'}),
+        }
