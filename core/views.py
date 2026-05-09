@@ -1162,6 +1162,6 @@ def niche_selection(request):
 
 
 def account_view(request):
-    return render(request, 'account.html')
+    return render(request, 'core/account.html')
 
 
