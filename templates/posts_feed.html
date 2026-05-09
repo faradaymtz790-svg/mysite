@@ -87,17 +87,17 @@
         }
 
         /* Audio Player & Visualizer */
-        .audio-visual-container {
-            width: 100%;
-            height: 80vh;
-            position: relative;
-            background-size: cover;
-            background-position: center;
-            background-color: #222;
-            overflow: hidden;
-            scroll-snap-align: start; 
-        }
-
+       .audio-visual-container {
+    width: 100%;
+    height: 320px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-color: #222;
+    overflow: hidden;
+    scroll-snap-align: start;
+    border-radius: 0;
+}
         .audio-visual-container::after {
             content: "";
             position: absolute;
@@ -107,17 +107,17 @@
         }
 
         .visualizer-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            height: 320px;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            pointer-events: none;
-            z-index: 2;
-        }
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 320px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 2;
+}
 
         .v-bar { flex: 1; height: 5px; border-radius: 3px; transition: 0.1s; opacity: 0.7; }
 
