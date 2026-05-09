@@ -32,7 +32,7 @@ urlpatterns += i18n_patterns(
     
     # --- PRIMARY NAVIGATION ---
     # The root now points directly to home.html via views.home_view
-    path('', include('core.urls')),
+   
     path('', views.home_view, name='home'), 
     path('feed/', views.posts_feed, name='feed'),
     path('signup/', views.signup, name='signup'),
