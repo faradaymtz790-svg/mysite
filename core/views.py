@@ -1160,16 +1160,8 @@ def niche_selection(request):
     return render(request, 'niche_selection.html')
 
 
-from django.http import HttpResponse
-from .models import Profile
 
-def force_cleanup_database(request):
-    # This does the work the shell would have done
-    profiles = Profile.objects.all()
-    for p in profiles:
-        if p.bio: 
-            p.bio = p.bio[:200]
-        if p.links: 
-            p.links = "https://google.com"
-        p.save()
-    return HttpResponse("Database cleaned! You can now delete this view.")
+def account_view(request):
+    return render(request, 'account.html')
+
+
