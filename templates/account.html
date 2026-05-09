@@ -1,346 +1,274 @@
-{% include 'navbar.html' %}
+{% extends 'base.html' %}
+{% load i18n %}
 
+{% block content %}
 <style>
-    :root{
-        --primary-green:#00a86b;
-        --bg-color:#f4fff6;
-        --card-bg:#ffffff;
-        --border-color:#e5e7eb;
-        --text-main:#111827;
-        --text-muted:#6b7280;
-        --danger:#dc3545;
+    :root {
+        --primary-green: #00a86b;
+        --bg-light: #f8f9fa;
+        --text-dark: #262626;
+        --text-muted: #8e8e8e;
+        --border-color: #eee;
+        --danger: #ff4d4d;
+        --danger-bg: #fff5f5;
     }
 
-    *{
-        box-sizing:border-box;
+    /* Account Page Layout */
+    .account-page-wrapper {
+        width: 100%;
+        min-height: 100vh;
+        background-color: white;
+        padding-bottom: 50px;
     }
 
-    body{
-        margin:0;
-        background:var(--bg-color);
-        font-family:'Inter',sans-serif;
+    .account-header {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
-    .settings-wrapper{
-        width:100%;
-        min-height:100vh;
-        display:flex;
-        justify-content:center;
-        align-items:flex-start;
-        padding:100px 16px 40px;
+    .back-link {
+        font-size: 24px;
+        text-decoration: none;
+        color: var(--text-dark);
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
     }
 
-    .settings-card{
-        width:100%;
-        max-width:520px;
-        background:var(--card-bg);
-        border-radius:28px;
-        padding:28px;
-        box-shadow:0 15px 40px rgba(0,0,0,0.08);
-        border:1px solid rgba(0,0,0,0.05);
-        position:relative;
-        overflow:hidden;
+    .account-header h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-dark);
     }
 
-    .settings-card::before{
-        content:"";
-        position:absolute;
-        top:0;
-        left:0;
-        width:100%;
-        height:6px;
-        background:linear-gradient(90deg,var(--primary-green),#00d084);
+    .account-container {
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
     }
 
-    .settings-header{
-        text-align:center;
-        margin-bottom:32px;
+    .section-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin: 24px 0 12px;
+        letter-spacing: 0.5px;
     }
 
-    .settings-icon{
-        width:80px;
-        height:80px;
-        border-radius:50%;
-        background:linear-gradient(135deg,#e9fff5,#d7f7e8);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        margin:0 auto 18px;
-        box-shadow:0 8px 25px rgba(0,168,107,0.15);
+    /* Information Cards */
+    .info-card-group {
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        background: white;
     }
 
-    .settings-icon span{
-        font-size:34px;
+    .info-item {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
     }
 
-    .settings-title{
-        margin:0;
-        font-size:30px;
-        font-weight:800;
-        color:var(--text-main);
+    .info-item:last-child {
+        border-bottom: none;
     }
 
-    .settings-subtitle{
-        margin-top:10px;
-        color:var(--text-muted);
-        font-size:15px;
-        line-height:1.5;
+    .info-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
     }
 
-    .user-box{
-        width:100%;
-        padding:18px;
-        border-radius:20px;
-        background:var(--bg-color);
-        border:1px solid rgba(0,168,107,0.18);
-        margin-bottom:22px;
+    .info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-dark);
     }
 
-    .user-label{
-        font-size:13px;
-        color:var(--text-muted);
-        margin-bottom:6px;
+    /* Danger Zone */
+    .danger-section {
+        margin-top: 40px;
+        padding: 24px;
+        background-color: var(--danger-bg);
+        border-radius: 20px;
+        border: 1px solid #ffdbdb;
     }
 
-    .username{
-        font-size:18px;
-        font-weight:700;
-        color:var(--text-main);
-        word-break:break-word;
+    .danger-section h2 {
+        color: var(--danger);
+        font-size: 18px;
+        font-weight: 800;
+        margin: 0 0 10px 0;
     }
 
-    .main-btn{
-        width:100%;
-        min-height:56px;
-        border:none;
-        border-radius:18px;
-        font-size:15px;
-        font-weight:700;
-        cursor:pointer;
-        transition:0.25s ease;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        padding:14px 18px;
+    .danger-section p {
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
     }
 
-    .delete-btn{
-        background:#fff5f5;
-        color:var(--danger);
-        border:1px solid #ffd6d6;
+    /* Buttons */
+    .btn-action {
+        width: 100%;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 15px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        display: block;
     }
 
-    .delete-btn:hover{
-        transform:translateY(-2px);
-        background:#ffecec;
+    .btn-delete-trigger {
+        background-color: var(--danger);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 77, 77, 0.2);
     }
 
-    .danger-box{
-        background:#fff8f8;
-        border:1px solid #ffd9d9;
-        padding:18px;
-        border-radius:20px;
-        margin-bottom:25px;
+    .btn-delete-trigger:hover {
+        background-color: #e64545;
+        transform: translateY(-1px);
     }
 
-    .danger-title{
-        color:var(--danger);
-        margin:0 0 10px;
-        font-size:22px;
-        font-weight:800;
+    .btn-cancel {
+        background: white;
+        border: 1px solid var(--border-color);
+        color: var(--text-dark);
+        margin-top: 12px;
     }
 
-    .danger-text{
-        color:var(--text-muted);
-        font-size:14px;
-        line-height:1.7;
-        margin:0;
+    /* Confirmation Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
     }
 
-    .btn-group{
-        display:flex;
-        flex-direction:column;
-        gap:14px;
+    .modal-box {
+        background: white;
+        border-radius: 28px;
+        padding: 32px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        animation: modalIn 0.3s ease-out;
     }
 
-    .confirm-btn{
-        background:var(--danger);
-        color:white;
-        box-shadow:0 10px 25px rgba(220,53,69,0.25);
+    @keyframes modalIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
     }
 
-    .confirm-btn:hover{
-        transform:translateY(-2px);
-    }
-
-    .cancel-btn{
-        background:var(--primary-green);
-        color:white;
-        box-shadow:0 10px 25px rgba(0,168,107,0.22);
-    }
-
-    .cancel-btn:hover{
-        transform:translateY(-2px);
-    }
-
-    #confirm-ui{
-        display:none;
-        animation:fadeIn .3s ease;
-    }
-
-    @keyframes fadeIn{
-        from{
-            opacity:0;
-            transform:translateY(10px);
-        }
-        to{
-            opacity:1;
-            transform:translateY(0);
-        }
-    }
-
-    /* Mobile Optimization */
-    @media (max-width:768px){
-
-        .settings-wrapper{
-            padding:85px 12px 30px;
-        }
-
-        .settings-card{
-            padding:22px 18px;
-            border-radius:24px;
-        }
-
-        .settings-title{
-            font-size:24px;
-        }
-
-        .settings-subtitle{
-            font-size:14px;
-        }
-
-        .settings-icon{
-            width:72px;
-            height:72px;
-        }
-
-        .settings-icon span{
-            font-size:30px;
-        }
-
-        .main-btn{
-            font-size:14px;
-            min-height:54px;
-        }
-
-        .username{
-            font-size:16px;
-        }
-
-        .danger-title{
-            font-size:20px;
-        }
-    }
-
-    @media (max-width:480px){
-
-        .settings-wrapper{
-            padding-left:10px;
-            padding-right:10px;
-        }
-
-        .settings-card{
-            padding:18px 15px;
-            border-radius:22px;
-        }
-
-        .settings-title{
-            font-size:22px;
-        }
-
-        .main-btn{
-            border-radius:16px;
-        }
-
-        .user-box,
-        .danger-box{
-            border-radius:16px;
-        }
+    .modal-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
     }
 </style>
 
-<div class="settings-wrapper">
-    <div class="settings-card">
+<div class="account-page-wrapper">
+    <header class="account-header">
+        <a href="{% url 'settings' %}" class="back-link">⬅</a>
+        <h1>{% trans "Account Information" %}</h1>
+    </header>
 
-        <div class="settings-header">
-            <div class="settings-icon">
-                <span>⚙️</span>
+    <div class="account-container">
+        
+        <div class="section-label">{% trans "Profile Details" %}</div>
+        <div class="info-card-group">
+            <div class="info-item">
+                <span class="info-label">{% trans "Username" %}</span>
+                <span class="info-value">@{{ user.username }}</span>
             </div>
-
-            <h2 class="settings-title">Account Settings</h2>
-
-            <p class="settings-subtitle">
-                Manage your account security and personal preferences safely.
-            </p>
+            <div class="info-item">
+                <span class="info-label">{% trans "Email Address" %}</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Account Status" %}</span>
+                <span class="info-value" style="color: var(--primary-green);">{% trans "Active" %}</span>
+            </div>
         </div>
 
-        <div id="initial-ui">
-
-            <div class="user-box">
-                <div class="user-label">Logged in as</div>
-                <div class="username">@{{ user.username }}</div>
+        <div class="section-label">{% trans "Security" %}</div>
+        <div class="info-card-group">
+            <div class="info-item">
+                <span class="info-label">{% trans "Member Since" %}</span>
+                <span class="info-value">{{ user.date_joined|date:"F d, Y" }}</span>
             </div>
+        </div>
 
-            <button onclick="showConfirm()" class="main-btn delete-btn">
-                Delete Account
+        <div class="danger-section">
+            <h2>{% trans "Delete Account" %}</h2>
+            <p>{% trans "Warning: Deleting your account is permanent. All your posts, followers, and settings will be removed forever." %}</p>
+            <button onclick="toggleModal(true)" class="btn-action btn-delete-trigger">
+                {% trans "Delete My Account" %}
             </button>
-
         </div>
+    </div>
+</div>
 
-        <div id="confirm-ui">
+<!-- Permanent Delete Confirmation Modal -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-icon">⚠️</div>
+        <h3 style="margin-top: 0; font-size: 22px; font-weight: 800;">{% trans "Are you sure?" %}</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.5;">
+            {% trans "This action cannot be undone. Please confirm you want to permanently delete your Plugbar account." %}
+        </p>
 
-            <div class="danger-box">
-                <h3 class="danger-title">
-                    Are you absolutely sure?
-                </h3>
-
-                <p class="danger-text">
-                    This action is permanent and cannot be undone.
-                    Your posts, audio files, followers, and account data will be deleted forever.
-                </p>
-            </div>
-
-            <form action="{% url 'delete_account' %}" method="POST">
-                {% csrf_token %}
-
-                <div class="btn-group">
-
-                    <button type="submit" class="main-btn confirm-btn">
-                        Yes, Delete My Account
-                    </button>
-
-                    <button type="button"
-                            onclick="hideConfirm()"
-                            class="main-btn cancel-btn">
-                        No, Keep My Account
-                    </button>
-
-                </div>
-            </form>
-
-        </div>
-
+        <form action="{% url 'delete_account' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn-action btn-delete-trigger" style="box-shadow: none;">
+                {% trans "Confirm Delete" %}
+            </button>
+            <button type="button" onclick="toggleModal(false)" class="btn-action btn-cancel">
+                {% trans "Go Back" %}
+            </button>
+        </form>
     </div>
 </div>
 
 <script>
-    function showConfirm() {
-        document.getElementById('initial-ui').style.display = 'none';
-        document.getElementById('confirm-ui').style.display = 'block';
+    function toggleModal(show) {
+        const modal = document.getElementById('deleteModal');
+        if (show) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        } else {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
     }
 
-    function hideConfirm() {
-        document.getElementById('confirm-ui').style.display = 'none';
-        document.getElementById('initial-ui').style.display = 'block';
+    // Close modal if user clicks outside the white box
+    window.onclick = function(event) {
+        const modal = document.getElementById('deleteModal');
+        if (event.target == modal) {
+            toggleModal(false);
+        }
     }
 </script>
+{% endblock %}
