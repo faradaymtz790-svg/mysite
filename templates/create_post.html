@@ -128,7 +128,7 @@ textarea.addEventListener('input', () => {
     counter.textContent = `${words.length} / 350 words`;
 });
 
-// 2. File Manager selection logic (Preserved)
+// 2. File Manager selection logic
 imageInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('imageStatus').style.display = 'block';
@@ -140,11 +140,11 @@ audioInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('audioStatus').style.display = 'block';
         document.getElementById('audioStatus').innerText = "🎵 " + this.files[0].name;
-        if (isRecording) stopMediaRecorder(); // Safety if they pick a file while recording
+        if (isRecording) stopMediaRecorder(); 
     }
 });
 
-// 3. Audio Recording (Unlimited up to 8m)
+// 3. Audio Recording (Updated for better file compatibility)
 async function startRecording() {
     if (isRecording) {
         stopMediaRecorder();
@@ -153,21 +153,23 @@ async function startRecording() {
 
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
+        // Use a common mime type that Cloudinary handles well as audio
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
         chunks = [];
 
         mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
         mediaRecorder.onstop = () => {
             const blob = new Blob(chunks, { type: "audio/webm" });
-            const file = new File([blob], "voice.webm", { type: "audio/webm" });
+            // Naming it .webm or .mp3 helps Cloudinary auto-detect the resource type
+            const file = new File([blob], "voice_recording.webm", { type: "audio/webm" });
             
             const dt = new DataTransfer();
             dt.items.add(file);
             audioInput.files = dt.files;
 
             document.getElementById('audioStatus').style.display = 'block';
-            document.getElementById('audioStatus').innerText = "✅ Voice note recorded (Ready)";
+            document.getElementById('audioStatus').innerText = "✅ Voice note recorded (" + (blob.size / 1024).toFixed(1) + " KB)";
             clearTimeout(maxTimer);
         };
 
@@ -178,11 +180,10 @@ async function startRecording() {
         recordBtn.style.background = "#c62828";
         recordBtn.style.color = "white";
 
-        // 8-minute safety stop (480,000ms)
         maxTimer = setTimeout(() => {
             if (isRecording) {
                 stopMediaRecorder();
-                alert("Maximum limit (8 mins) reached.");
+                alert("Maximum limit reached.");
             }
         }, 480000); 
 
@@ -201,7 +202,7 @@ function stopMediaRecorder() {
     }
 }
 
-// 4. Submission Logic (The Fix for Render/Cloudinary)
+// 4. Submission Logic (Updated to ensure files are captured)
 postForm.addEventListener("submit", async function (e) {
     e.preventDefault();
     jsError.style.display = 'none';
@@ -212,9 +213,10 @@ postForm.addEventListener("submit", async function (e) {
     }
 
     submitBtn.disabled = true;
-    submitBtn.innerText = "Processing & Uploading...";
+    submitBtn.innerText = "Uploading to Cloudinary...";
 
     try {
+        // Creating FormData directly from the form captures the audio input even if populated via JS
         const formData = new FormData(postForm);
 
         const res = await fetch(window.location.href, {
@@ -230,7 +232,7 @@ postForm.addEventListener("submit", async function (e) {
             window.location.href = "{% url 'feed' %}";
         } else {
             const errorData = await res.json();
-            throw new Error(errorData.error || "Server error occurred.");
+            throw new Error(errorData.error || "Upload failed.");
         }
 
     } catch (err) {
