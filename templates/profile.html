@@ -260,18 +260,28 @@
     </div>
 </div>
 
-
 <script>
-    let activeAudio = null;
-
-    // Helper to get CSRF token from document
+    // --- UTILITY FUNCTIONS ---
     function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === ('csrftoken=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
+    // --- MODAL CONTROLS ---
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
+    // --- POST ACTIONS ---
     function handleLike(btn, postId) {
         btn.disabled = true;
         fetch(`/like-post/${postId}/`, {
@@ -287,6 +297,18 @@
         });
     }
 
+    function deletePost(id) {
+        if(confirm("Are you sure?")) { 
+            fetch(`/delete-post/${id}/`, { 
+                method: "POST", 
+                headers: { "X-CSRFToken": getCSRFToken() } 
+            }).then(r => r.json()).then(d => { 
+                if(d.success) document.getElementById(`post-card-${id}`).remove(); 
+            }); 
+        }
+    }
+
+    // --- AUDIO & VISUALIZER LOGIC ---
     function stopVisualizer(id) {
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
         bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
@@ -295,28 +317,43 @@
     }
 
     function togglePlay(id) {
-        let audio = document.getElementById("audio" + id),
-            btn = document.getElementById("playBtn" + id),
-            bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        let audio = document.getElementById("audio" + id);
+        let btn = document.getElementById("playBtn" + id);
+        let bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
-            // FIX: Added leading slash to API calls to prevent recursive URLs
+            // --- AUTO-PAUSE OTHER AUDIOS ---
+            document.querySelectorAll('audio').forEach(otherAudio => {
+                if (otherAudio !== audio) {
+                    otherAudio.pause();
+                    let otherId = otherAudio.id.replace('audio', '');
+                    stopVisualizer(otherId);
+                }
+            });
+
+            // Record Replay
             fetch(`/record-replay/${id}/`, {
                 method: "POST",
                 headers: { "X-CSRFToken": getCSRFToken() }
             })
             .then(r => r.json())
-            .then(d => { document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+            .then(d => { 
+                if(d.new_replay_count) document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; 
+            });
 
+            // Record Unique Listener
             if (!sessionStorage.getItem(`played_post_${id}`)) {
                 fetch(`/record-listener/${id}/`, {
                     method: "POST",
                     headers: { "X-CSRFToken": getCSRFToken() }
                 })
                 .then(r => r.json())
-                .then(d => { document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
+                .then(d => { 
+                    if(d.new_listener_count) document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; 
+                });
                 sessionStorage.setItem(`played_post_${id}`, "true");
             }
+
             audio.play();
             btn.innerHTML = "⏸";
             audio.ontimeupdate = () => {
@@ -331,60 +368,10 @@
         }
     }
 
-    function deletePost(id) {
-        if(confirm("Are you sure?")) { 
-            fetch(`/delete-post/${id}/`, { 
-                method: "POST", 
-                headers: { "X-CSRFToken": getCSRFToken() } 
-            }).then(r => r.json()).then(d => { 
-                if(d.success) document.getElementById(`post-card-${id}`).remove(); 
-            }); 
-        }
-    }
-
-  
-document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const saveBtn = document.getElementById('saveBtn');
-    saveBtn.innerText = "Saving...";
-    saveBtn.disabled = true;
-
-    // 'this' refers to the form. FormData(this) automatically grabs 
-    // the files from <input type="file"> because you have 'name' attributes.
-    const formData = new FormData(this);
-
-   fetch("{% url 'update_profile' %}", {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': getCSRFToken()
-            // REMEMBER: Do NOT set Content-Type header
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.reload(); // Reload to show the new images
-        } else {
-            alert('Error updating profile');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    })
-    .finally(() => {
-        saveBtn.innerText = "Save Changes";
-        saveBtn.disabled = false;
-    });
-});
-
-    // Create the FormData object from the form itself
-    // This automatically grabs all inputs including files
-   
-
+    // Initialize Visualizer Bars
     const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
     document.querySelectorAll('.visualizer-bars').forEach(v => {
+        v.innerHTML = ''; // Clear existing to prevent duplicates
         for(let i=0; i < 45; i++) { 
             let b = document.createElement("div"); 
             b.className = "v-bar"; 
@@ -393,60 +380,66 @@ document.getElementById('profileUpdateForm').addEventListener('submit', function
         }
     });
 
-    // --- FIX: FOLLOW BUTTON LOGIC ---
-   
-document.querySelectorAll('.follow-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const username = this.getAttribute('data-username'); 
-        const btn = this;
-        const btnText = btn.querySelector('.btn-text');
+    // --- PROFILE UPDATE FORM ---
+    const profileForm = document.getElementById('profileUpdateForm');
+    if(profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
 
-        fetch(`/follow/${username}/`, {
-            method: 'POST',
-            headers: { 
-                'X-CSRFToken': getCSRFToken(), 
-                'Content-Type': 'application/json' 
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Match the status your view sends back ('followed' or 'unfollowed')
-            if (data.status === 'followed') {
-                btn.classList.add('btn-unfollow', 'following');
-                btn.classList.remove('btn-follow');
-                if(btnText) btnText.innerHTML = 'Following';
-            } else {
-                btn.classList.remove('btn-unfollow', 'following');
-                btn.classList.add('btn-follow');
-                if(btnText) btnText.innerHTML = '+ Follow';
-            }
-
-            // Update the follower count on the page
-            const countBadge = document.getElementById(`follower-count-${username}`);
-            if (countBadge) {
-                countBadge.innerHTML = data.followers_count;
-            }
-        })
-        .catch(err => console.error("Follow error:", err));
-    });
-});
-
-
-
-function getCSRFToken() {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, 10) === ('csrftoken=')) {
-                cookieValue = decodeURIComponent(cookie.substring(10));
-                break;
-            }
-        }
+            const formData = new FormData(this);
+            fetch("{% url 'update_profile' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': getCSRFToken() }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) { window.location.reload(); } 
+                else { alert('Error updating profile'); }
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                saveBtn.innerText = "Save Changes";
+                saveBtn.disabled = false;
+            });
+        });
     }
-    return cookieValue;
-}
+
+    // --- FOLLOW LOGIC ---
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const username = this.getAttribute('data-username'); 
+            const btn = this;
+            const btnText = btn.querySelector('.btn-text');
+
+            fetch(`/follow/${username}/`, {
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': getCSRFToken(), 
+                    'Content-Type': 'application/json' 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    btn.classList.add('btn-unfollow', 'following');
+                    btn.classList.remove('btn-follow');
+                    if(btnText) btnText.innerHTML = 'Following';
+                } else {
+                    btn.classList.remove('btn-unfollow', 'following');
+                    btn.classList.add('btn-follow');
+                    if(btnText) btnText.innerHTML = '+ Follow';
+                }
+                const countBadge = document.getElementById(`follower-count-${username}`);
+                if (countBadge) { countBadge.innerHTML = data.followers_count; }
+            })
+            .catch(err => console.error("Follow error:", err));
+        });
+    });
+</script>
 
 </script>
 </body>

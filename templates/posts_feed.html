@@ -417,6 +417,7 @@
         });
     }
 
+    // UPDATED FUNCTION
     function togglePlay(id) {
         let audio = document.getElementById("audio" + id);
         let btn = document.getElementById("playBtn" + id);
@@ -425,6 +426,23 @@
         let bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
+            // --- NEW LOGIC: Pause all other audios and reset their buttons/bars ---
+            document.querySelectorAll('audio').forEach(otherAudio => {
+                if (otherAudio !== audio) {
+                    otherAudio.pause();
+                    // Extract ID from the audio element's ID (e.g., "audio123" -> "123")
+                    let otherId = otherAudio.id.replace('audio', '');
+                    let otherBtn = document.getElementById("playBtn" + otherId);
+                    let otherBars = document.querySelectorAll(`#viz${otherId} .v-bar`);
+                    
+                    if (otherBtn) otherBtn.innerHTML = "▶";
+                    if (otherBars) {
+                        otherBars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
+                    }
+                }
+            });
+            // --------------------------------------------------------------------
+
             audio.play();
             btn.innerHTML = "⏸";
             fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
@@ -542,5 +560,7 @@
         .catch(err => console.error("Error:", err));
     }
 </script>
+  
+
 </body>
 </html>

@@ -2,142 +2,173 @@
 {% load i18n %}
 
 <style>
-    /* Import Signature Font */
-    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500&display=swap');
 
-    /* 🌿 STACKED GLASS NAVBAR */
+    :root {
+        --primary-green: #00a86b;
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --soft-gray: #f0f2f5;
+    }
+
     .navbar-container {
         display: flex;
-        flex-direction: column; 
+        flex-direction: column;
         align-items: center;
         width: 100%;
-        background: rgba(255, 255, 255, 0.9);
+        background: var(--glass-bg);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         position: sticky;
         top: 0;
         z-index: 1000;
-        padding: 8px 0 0 0; 
+        padding: 12px 0 8px 0;
+        font-family: 'Inter', sans-serif;
     }
 
     .nav-top-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        width: 95%; 
-        max-width: 1200px;
-        margin-bottom: 5px;
+        width: 92%;
+        max-width: 1400px;
+        position: relative;
     }
 
     .nav-logo {
         font-family: 'Great Vibes', cursive;
-        font-size: 32px; 
-        font-weight: 400;
-        color: #00a86b;
+        font-size: 34px;
+        color: var(--primary-green);
         text-decoration: none;
-        flex: 1; 
-        line-height: 1;
+        transition: transform 0.2s;
+        z-index: 10;
     }
 
-    /* 🌎 LANGUAGE SELECTOR STYLING */
-    .lang-form-nav {
-        margin-right: 12px;
+    /* 🔍 EXPANDABLE SEARCH BAR LOGIC */
+    .search-wrapper-form {
+        position: absolute;
+        right: 120px; /* Adjust based on your settings icons width */
         display: flex;
         align-items: center;
+        justify-content: flex-end;
+        width: 40px; 
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    /* When the search bar is focused/active */
+    .search-wrapper-form:focus-within {
+        width: 85%;
+        right: 7.5%; /* Centers it at 85% width */
+        z-index: 100;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 20px 20px 20px 50px;
+        border-radius: 50px; /* Round Circle */
+        border: 2px solid var(--primary-green);
+        background: white;
+        outline: none;
+        font-size: 16px;
+        opacity: 0;
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+
+    .search-wrapper-form:focus-within .search-input {
+        opacity: 1;
+        cursor: text;
+    }
+
+    .search-icon-trigger {
+        position: absolute;
+        left: 10px;
+        color: #65676b;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+
+    .search-wrapper-form:focus-within .search-icon-trigger {
+        color: var(--primary-green);
+        left: 20px;
+    }
+
+    /* Hide logo and settings when searching on small screens (Optional) */
+    .navbar-container:has(.search-input:focus) .nav-logo,
+    .navbar-container:has(.search-input:focus) .settings-wrapper {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .settings-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 10;
+        transition: opacity 0.3s;
     }
 
     .nav-lang-select {
         border: none;
-        background: #f0f2f5;
-        border-radius: 12px;
-        padding: 5px 10px;
+        background: var(--soft-gray);
+        border-radius: 15px;
+        padding: 6px 12px;
         font-size: 13px;
-        color: #65676b;
+        font-weight: 600;
         cursor: pointer;
-        font-family: 'Inter', sans-serif;
         outline: none;
-        transition: 0.3s;
-    }
-
-    .nav-lang-select:hover {
-        background: #e4e6eb;
-        color: #00a86b;
-    }
-
-    .search-wrapper-form {
-        position: relative; 
-        display: flex; 
-        align-items: center; 
-        max-width: 400px; 
-        width: 100%;
-        flex: 2;
-        margin: 0 10px;
-    }
-
-    .settings-wrapper {
-        flex: 1;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
     }
 
     .settings-icon-btn {
         text-decoration: none;
-        font-size: 20px;
-        background: #f0f2f5;
-        width: 38px;
-        height: 38px;
+        background: var(--soft-gray);
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        transition: 0.3s;
+        font-size: 18px;
     }
 
     .nav-bottom-row {
         display: flex;
         justify-content: center;
         width: 100%;
-        max-width: 600px; 
-        gap: 10px;
-        margin-top: 5px;
+        max-width: 500px;
+        gap: 25px;
+        margin-top: 10px;
     }
 
     .nav-link {
         text-decoration: none;
         color: #65676b;
-        font-size: 26px;
-        padding: 10px 0;
-        flex: 1; 
-        text-align: center;
-        position: relative;
+        font-size: 24px;
+        padding: 8px;
+        transition: 0.2s;
     }
 
     .nav-link:hover {
-        color: #00a86b;
+        color: var(--primary-green);
+        transform: translateY(-2px);
     }
 </style>
 
 <div class="navbar-container">
     <div class="nav-top-row">
-        <!-- Logo -->
         <a href="/" class="nav-logo">Plugbar</a>
 
-        <!-- Search Section -->
         <form action="{% url 'search' %}" method="GET" class="search-wrapper-form">
-            <input type="text" name="q" placeholder="Search..." value="{{ request.GET.q }}"
-                   style="width: 100%; padding: 10px 15px 10px 40px; border-radius: 25px; border: 1px solid #ddd; background: #f0f2f5; outline: none;">
-            <div style="position: absolute; left: 12px; color: #65676b;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="search-icon-trigger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
             </div>
+            <input type="text" name="q" class="search-input" placeholder="Search now......!" value="{{ request.GET.q }}">
         </form>
 
-        <!-- Right Side: Language + Settings -->
         <div class="settings-wrapper">
-            <!-- Language Picker -->
             <form action="{% url 'set_language' %}" method="post" class="lang-form-nav">
                 {% csrf_token %}
                 <input name="next" type="hidden" value="{{ request.get_full_path|safe }}">
@@ -151,12 +182,10 @@
                     {% endfor %}
                 </select>
             </form>
-
             <a href="{% url 'settings' %}" class="settings-icon-btn">⚙️</a>
         </div>
     </div>
 
-    <!-- Navigation Links -->
     <div class="nav-bottom-row">
         {% if request.user.is_authenticated %}
             <a href="{% url 'profile' username=request.user.username %}" class="nav-link">🏠</a>
