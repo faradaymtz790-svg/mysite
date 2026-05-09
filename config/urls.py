@@ -34,8 +34,7 @@ urlpatterns += i18n_patterns(
     path('rosetta/', include('rosetta.urls')),
     path('accounts/', include('allauth.urls')),
 
-    # 🔹 CORE APP ROUTES (IMPORTANT FIX HERE)
-    path('', include('core.urls')),
+    
 
     # 🔹 Optional direct routes (keep but safe)
     path('home/', views.home_view, name='home'),
