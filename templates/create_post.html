@@ -82,7 +82,6 @@
         <div class="error-msg">{{ error }}</div>
     {% endif %}
 
-    <!-- Added enctype for file handling -->
     <form id="postForm" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
@@ -92,10 +91,9 @@
         <!-- AUDIO SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('audioInput').click()">📁 Select Audio</div>
-            <div class="icon-box" id="recordBtn" onclick="startRecording()">🎤 Record 5s</div>
+            <div class="icon-box" id="recordBtn" onclick="startRecording()">🎤 Record Voice</div>
         </div>
         <div id="audioStatus" class="file-status"></div>
-        <!-- Added name="audio" for Django -->
         <input type="file" id="audioInput" name="audio" accept="audio/*">
 
         <!-- IMAGE SECTION -->
@@ -103,7 +101,6 @@
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">🖼 Set Cover Image</div>
         </div>
         <div id="imageStatus" class="file-status"></div>
-        <!-- Added name="image" for Django -->
         <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png">
 
         <button type="submit" id="submitBtn">Post to Feed</button>
@@ -118,14 +115,20 @@ const imageInput = document.getElementById('imageInput');
 const postForm = document.getElementById('postForm');
 const submitBtn = document.getElementById('submitBtn');
 const jsError = document.getElementById('jsError');
+const recordBtn = document.getElementById('recordBtn');
 
-// Word counter
+let mediaRecorder;
+let chunks = [];
+let isRecording = false;
+let maxTimer;
+
+// 1. Word counter logic
 textarea.addEventListener('input', () => {
     const words = textarea.value.trim().split(/\s+/).filter(w => w);
     counter.textContent = `${words.length} / 350 words`;
 });
 
-// UI Updates
+// 2. File Manager selection logic (Preserved)
 imageInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('imageStatus').style.display = 'block';
@@ -137,40 +140,68 @@ audioInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('audioStatus').style.display = 'block';
         document.getElementById('audioStatus').innerText = "🎵 " + this.files[0].name;
+        if (isRecording) stopMediaRecorder(); // Safety if they pick a file while recording
     }
 });
 
-/* ---------------- AUDIO RECORDING ---------------- */
-let mediaRecorder;
-let chunks = [];
-
+// 3. Audio Recording (Unlimited up to 8m)
 async function startRecording() {
+    if (isRecording) {
+        stopMediaRecorder();
+        return;
+    }
+
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
         chunks = [];
-        document.getElementById('recordBtn').innerText = "Recording...";
-        
-        setTimeout(() => mediaRecorder.stop(), 5000);
 
-        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
         mediaRecorder.onstop = () => {
             const blob = new Blob(chunks, { type: "audio/webm" });
             const file = new File([blob], "voice.webm", { type: "audio/webm" });
+            
             const dt = new DataTransfer();
             dt.items.add(file);
             audioInput.files = dt.files;
-            document.getElementById('recordBtn').innerText = "🎤 Record 5s";
+
             document.getElementById('audioStatus').style.display = 'block';
-            document.getElementById('audioStatus').innerText = "✅ Voice note recorded";
+            document.getElementById('audioStatus').innerText = "✅ Voice note recorded (Ready)";
+            clearTimeout(maxTimer);
         };
+
+        mediaRecorder.start();
+        isRecording = true;
+        
+        recordBtn.innerText = "🛑 Stop (Max 8:00)";
+        recordBtn.style.background = "#c62828";
+        recordBtn.style.color = "white";
+
+        // 8-minute safety stop (480,000ms)
+        maxTimer = setTimeout(() => {
+            if (isRecording) {
+                stopMediaRecorder();
+                alert("Maximum limit (8 mins) reached.");
+            }
+        }, 480000); 
+
     } catch (err) {
-        alert("Microphone access denied or not available.");
+        alert("Microphone access denied.");
     }
 }
 
-/* ---------------- FORM SUBMISSION ---------------- */
+function stopMediaRecorder() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+        isRecording = false;
+        recordBtn.innerText = "🎤 Record Voice";
+        recordBtn.style.background = "rgba(255,255,255,0.5)";
+        recordBtn.style.color = "green";
+    }
+}
+
+// 4. Submission Logic (The Fix for Render/Cloudinary)
 postForm.addEventListener("submit", async function (e) {
     e.preventDefault();
     jsError.style.display = 'none';
@@ -184,10 +215,9 @@ postForm.addEventListener("submit", async function (e) {
     submitBtn.innerText = "Processing & Uploading...";
 
     try {
-        // We use FormData to wrap the entire form, including files
         const formData = new FormData(postForm);
 
-        const res = await fetch("{% url 'create_post' %}", {
+        const res = await fetch(window.location.href, {
             method: "POST",
             body: formData,
             headers: {
