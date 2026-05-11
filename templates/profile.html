@@ -5,143 +5,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ profile.user.username|capfirst }} | PROFILE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-green: #00c878;
-            --primary-hover: #00a362;
-            --bg-color: #f8fafc;
-            --text-main: #1a1a1a;
-            --text-muted: #64748b;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --border-light: rgba(255, 255, 255, 0.3);
+            --primary-green:#00a86b;
+            --light-green:#e6f7ef;
+            --bg-color:#f4fff6;
+            --border-color:#dbdbdb;
+            --text-main:#262626;
+            --bright-blue: #007bff; /* Bright Blue for Progress */
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-color); 
-            margin: 0; 
-            padding-top: 80px; 
-            color: var(--text-main);
-        }
+        body { font-family:'Inter', sans-serif; background:var(--bg-color); margin:0; padding-top:80px; }
 
-        /* --- PROFILE HEADER --- */
-        .profile-wrapper {
-            width: 100%; max-width: 100%; margin: 0; background: white;
-            overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 30px;
-        }
-
-        .cover { height: 280px; background: #e2e8f0; position: relative; }
+        /* ... Your Navbar & Wrapper Styles ... */
+        .navbar { position:fixed; top:0; width:100%; height:65px; background:white; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); z-index:1000; padding: 0 5%; box-sizing: border-box; }
+        .profile-wrapper { width: 100%; max-width: 100%; margin: 0; background: white; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px; }
+        .cover { height: 250px; background: #d0f0d8; }
         .cover img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-header-main { padding: 20px 5%; }
+        .badge-verified { display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-green); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; margin-left: 8px; vertical-align: middle; }
+        .avatar-main { width: 130px; height: 130px; border-radius: 50%; border: 5px solid white; margin-top: -85px; background: white; object-fit: cover; display: block; }
+        .info-section { margin-top: 15px; text-transform: capitalize; }
+        .info-label { font-weight: 700; color: var(--text-main); margin-top: 12px; display: block; }
+        .underlined-text { text-decoration: underline; color: #444; }
+        .blue-link { color: #0044cc; text-decoration: underline; }
+        .stats-bar { display: flex; gap: 25px; margin: 20px 0; border-top: 1px solid #eee; padding-top: 15px; }
+        .stat-link { text-decoration: none; color: var(--text-main); font-size: 15px; cursor: pointer; text-transform: capitalize; }
+        .stat-link b { font-size: 18px; }
 
-        .profile-header-main { padding: 0 5% 30px 5%; position: relative; }
+        /* BUTTONS */
+        .btn-edit, .btn-follow { background: var(--primary-green); color: white; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 700; cursor: pointer; float: right; margin-top: 10px; text-transform: capitalize; transition: 0.3s; }
+        .btn-unfollow { background: rgba(0,0,0,0.05); color: var(--text-main); border: 1px solid var(--border-color); padding: 12px 25px; border-radius: 30px; font-weight: 700; cursor: pointer; float: right; margin-top: 10px; text-transform: capitalize; transition: 0.3s; }
+
+        /* POSTS */
+        .post { background:white; border-radius:24px; margin-bottom:35px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.08); width: 100%; position: relative; }
+        .post-header { padding:15px; display:flex; justify-content:space-between; align-items: flex-start; }
+        .user-meta { display:flex; gap:10px; }
+        .post-avatar { width:40px; height:40px; border-radius:50%; }
+        .db-post-title { text-decoration: underline; color: green; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;}
         
-        .avatar-main {
-            width: 140px; height: 140px; border-radius: 50%; border: 6px solid white;
-            margin-top: -70px; background: white; object-fit: cover; display: block; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .audio-visual-container { height:320px; position:relative; background-size:cover; background-position:center; background-color: #222; overflow:hidden; }
+        .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
+        .v-bar { flex:1; height:5px; border-radius:3px; transition:0.05s; }
+
+        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 40px; left: 20px; z-index: 10; }
+
+        /* PROGRESS BAR STYLES */
+        .progress-wrapper {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 12px;
+            background: rgba(0,0,0,0.3); z-index: 20; cursor: pointer;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 0%; background: var(--bright-blue); position: relative; transition: width 0.1s linear;
+        }
+        .progress-arrow {
+            position: absolute; right: -8px; top: -10px; width: 0; height: 0;
+            border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--bright-blue); /* Upward Arrow */
         }
 
-        .badge-verified {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--primary-green); color: white; border-radius: 50%;
-            width: 18px; height: 18px; font-size: 10px; margin-left: 8px;
-        }
+        .post-actions-row { display: flex; align-items: center; gap: 25px; padding: 15px 20px; background: rgba(0, 0, 0, 0.02); }
+        .heart-btn { background:none; border:none; font-size:22px; cursor:pointer; color: #ccc; transition: 0.3s; }
+        .heart-btn.is-liked { color: var(--primary-green); transform: scale(1.1); }
 
-        .info-section { margin-top: 15px; }
-        .info-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 15px; display: block; }
-        .underlined-text { font-size: 15px; color: #334155; }
-        .blue-link a { color: #2563eb; text-decoration: none; font-weight: 500; }
-
-        .stats-bar { display: flex; gap: 30px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
-        .stat-link { text-decoration: none; color: var(--text-main); font-size: 14px; transition: 0.2s; }
-        .stat-link b { font-size: 18px; display: block; color: var(--primary-green); }
-
-        /* --- BUTTONS --- */
-        .btn-edit, .btn-follow, .btn-unfollow { 
-            padding: 10px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; 
-            float: right; margin-top: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none; font-size: 14px;
-        }
-
-        .btn-edit, .btn-follow { background: var(--primary-green); color: white; box-shadow: 0 4px 12px rgba(0, 200, 120, 0.2); }
-        .btn-edit:hover, .btn-follow:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .btn-unfollow { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
-
-        /* --- POST STYLING (FULL BACKGROUND) --- */
-        .post { 
-            position: relative; background: #fff; border-radius: 30px; margin-bottom: 40px; 
-            overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 100%;
-        }
-
-        .post-bg-wrapper {
-            position: relative; width: 100%; height: 480px; 
-            background-size: cover; background-position: center;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-
-        .glass-header {
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            padding: 15px 25px; border-bottom: 1px solid var(--border-light);
-        }
-
-        .glass-footer {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            padding: 18px 25px; border-top: 1px solid var(--border-light);
-        }
-
-        .post-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid white; }
-        .db-post-title { color: var(--primary-green); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* --- AUDIO UI --- */
-        .audio-visual-container { height: 100%; flex-grow: 1; position: relative; }
-        .visualizer-bars { 
-            display: flex; align-items: flex-end; gap: 2px; height: 100%; 
-            position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; 
-            background: linear-gradient(90deg, #00c878, #00e0ff, #00c878); opacity: 0.6;
-        }
-        .v-bar { flex: 1; height: 100%; background: rgba(255, 255, 255, 0.2); transition: 0.1s ease; }
-
-        .progress-container { width: 100%; height: 6px; background: rgba(0,0,0,0.1); position: absolute; bottom: 0; z-index: 15; cursor: pointer; }
-        .progress-bar { height: 100%; background: var(--primary-green); width: 0%; }
-
-        .overlay-ui { position: absolute; bottom: 20px; width: 100%; padding: 0 25px; z-index: 10; display: flex; align-items: center; gap: 15px; box-sizing: border-box; }
-        .play-trigger { 
-            width: 55px; height: 55px; border-radius: 50%; background: white; color: var(--primary-green); 
-            border: none; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: 0.3s;
-        }
-        .time-stamp { color: white; font-size: 13px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-
-        .post-actions-row { display: flex; align-items: center; justify-content: space-between; }
-        .heart-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #cbd5e1; transition: 0.3s; }
-        .heart-btn.is-liked { color: #f43f5e; transform: scale(1.1); }
-
-        /* --- MODAL (MODERN & COMPACT) --- */
-        #editModal { 
-            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; 
-        }
+        /* UPDATED BEAUTIFUL MODAL UI */
+        #editModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-body { 
-            background: white; padding: 32px; border-radius: 28px; width: 92%; max-width: 440px; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.4s ease;
+            background: white; padding: 35px; border-radius: 30px; width: 92%; max-width: 480px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
         }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; display: block; text-transform: uppercase; }
+        .modal-body h2 { font-weight: 800; font-size: 24px; margin-bottom: 25px; color: var(--text-main); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 700; font-size: 12px; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-group input, .form-group textarea { 
-            width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; 
-            font-family: inherit; font-size: 14px; background: #f8fafc; box-sizing: border-box;
+            width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 14px; 
+            background: #f8fafc; font-family: inherit; font-size: 14px; box-sizing: border-box; transition: 0.2s;
         }
-        .image-preview-wrapper { display: flex; align-items: center; gap: 12px; padding: 10px; background: #f1f5f9; border-radius: 12px; margin-top: 5px; }
-
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .fab-add-post {
-            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
-            background: var(--primary-green); color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            text-decoration: none; font-size: 30px; box-shadow: 0 10px 25px rgba(0, 200, 120, 0.3); z-index: 100;
-        }
+        .form-group input:focus { border-color: var(--primary-green); outline: none; background: white; }
+        
+        .fab-add-post { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background-color: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 35px; font-weight: bold; box-shadow: 0 10px 25px rgba(0, 168, 107, 0.3); z-index: 9999; }
     </style>
 </head>
 <body>
@@ -162,27 +105,21 @@
             </button>
         {% endif %}
         
-        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/140{% endif %}" class="avatar-main">
+        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
         
         <div class="info-section">
-            <h1 style="margin: 15px 0 5px 0; font-weight: 800; display: flex; align-items: center; font-size: 28px;">
+            <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
                 {{ profile.user.username|capfirst }}
                 <span class="badge-verified" title="Verified Member">✓</span>
             </h1>
+            <span class="info-label">Bio</span>
+            <div class="underlined-text">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <span class="info-label">Bio</span>
-                    <div class="underlined-text">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
-                </div>
-                <div>
-                    <span class="info-label">Location</span>
-                    <div style="color: #64748b; font-size: 15px;">📍 {{ profile.location|default:"Global" }}</div>
-                </div>
-            </div>
+            <span class="info-label">Location</span>
+            <div style="color: #666;">{{ profile.location|default:"Not specified" }}</div>
 
             <span class="info-label">Link</span>
-            <div class="blue-link"><a href="{{ profile.links }}" target="_blank">🔗 {{ profile.links|default:"No link provided" }}</a></div>
+            <div class="blue-link"><a href="{{ profile.links }}" target="_blank">{{ profile.links|default:"No link provided" }}</a></div>
         </div>
 
         <div class="stats-bar">
@@ -193,62 +130,49 @@
     </div>
 </div>
 
-<div style="max-width: 900px; margin: 0 auto; padding: 0 5%;">
-    <h3 style="margin-bottom: 25px; color: var(--text-main); font-weight: 800;">Recent Tracks</h3>
-    
+<div class="profile-wrapper" style="background: transparent; box-shadow: none; padding: 0 5%;">
+    <h3 style="margin-bottom: 20px; color: var(--primary-green);">Posts Feed</h3>
     {% for post in user_posts %}
     <div class="post" id="post-card-{{ post.id }}">
-        <div class="post-bg-wrapper" style="background-image: url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/800x500{% endif %}')">
-            
-            <div class="glass-header">
-                <div class="post-actions-row">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <img class="post-avatar" src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <b style="font-size: 14px;">{{ profile.user.username|capfirst }}</b>
-                                <span class="badge-verified" style="width: 12px; height: 12px; font-size: 8px;">✓</span>
-                            </div>
-                            <div style="font-size: 11px; color: var(--text-muted);">{{ post.created_at|timesince }} ago</div>
-                        </div>
+        <div class="post-header">
+            <div class="user-meta">
+                <img class="post-avatar" src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}">
+                <div>
+                    <div style="display: flex; align-items: center;">
+                        <b>{{ profile.user.username|capfirst }}</b>
+                        <span class="badge-verified" style="width: 12px; height: 12px; font-size: 8px;">✓</span>
                     </div>
-                    {% if request.user == profile.user %}
-                    <span onclick="deletePost({{post.id}})" style="cursor:pointer; font-size: 14px;" title="Delete Post">🗑️</span>
-                    {% endif %}
+                    <div style="font-size:12px;color:gray;">{{ post.created_at|timesince }} ago</div>
+                    <div style="margin-top: 5px; font-size: 13px;">POST TITLE: <span class="db-post-title">{{ post.title }}</span></div>
                 </div>
-                <div style="margin-top: 10px;"><span class="db-post-title">{{ post.title }}</span></div>
             </div>
+            {% if request.user == profile.user %}
+            <span onclick="deletePost({{post.id}})" style="cursor:pointer" title="Delete Post">🗑️</span>
+            {% endif %}
+        </div>
 
-            <div class="audio-visual-container">
-                <div class="visualizer-bars" id="viz{{post.id}}"></div>
-                
-                <div class="overlay-ui">
-                    {% if post.audio %}
-                        <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateAudioProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
-                        <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
-                        <span id="time{{post.id}}" class="time-stamp">0:00</span>
-                    {% endif %}
-                </div>
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
+            <div class="visualizer-bars" id="viz{{post.id}}"></div>
+            {% if post.audio %}
+                <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
+                <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+            {% endif %}
 
-                <div class="progress-container" onclick="seekAudio(event, {{post.id}})">
-                    <div class="progress-bar" id="progress{{post.id}}"></div>
+            <div class="progress-wrapper" onclick="seekAudio(event, {{post.id}})">
+                <div class="progress-bar-fill" id="fill{{post.id}}">
+                    <div class="progress-arrow"></div>
                 </div>
             </div>
         </div>
 
-        <div class="glass-footer">
-            <div class="post-actions-row">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" id="heart-{{ post.id }}" onclick="handleLike(this, '{{ post.id }}')">❤</button>
-                    <span id="like-count-{{ post.id }}" style="font-weight: 800; font-size: 15px;">{{ post.likes.count }}</span>
-                </div>
-                
-                <div style="display: flex; gap: 20px; color: var(--text-muted); font-size: 13px;">
-                    <div title="Unique Listeners">🎧 <b>{{ post.listeners_count }}</b></div>
-                    <div title="Total Replays">👂 <b>{{ post.replays_count }}</b></div>
-                    <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">💬 <b>{{ post.comments.count }}</b></a>
-                </div>
+        <div class="post-actions-row">
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" id="heart-{{ post.id }}" onclick="handleLike(this, '{{ post.id }}')">❤</button>
+                <span id="like-count-{{ post.id }}" style="font-weight: 700;">{{ post.likes.count }}</span>
             </div>
+            <div title="Unique Listeners">🎧 <span id="unique-listeners-{{post.id}}" style="font-weight: 700;">{{ post.listeners_count }}</span></div>
+            <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count }}</span></div>
+            <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">💬 <span style="font-weight: 700;">{{ post.comments.count }}</span></a>
         </div>
     </div>
     {% endfor %}
@@ -256,100 +180,49 @@
 
 <div id="editModal">
     <div class="modal-body">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <h2 style="margin:0; font-size: 20px; font-weight: 800;">Edit Profile</h2>
-            <span onclick="closeModal()" style="cursor:pointer; font-size: 24px; color: #94a3b8;">&times;</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Update Profile</h2>
+            <span onclick="closeModal()" style="cursor:pointer; font-size: 28px; color: #94a3b8;">&times;</span>
         </div>
-        
-        <form id="profileUpdateForm" method="POST" action="{% url 'update_profile' %}" enctype="multipart/form-data">
+        <form id="profileUpdateForm" enctype="multipart/form-data">
             {% csrf_token %}
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group">
-                    <label>Profile Image</label>
-                    <div class="image-preview-wrapper">
-                        <img src="{% if profile.image %}{{ profile.image.url }}{% endif %}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
-                        <input type="file" name="image" accept="image/*" style="border:none; padding:0; background:transparent; font-size: 10px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Cover Photo</label>
-                    <div class="image-preview-wrapper">
-                        <img src="{% if profile.cover_photo %}{{ profile.cover_photo.url }}{% endif %}" style="width: 35px; height: 35px; border-radius: 4px; object-fit: cover;">
-                        <input type="file" name="cover_photo" accept="image/*" style="border:none; padding:0; background:transparent; font-size: 10px;">
-                    </div>
-                </div>
+                <div class="form-group"><label>Avatar</label><input type="file" name="image" accept="image/*"></div>
+                <div class="form-group"><label>Cover</label><input type="file" name="cover_photo" accept="image/*"></div>
             </div>
-
-            <div class="form-group">
-                <label>Biography</label>
-                <textarea name="bio" rows="3">{{ profile.bio }}</textarea>
-            </div>
-
+            <div class="form-group"><label>Biography</label><textarea name="bio" rows="3">{{ profile.bio }}</textarea></div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" name="location" value="{{ profile.location }}">
-                </div>
-                <div class="form-group">
-                    <label>Website Link</label>
-                    <input type="url" name="links" value="{{ profile.links }}">
-                </div>
+                <div class="form-group"><label>Location</label><input type="text" name="location" value="{{ profile.location }}"></div>
+                <div class="form-group"><label>Website Link</label><input type="url" name="links" value="{{ profile.links }}"></div>
             </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
-                <button type="button" class="btn-unfollow" style="margin:0" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn-edit" id="saveBtn" style="margin:0">Save Changes</button>
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 10px;">
+                <button type="button" class="btn-edit" style="background:#e2e8f0; color:#475569;" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-edit" id="saveBtn" style="margin:0;">Update Profile</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    function getCSRFToken() {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, 10) === ('csrftoken=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(10));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
+    function getCSRFToken() { return document.querySelector('[name=csrfmiddlewaretoken]').value; }
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
-    function updateAudioProgress(id) {
+    // PROGRESS BAR LOGIC
+    function updateProgress(id) {
         const audio = document.getElementById("audio" + id);
-        const progressBar = document.getElementById("progress" + id);
-        const timeDisplay = document.getElementById("time" + id);
+        const fill = document.getElementById("fill" + id);
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-
+        
         if (audio.duration) {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = percent + "%";
-            let mins = Math.floor(audio.currentTime / 60);
-            let secs = Math.floor(audio.currentTime % 60);
-            timeDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            bars.forEach(bar => {
-                let vol = Math.random() * 80 + 10;
-                bar.style.height = (100 - vol) + "%";
+            const progress = (audio.currentTime / audio.duration) * 100;
+            fill.style.width = progress + "%";
+            
+            // Visualizer pulse while playing
+            bars.forEach(b => {
+                b.style.height = (Math.random() * 260 + 20) + "px";
+                b.style.opacity = "1";
             });
-        }
-    }
-
-    function togglePlay(id) {
-        let audio = document.getElementById("audio" + id);
-        let btn = document.getElementById("playBtn" + id);
-        if (audio.paused) {
-            audio.play(); btn.innerHTML = "⏸";
-        } else {
-            audio.pause(); btn.innerHTML = "▶";
         }
     }
 
@@ -357,42 +230,96 @@
         const audio = document.getElementById("audio" + id);
         const rect = event.currentTarget.getBoundingClientRect();
         const x = event.clientX - rect.left;
-        audio.currentTime = (x / rect.width) * audio.duration;
+        const width = rect.width;
+        audio.currentTime = (x / width) * audio.duration;
     }
 
-    // Initialize Waveform
-    document.querySelectorAll('.visualizer-bars').forEach(v => {
-        v.innerHTML = '';
-        for(let i=0; i < 60; i++) { 
-            let b = document.createElement("div"); 
-            b.className = "v-bar"; 
-            v.appendChild(b); 
-        }
-    });
+    function stopVisualizer(id) {
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
+        const btn = document.getElementById('playBtn' + id);
+        if(btn) btn.innerHTML = "▶";
+        document.getElementById("fill" + id).style.width = "0%";
+    }
 
-    // Profile & Follow Logic (Async)
-    document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const saveBtn = document.getElementById('saveBtn');
-        saveBtn.innerText = "Saving...";
-        fetch(this.action, { method: 'POST', body: new FormData(this), headers: { 'X-CSRFToken': getCSRFToken() } })
-        .then(r => r.json()).then(data => { if (data.success) window.location.reload(); });
+    function togglePlay(id) {
+        let audio = document.getElementById("audio" + id),
+            btn = document.getElementById("playBtn" + id);
+
+        if (audio.paused) {
+            // Your analytics fetch calls...
+            fetch(`/record-replay/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+            .then(r => r.json()).then(d => { document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+
+            if (!sessionStorage.getItem(`played_post_${id}`)) {
+                fetch(`/record-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+                .then(r => r.json()).then(d => { document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
+                sessionStorage.setItem(`played_post_${id}`, "true");
+            }
+            audio.play();
+            btn.innerHTML = "⏸";
+        } else {
+            audio.pause();
+            btn.innerHTML = "▶";
+            const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+            bars.forEach(b => { b.style.opacity = "0.4"; });
+        }
+    }
+
+    // Preserve your Follow/Like/Delete/Update Fetch logic exactly
+    document.querySelectorAll('.follow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const username = this.getAttribute('data-username'); 
+            const btn = this;
+            fetch(`/follow/${username}/`, { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' } })
+            .then(r => r.json()).then(data => {
+                if (data.status === 'followed') {
+                    btn.classList.add('following', 'btn-unfollow'); btn.classList.remove('btn-follow');
+                    btn.querySelector('.btn-text').innerHTML = 'Following';
+                } else {
+                    btn.classList.remove('following', 'btn-unfollow'); btn.classList.add('btn-follow');
+                    btn.querySelector('.btn-text').innerHTML = '+ Follow';
+                }
+                const badge = document.getElementById(`follower-count-${username}`);
+                if (badge) badge.innerHTML = data.followers_count;
+            });
+        });
     });
 
     function handleLike(btn, postId) {
+        btn.disabled = true;
         fetch(`/like-post/${postId}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
         .then(r => r.json()).then(d => {
             document.getElementById(`like-count-${postId}`).innerText = d.count;
             d.liked ? btn.classList.add('is-liked') : btn.classList.remove('is-liked');
+            btn.disabled = false;
         });
     }
 
     function deletePost(id) {
-        if(confirm("Delete this post permanently?")) { 
+        if(confirm("Are you sure?")) { 
             fetch(`/delete-post/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
             .then(r => r.json()).then(d => { if(d.success) document.getElementById(`post-card-${id}`).remove(); }); 
         }
     }
+
+    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
+        e.preventDefault(); 
+        const btn = document.getElementById('saveBtn'); btn.disabled = true; 
+        const res = await fetch("{% url 'update_profile' %}", { method: 'POST', body: new FormData(this), headers: { 'X-CSRFToken': getCSRFToken() } });
+        const d = await res.json(); 
+        if(d.success) window.location.reload(); else alert("Error updating profile."); 
+        btn.disabled = false;
+    };
+
+    // Waveform init
+    const colors = ['#00a86b', '#0044cc', '#ff69b4', '#ffd700'];
+    document.querySelectorAll('.visualizer-bars').forEach(v => {
+        for(let i=0; i < 45; i++) { 
+            let b = document.createElement("div"); b.className = "v-bar"; 
+            b.style.backgroundColor = colors[i % colors.length]; v.appendChild(b); 
+        }
+    });
 </script>
 </body>
 </html>

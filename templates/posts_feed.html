@@ -16,32 +16,14 @@
             --text-main: #262626;
             --text-muted: #8e8e8e;
             --soft-green: #eaffea;
-            /* Add your image URL here */
-            --feed-bg-image: url('https://images.unsplash.com/photo-1557683316-973673baf926'); 
+            --bright-blue: #007bff; /* Progress Color */
         }
 
         body {
             font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
             margin: 0;
             padding-top: 80px;
-            /* Background implementation */
-            background-image: var(--feed-bg-image);
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-        }
-
-        /* Optional: Add a slight overlay to the body if the image makes text hard to read */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(244, 255, 246, 0.8); /* Matches your --bg-color with transparency */
-            z-index: -1;
         }
 
         /* Navbar */
@@ -72,7 +54,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            position: relative;
         }
 
         .post {
@@ -83,9 +64,10 @@
             box-shadow: none;
             background: white;
             border-bottom: 1px solid var(--border-color);
+            position: relative;
         }
 
-        .post:hover { transform: translateY(-5px); }
+        .post:hover { transform: translateY(-5px); transition: 0.3s; }
 
         .post-header {
             width: 100%;
@@ -127,60 +109,41 @@
             z-index: 1;
         }
 
-        /* 20-Color Spectrum Visualizer */
         .visualizer-bars {
             display: flex;
             align-items: flex-end;
-            gap: 2px;
-            height: 100%;
+            gap: 3px;
+            height: 320px;
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
             pointer-events: none;
             z-index: 2;
-            background: linear-gradient(90deg, 
-                #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, 
-                #00ff7f, #00ffff, #007fff, #0000ff, #7f00ff, 
-                #ff00ff, #ff007f, #f44336, #e91e63, #9c27b0, 
-                #673ab7, #3f51b5, #2196f3, #03a9f4, #00bcd4);
         }
 
-        .v-bar { 
-            flex: 1; 
-            height: 100%; 
-            background: rgba(34, 34, 34, 0.85); 
-            transition: height 0.08s ease; 
-        }
-
-        /* Progress Bar */
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            z-index: 15;
-            cursor: pointer;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--primary-green);
-            width: 0%;
-            transition: width 0.1s linear;
-        }
+        .v-bar { flex: 1; height: 5px; border-radius: 3px; transition: 0.1s; opacity: 0.7; }
 
         .overlay-ui {
             position: absolute;
-            bottom: 10px;
+            bottom: 0;
             width: 100%;
             padding: 20px;
             z-index: 10;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        }
+
+        /* PROGRESS SYSTEM */
+        .progress-wrapper {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 10px;
+            background: rgba(0,0,0,0.3); z-index: 20; cursor: pointer;
+        }
+        .progress-bar-fill {
+            height: 100%; width: 0%; background: var(--bright-blue); position: relative; transition: width 0.1s linear;
+        }
+        .progress-arrow {
+            position: absolute; right: -8px; top: -10px; width: 0; height: 0;
+            border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--bright-blue);
         }
 
         .play-trigger {
@@ -198,13 +161,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .time-stamp {
-            color: white;
-            font-size: 14px;
-            font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            position: relative;
+            z-index: 11;
         }
 
         /* Actions & UI Elements */
@@ -214,7 +172,7 @@
             justify-content: flex-start;
             gap: 25px;
             padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.9); /* Slightly opaque for visibility over BG */
+            background: rgba(0, 0, 0, 0.02);
             border-top: 1px solid rgba(0, 0, 0, 0.05);
             width: 100%;
             box-sizing: border-box;
@@ -398,19 +356,19 @@
 
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }} {% else %}https://via.placeholder.com/600x320{% endif %}')"> 
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
-            
-            <div class="progress-container" onclick="seekAudio(event, {{post.id}})">
-                <div class="progress-bar" id="progress{{post.id}}"></div>
-            </div>
-
             <div class="overlay-ui">
                 {% if post.audio %}
-                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateAudioProgress({{post.id}})"></audio>
+                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateProgress({{ post.id }})" onended="resetUI({{ post.id }})"></audio>
                     <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
-                    <span id="time{{post.id}}" class="time-stamp">0:00</span>
                 {% else %}
                     <p style="color: white; font-size: 12px;">Audio missing</p>
                 {% endif %}
+            </div>
+
+            <div class="progress-wrapper" onclick="seekAudio(event, {{post.id}})">
+                <div class="progress-bar-fill" id="fill{{post.id}}">
+                    <div class="progress-arrow"></div>
+                </div>
             </div>
         </div>
 
@@ -467,9 +425,40 @@
 <a href="/create_post/" class="floating-btn">+</a>
 
 <script>
-    // All original script logic preserved below
     function getCSRFToken(){
         return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
+    }
+
+    // NEW PROGRESS & SEEK LOGIC
+    function updateProgress(id) {
+        const audio = document.getElementById("audio" + id);
+        const fill = document.getElementById("fill" + id);
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            fill.style.width = percent + "%";
+            
+            // Visualizer logic integrated here
+            bars.forEach(bar => { 
+                bar.style.height = (Math.random() * 260 + 20) + "px"; 
+                bar.style.opacity = "1"; 
+            });
+        }
+    }
+
+    function seekAudio(event, id) {
+        const audio = document.getElementById("audio" + id);
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        audio.currentTime = (x / rect.width) * audio.duration;
+    }
+
+    function resetUI(id) {
+        document.getElementById("playBtn" + id).innerHTML = "▶";
+        document.getElementById("fill" + id).style.width = "0%";
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
     }
 
     function handleLike(element, postId) {
@@ -485,51 +474,13 @@
         });
     }
 
-    function updateAudioProgress(id) {
-        const audio = document.getElementById("audio" + id);
-        const progressBar = document.getElementById("progress" + id);
-        const timeDisplay = document.getElementById("time" + id);
-        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-
-        if (audio.duration) {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = percent + "%";
-            let mins = Math.floor(audio.currentTime / 60);
-            let secs = Math.floor(audio.currentTime % 60);
-            timeDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            bars.forEach(bar => {
-                let vol = Math.random() * 75 + 5;
-                bar.style.height = (100 - vol) + "%";
-            });
-        }
-    }
-
-    function seekAudio(event, id) {
-        const audio = document.getElementById("audio" + id);
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const width = rect.width;
-        audio.currentTime = (x / width) * audio.duration;
-    }
-
     function togglePlay(id) {
         let audio = document.getElementById("audio" + id);
         let btn = document.getElementById("playBtn" + id);
         let replaySpan = document.getElementById(`total-replays-${id}`);
         let listenerSpan = document.getElementById(`unique-listeners-${id}`);
-        let bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
-            document.querySelectorAll('audio').forEach(otherAudio => {
-                if (otherAudio !== audio) {
-                    otherAudio.pause();
-                    let otherId = otherAudio.id.replace('audio', '');
-                    let otherBtn = document.getElementById("playBtn" + otherId);
-                    let otherBars = document.querySelectorAll(`#viz${otherId} .v-bar`);
-                    if (otherBtn) otherBtn.innerHTML = "▶";
-                    if (otherBars) otherBars.forEach(bar => bar.style.height = "100%");
-                }
-            });
             audio.play();
             btn.innerHTML = "⏸";
             fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
@@ -540,7 +491,8 @@
         } else {
             audio.pause();
             btn.innerHTML = "▶";
-            bars.forEach(bar => bar.style.height = "100%");
+            const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+            bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
         }
     }
 
@@ -550,10 +502,12 @@
         .then(() => document.getElementById(`post-card-${id}`).remove());
     }
 
+    const vizColors = ['#00a86b', 'rgba(0,168,107,0.5)', '#3498db', '#f1c40f', '#9b59b6', '#e67e22', '#795548', '#e91e63'];
     document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 50; i++) {
+        for(let i=0; i < 45; i++) {
             let bar = document.createElement("div");
             bar.className = "v-bar";
+            bar.style.backgroundColor = vizColors[i % vizColors.length];
             v.appendChild(bar);
         }
     });
@@ -626,11 +580,18 @@
     function toggleBlockUser(userId, btnElement) {
         fetch(`/block-user/${userId}/`, {
             method: "POST",
-            headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" }
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "Content-Type": "application/json"
+            }
         })
         .then(r => r.json())
         .then(data => {
-            btnElement.innerText = data.is_blocked ? "✅ Unblock User" : "🚫 Block User";
+            if (data.is_blocked) {
+                btnElement.innerText = "✅ Unblock User";
+            } else {
+                btnElement.innerText = "🚫 Block User";
+            }
         })
         .catch(err => console.error("Error:", err));
     }
