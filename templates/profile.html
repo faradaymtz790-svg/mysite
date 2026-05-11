@@ -1,3 +1,4 @@
+{% load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,17 +13,12 @@
             --bg-color:#f4fff6;
             --border-color:#dbdbdb;
             --text-main:#262626;
+            --text-muted: #8e8e8e;
         }
 
         body { font-family:'Inter', sans-serif; background:var(--bg-color); margin:0; padding-top:80px; }
 
-        .navbar {
-            position:fixed; top:0; width:100%; height:65px;
-            background:white; display:flex; justify-content:space-between;
-            align-items:center; border-bottom:1px solid var(--border-color);
-            z-index:1000; padding: 0 5%; box-sizing: border-box;
-        }
-
+        /* Profile Layout */
         .profile-wrapper {
             width: 100%; max-width: 100%; margin: 0; background: white;
             overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px;
@@ -65,52 +61,124 @@
             float: right; margin-top: 10px; text-transform: capitalize; transition: 0.3s;
         }
 
+        /* Post Styling */
         .post { background:white; border-radius:24px; margin-bottom:35px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.08); width: 100%; }
         .post-header { padding:15px; display:flex; justify-content:space-between; align-items: flex-start; }
         .user-meta { display:flex; gap:10px; }
         .post-avatar { width:40px; height:40px; border-radius:50%; }
         .db-post-title { text-decoration: underline; color: green; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;}
         
-        .audio-visual-container { height:320px; position:relative; background-size:cover; background-position:center; background-color: #222; overflow:hidden; }
-        .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
-        .v-bar { flex:1; height:5px; border-radius:3px; transition:0.05s; }
+        /* Advanced Audio UI */
+        .audio-visual-container { 
+            height:320px; 
+            position:relative; 
+            background-size:cover; 
+            background-position:center; 
+            background-color: #222; 
+            overflow:hidden; 
+        }
 
-        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 20px; left: 20px; z-index: 10; }
+        .audio-visual-container::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.2), transparent);
+            z-index: 1;
+        }
+
+        .visualizer-bars { 
+            display:flex; 
+            align-items:flex-end; 
+            gap:2px; 
+            height:100%; 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            pointer-events: none; 
+            z-index: 2; 
+            background: linear-gradient(90deg, 
+                #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, 
+                #00ff7f, #00ffff, #007fff, #0000ff, #7f00ff, 
+                #ff00ff, #ff007f, #f44336, #e91e63, #9c27b0, 
+                #673ab7, #3f51b5, #2196f3, #03a9f4, #00bcd4);
+        }
+
+        .v-bar { flex:1; height:100%; background: rgba(34, 34, 34, 0.85); transition:0.08s ease; }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 15;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-green);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .overlay-ui {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            padding: 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .play-trigger { 
+            width:60px; 
+            height:60px; 
+            border-radius:50%; 
+            background: white; 
+            color: var(--primary-green); 
+            border:none; 
+            font-size:26px; 
+            cursor:pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: 0.3s;
+        }
+
+        .time-stamp {
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
 
         .post-actions-row { display: flex; align-items: center; gap: 25px; padding: 15px 20px; background: rgba(0, 0, 0, 0.02); }
         .heart-btn { background:none; border:none; font-size:22px; cursor:pointer; color: #ccc; transition: 0.3s; }
         .heart-btn.is-liked { color: var(--primary-green); transform: scale(1.1); }
-        .heart-btn:disabled { opacity: 0.5; cursor: wait; }
 
+        /* Modal & Form Icons */
         #editModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-body { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 500px; }
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; text-transform: capitalize; }
+        .form-group label { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 5px; text-transform: capitalize; }
         .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
         
+        .icon-box { font-size: 18px; }
+
         .fab-add-post {
             position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
             background-color: var(--primary-green); color: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             text-decoration: none; font-size: 35px; font-weight: bold;
             box-shadow: 0 10px 25px rgba(0, 168, 107, 0.3); z-index: 9999;
-            transition: transform 0.2s ease, background-color 0.2s;
+            transition: transform 0.2s ease;
         }
-        .fab-add-post:hover { transform: scale(1.1); background-color: #008f5b; }
-
-        .follow-btn.following {
-            background: var(--primary-green);
-            color: white;
-            border-color: var(--primary-green);
-        }
-
-
-        .modal-body img {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    background: rgba(255, 255, 255, 0.1);
-}
-
     </style>
 </head>
 <body>
@@ -120,18 +188,13 @@
 <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <!-- FIX: Added check for absolute media pathing -->
     <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
             <button class="btn-edit" onclick="openModal()">Edit Profile</button>
         {% elif request.user.is_authenticated %}
-            <!-- FIX: Follow buttons now use consistent data attributes for JS -->
-            <button type="button" 
-                    id="follow-btn-main" 
-                    class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" 
-                    data-username="{{ profile.user.username}}">
+            <button type="button" id="follow-btn-main" class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" data-username="{{ profile.user.username}}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
@@ -153,18 +216,12 @@
             <div class="blue-link"><a href="{{ profile.links }}" target="_blank">{{ profile.links|default:"No link provided" }}</a></div>
         </div>
 
-       <div class="stats-bar">
-    <!-- Changed user_id to username to match your urls.py -->
-    <a href="{% url 'following_list' username=profile.user.username %}" class="stat-link">
-        <b>{{ following_count }}</b> Following
-    </a>
-
-    <a href="{% url 'followers_list' username=profile.user.username %}" class="stat-link">
-        <b id="follower-count-{{ profile.user.username }}">{{ followers_count }}</b> Followers
-    </a>
-
-    <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
-</div>
+        <div class="stats-bar">
+            <a href="{% url 'following_list' username=profile.user.username %}" class="stat-link"><b>{{ following_count }}</b> Following</a>
+            <a href="{% url 'followers_list' username=profile.user.username %}" class="stat-link"><b id="follower-count-{{ profile.user.username }}">{{ followers_count }}</b> Followers</a>
+            <div class="stat-link"><b>{{ user_posts.count }}</b> Posts</div>
+        </div>
+    </div>
 </div>
 
 <div class="profile-wrapper" style="background: transparent; box-shadow: none; padding: 0 5%;">
@@ -190,10 +247,18 @@
 
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
-            {% if post.audio %}
-                <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onended="stopVisualizer({{post.id}})"></audio>
-                <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
-            {% endif %}
+            
+            <div class="progress-container" onclick="seekAudio(event, {{post.id}})">
+                <div class="progress-bar" id="progress{{post.id}}"></div>
+            </div>
+
+            <div class="overlay-ui">
+                {% if post.audio %}
+                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateAudioProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
+                    <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                    <span id="time{{post.id}}" class="time-stamp">0:00</span>
+                {% endif %}
+            </div>
         </div>
 
         <div class="post-actions-row">
@@ -209,8 +274,6 @@
     {% endfor %}
 </div>
 
-
-
 <div id="editModal">
     <div class="modal-body">
         <h2 style="color:var(--primary-green);">Edit Profile</h2>
@@ -218,37 +281,34 @@
         <form id="profileUpdateForm" method="POST" action="{% url 'update_profile' %}" enctype="multipart/form-data">
             {% csrf_token %}
             
-            <!-- Current Profile Image Preview -->
             <div class="form-group">
-                <label>Current Profile Image</label>
+                <label><span class="icon-box">🖼️</span> Current Profile Image</label>
                 {% if profile.image %}
-                    <img src="{{ profile.image.url }}" style="width: 80px; height: 80px; border-radius: 50%; display: block; margin-bottom: 10px;">
+                    <img src="{{ profile.image.url }}" style="width: 80px; height: 80px; border-radius: 50%; display: block; margin-bottom: 10px; border: 2px solid var(--primary-green);">
                 {% endif %}
                 <input type="file" name="image" accept="image/*">
             </div>
 
-            <!-- Current Cover Photo Preview -->
             <div class="form-group">
-                <label>Current Cover Photo</label>
+                <label><span class="icon-box">📸</span> Current Cover Photo</label>
                 {% if profile.cover_photo %}
-                    <img src="{{ profile.cover_photo.url }}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 10px;">
+                    <img src="{{ profile.cover_photo.url }}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 10px; border: 1px solid #ddd;">
                 {% endif %}
                 <input type="file" name="cover_photo" accept="image/*">
             </div>
 
             <div class="form-group">
-                <label>Bio</label>
+                <label><span class="icon-box">📝</span> Bio</label>
                 <textarea name="bio" rows="4">{{ profile.bio }}</textarea>
             </div>
 
             <div class="form-group">
-                <label>Location</label>
+                <label><span class="icon-box">📍</span> Location</label>
                 <input type="text" name="location" value="{{ profile.location }}">
             </div>
 
             <div class="form-group">
-                <label>Link</label>
-                <!-- The URL goes in the 'value' attribute here -->
+                <label><span class="icon-box">🔗</span> Link</label>
                 <input type="url" name="links" value="{{ profile.links }}">
             </div>
 
@@ -261,7 +321,6 @@
 </div>
 
 <script>
-    // --- UTILITY FUNCTIONS ---
     function getCSRFToken() {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -277,41 +336,41 @@
         return cookieValue;
     }
 
-    // --- MODAL CONTROLS ---
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
-    // --- POST ACTIONS ---
-    function handleLike(btn, postId) {
-        btn.disabled = true;
-        fetch(`/like-post/${postId}/`, {
-            method: "POST",
-            headers: { "X-CSRFToken": getCSRFToken() }
-        })
-        .then(r => r.json())
-        .then(d => {
-            document.getElementById(`like-count-${postId}`).innerText = d.count;
-            if(d.liked) btn.classList.add('is-liked');
-            else btn.classList.remove('is-liked');
-            btn.disabled = false;
-        });
-    }
+    // --- UPDATED AUDIO LOGIC ---
+    function updateAudioProgress(id) {
+        const audio = document.getElementById("audio" + id);
+        const progressBar = document.getElementById("progress" + id);
+        const timeDisplay = document.getElementById("time" + id);
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
-    function deletePost(id) {
-        if(confirm("Are you sure?")) { 
-            fetch(`/delete-post/${id}/`, { 
-                method: "POST", 
-                headers: { "X-CSRFToken": getCSRFToken() } 
-            }).then(r => r.json()).then(d => { 
-                if(d.success) document.getElementById(`post-card-${id}`).remove(); 
-            }); 
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + "%";
+            
+            let mins = Math.floor(audio.currentTime / 60);
+            let secs = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+            bars.forEach(bar => {
+                let vol = Math.random() * 75 + 5;
+                bar.style.height = (100 - vol) + "%";
+            });
         }
     }
 
-    // --- AUDIO & VISUALIZER LOGIC ---
+    function seekAudio(event, id) {
+        const audio = document.getElementById("audio" + id);
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        audio.currentTime = (x / rect.width) * audio.duration;
+    }
+
     function stopVisualizer(id) {
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
+        bars.forEach(b => { b.style.height = "100%"; });
         const btn = document.getElementById('playBtn' + id);
         if(btn) btn.innerHTML = "▶";
     }
@@ -319,128 +378,90 @@
     function togglePlay(id) {
         let audio = document.getElementById("audio" + id);
         let btn = document.getElementById("playBtn" + id);
-        let bars = document.querySelectorAll(`#viz${id} .v-bar`);
-
+        
         if (audio.paused) {
-            // --- AUTO-PAUSE OTHER AUDIOS ---
-            document.querySelectorAll('audio').forEach(otherAudio => {
-                if (otherAudio !== audio) {
-                    otherAudio.pause();
-                    let otherId = otherAudio.id.replace('audio', '');
-                    stopVisualizer(otherId);
+            document.querySelectorAll('audio').forEach(other => {
+                if (other !== audio) {
+                    other.pause();
+                    stopVisualizer(other.id.replace('audio', ''));
                 }
             });
 
-            // Record Replay
-            fetch(`/record-replay/${id}/`, {
-                method: "POST",
-                headers: { "X-CSRFToken": getCSRFToken() }
-            })
-            .then(r => r.json())
-            .then(d => { 
-                if(d.new_replay_count) document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; 
-            });
-
-            // Record Unique Listener
-            if (!sessionStorage.getItem(`played_post_${id}`)) {
-                fetch(`/record-listener/${id}/`, {
-                    method: "POST",
-                    headers: { "X-CSRFToken": getCSRFToken() }
-                })
-                .then(r => r.json())
-                .then(d => { 
-                    if(d.new_listener_count) document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; 
-                });
-                sessionStorage.setItem(`played_post_${id}`, "true");
-            }
-
             audio.play();
             btn.innerHTML = "⏸";
-            audio.ontimeupdate = () => {
-                bars.forEach(b => {
-                    b.style.height = (Math.random() * 260 + 20) + "px";
-                    b.style.opacity = "1";
-                });
-            };
+            
+            // Record stats (Keeping your original endpoints)
+            fetch(`/record-replay/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+            .then(r => r.json()).then(d => { if(d.new_replay_count) document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+
+            if (!sessionStorage.getItem(`played_post_${id}`)) {
+                fetch(`/record-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+                .then(r => r.json()).then(d => { if(d.new_listener_count) document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
+                sessionStorage.setItem(`played_post_${id}`, "true");
+            }
         } else {
             audio.pause();
             stopVisualizer(id);
         }
     }
 
-    // Initialize Visualizer Bars
-    const colors = ['#00a86b', '#0044cc', '#ff69b4', '#8b4513', '#ffd700', 'rgba(0, 168, 107, 0.5)'];
+    // Initialize Waveform
     document.querySelectorAll('.visualizer-bars').forEach(v => {
-        v.innerHTML = ''; // Clear existing to prevent duplicates
-        for(let i=0; i < 45; i++) { 
+        v.innerHTML = '';
+        for(let i=0; i < 50; i++) { 
             let b = document.createElement("div"); 
             b.className = "v-bar"; 
-            b.style.backgroundColor = colors[i % colors.length];
             v.appendChild(b); 
         }
     });
 
-    // --- PROFILE UPDATE FORM ---
-    const profileForm = document.getElementById('profileUpdateForm');
-    if(profileForm) {
-        profileForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.innerText = "Saving...";
-            saveBtn.disabled = true;
-
-            const formData = new FormData(this);
-            fetch("{% url 'update_profile' %}", {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': getCSRFToken() }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) { window.location.reload(); } 
-                else { alert('Error updating profile'); }
-            })
-            .catch(error => console.error('Error:', error))
-            .finally(() => {
-                saveBtn.innerText = "Save Changes";
-                saveBtn.disabled = false;
-            });
+    // Profile & Follow Handlers (Existing Logic Maintained)
+    function handleLike(btn, postId) {
+        btn.disabled = true;
+        fetch(`/like-post/${postId}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+        .then(r => r.json()).then(d => {
+            document.getElementById(`like-count-${postId}`).innerText = d.count;
+            d.liked ? btn.classList.add('is-liked') : btn.classList.remove('is-liked');
+            btn.disabled = false;
         });
     }
 
-    // --- FOLLOW LOGIC ---
+    function deletePost(id) {
+        if(confirm("Are you sure?")) { 
+            fetch(`/delete-post/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+            .then(r => r.json()).then(d => { if(d.success) document.getElementById(`post-card-${id}`).remove(); }); 
+        }
+    }
+
     document.querySelectorAll('.follow-btn').forEach(button => {
         button.addEventListener('click', function() {
             const username = this.getAttribute('data-username'); 
-            const btn = this;
-            const btnText = btn.querySelector('.btn-text');
-
             fetch(`/follow/${username}/`, {
                 method: 'POST',
-                headers: { 
-                    'X-CSRFToken': getCSRFToken(), 
-                    'Content-Type': 'application/json' 
-                }
+                headers: { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' }
             })
-            .then(response => response.json())
-            .then(data => {
+            .then(r => r.json()).then(data => {
                 if (data.status === 'followed') {
-                    btn.classList.add('btn-unfollow', 'following');
-                    btn.classList.remove('btn-follow');
-                    if(btnText) btnText.innerHTML = 'Following';
+                    this.classList.replace('btn-follow', 'btn-unfollow');
+                    this.classList.add('following');
+                    this.querySelector('.btn-text').innerHTML = 'Following';
                 } else {
-                    btn.classList.remove('btn-unfollow', 'following');
-                    btn.classList.add('btn-follow');
-                    if(btnText) btnText.innerHTML = '+ Follow';
+                    this.classList.replace('btn-unfollow', 'btn-follow');
+                    this.classList.remove('following');
+                    this.querySelector('.btn-text').innerHTML = '+ Follow';
                 }
-                const countBadge = document.getElementById(`follower-count-${username}`);
-                if (countBadge) { countBadge.innerHTML = data.followers_count; }
-            })
-            .catch(err => console.error("Follow error:", err));
+                document.getElementById(`follower-count-${username}`).innerHTML = data.followers_count;
+            });
         });
     });
-</script>
 
+    document.getElementById('profileUpdateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.innerText = "Saving...";
+        fetch(this.action, { method: 'POST', body: new FormData(this), headers: { 'X-CSRFToken': getCSRFToken() } })
+        .then(r => r.json()).then(data => { if (data.success) window.location.reload(); });
+    });
 </script>
 </body>
 </html>

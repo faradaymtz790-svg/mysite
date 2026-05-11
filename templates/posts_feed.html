@@ -87,17 +87,18 @@
         }
 
         /* Audio Player & Visualizer */
-       .audio-visual-container {
-    width: 100%;
-    height: 320px;
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    background-color: #222;
-    overflow: hidden;
-    scroll-snap-align: start;
-    border-radius: 0;
-}
+        .audio-visual-container {
+            width: 100%;
+            height: 320px;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-color: #222;
+            overflow: hidden;
+            scroll-snap-align: start;
+            border-radius: 0;
+        }
+
         .audio-visual-container::after {
             content: "";
             position: absolute;
@@ -106,27 +107,61 @@
             z-index: 1;
         }
 
+        /* 20-Color Spectrum Visualizer */
         .visualizer-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 320px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-    z-index: 2;
-}
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            z-index: 2;
+            /* Multi-color linear gradient background */
+            background: linear-gradient(90deg, 
+                #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, 
+                #00ff7f, #00ffff, #007fff, #0000ff, #7f00ff, 
+                #ff00ff, #ff007f, #f44336, #e91e63, #9c27b0, 
+                #673ab7, #3f51b5, #2196f3, #03a9f4, #00bcd4);
+        }
 
-        .v-bar { flex: 1; height: 5px; border-radius: 3px; transition: 0.1s; opacity: 0.7; }
+        .v-bar { 
+            flex: 1; 
+            height: 100%; 
+            background: rgba(34, 34, 34, 0.85); /* The dark mask */
+            transition: height 0.08s ease; 
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 15;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-green);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
 
         .overlay-ui {
             position: absolute;
-            bottom: 0;
+            bottom: 10px;
             width: 100%;
             padding: 20px;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .play-trigger {
@@ -144,6 +179,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .time-stamp {
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
 
         /* Actions & UI Elements */
@@ -337,10 +379,16 @@
 
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }} {% else %}https://via.placeholder.com/600x320{% endif %}')"> 
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
+            
+            <div class="progress-container" onclick="seekAudio(event, {{post.id}})">
+                <div class="progress-bar" id="progress{{post.id}}"></div>
+            </div>
+
             <div class="overlay-ui">
                 {% if post.audio %}
-                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}"></audio>
+                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateAudioProgress({{post.id}})"></audio>
                     <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                    <span id="time{{post.id}}" class="time-stamp">0:00</span>
                 {% else %}
                     <p style="color: white; font-size: 12px;">Audio missing</p>
                 {% endif %}
@@ -368,11 +416,11 @@
             </div>
             
             <div class="action-item">
-    <a href="{% url 'post_comments' post.id %}" class="comment-link">
-        <span class="action-icon">💬</span>
-        <span class="action-value">{{ post.comments.all.count }}</span>
-    </a>
-</div>
+                <a href="{% url 'post_comments' post.id %}" class="comment-link">
+                    <span class="action-icon">💬</span>
+                    <span class="action-value">{{ post.comments.all.count }}</span>
+                </a>
+            </div>
         </div>
     </div>
     {% endif %}
@@ -417,7 +465,38 @@
         });
     }
 
-    // UPDATED FUNCTION
+    // UPDATED PROGRESS AND VISUALIZER LOGIC
+    function updateAudioProgress(id) {
+        const audio = document.getElementById("audio" + id);
+        const progressBar = document.getElementById("progress" + id);
+        const timeDisplay = document.getElementById("time" + id);
+        const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + "%";
+            
+            // Update time
+            let mins = Math.floor(audio.currentTime / 60);
+            let secs = Math.floor(audio.currentTime % 60);
+            timeDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+            // Animate bars by shrinking the dark mask to reveal the 20-color background
+            bars.forEach(bar => {
+                let vol = Math.random() * 75 + 5; // Simulating wave movement
+                bar.style.height = (100 - vol) + "%";
+            });
+        }
+    }
+
+    function seekAudio(event, id) {
+        const audio = document.getElementById("audio" + id);
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const width = rect.width;
+        audio.currentTime = (x / width) * audio.duration;
+    }
+
     function togglePlay(id) {
         let audio = document.getElementById("audio" + id);
         let btn = document.getElementById("playBtn" + id);
@@ -426,22 +505,17 @@
         let bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
-            // --- NEW LOGIC: Pause all other audios and reset their buttons/bars ---
+            // Pause all other audios
             document.querySelectorAll('audio').forEach(otherAudio => {
                 if (otherAudio !== audio) {
                     otherAudio.pause();
-                    // Extract ID from the audio element's ID (e.g., "audio123" -> "123")
                     let otherId = otherAudio.id.replace('audio', '');
                     let otherBtn = document.getElementById("playBtn" + otherId);
                     let otherBars = document.querySelectorAll(`#viz${otherId} .v-bar`);
-                    
                     if (otherBtn) otherBtn.innerHTML = "▶";
-                    if (otherBars) {
-                        otherBars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
-                    }
+                    if (otherBars) otherBars.forEach(bar => bar.style.height = "100%");
                 }
             });
-            // --------------------------------------------------------------------
 
             audio.play();
             btn.innerHTML = "⏸";
@@ -450,13 +524,10 @@
                 if (d.total_plays !== undefined) replaySpan.innerText = d.total_plays; 
                 if (d.unique_listeners !== undefined) listenerSpan.innerText = d.unique_listeners;
             });
-            audio.ontimeupdate = () => {
-                bars.forEach(bar => { bar.style.height = (Math.random() * 260 + 20) + "px"; bar.style.opacity = "1"; });
-            };
         } else {
             audio.pause();
             btn.innerHTML = "▶";
-            bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
+            bars.forEach(bar => bar.style.height = "100%");
         }
     }
 
@@ -466,16 +537,16 @@
         .then(() => document.getElementById(`post-card-${id}`).remove());
     }
 
-    const vizColors = ['#00a86b', 'rgba(0,168,107,0.5)', '#3498db', '#f1c40f', '#9b59b6', '#e67e22', '#795548', '#e91e63'];
+    // Initialize the visualizer bars for all posts
     document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 45; i++) {
+        for(let i=0; i < 50; i++) {
             let bar = document.createElement("div");
             bar.className = "v-bar";
-            bar.style.backgroundColor = vizColors[i % vizColors.length];
             v.appendChild(bar);
         }
     });
 
+    // Follow functionality
     document.querySelectorAll('.follow-btn').forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.getAttribute('data-user-id');
@@ -504,6 +575,7 @@
         });
     });
 
+    // Share functionality
     let currentShareUrl = ""; let currentPostId = null;
     function openShareMenu(postId, url) { currentPostId = postId; currentShareUrl = url; document.getElementById('shareModal').style.display = 'flex'; }
     function closeShareMenu() { document.getElementById('shareModal').style.display = 'none'; }
@@ -544,23 +616,15 @@
     function toggleBlockUser(userId, btnElement) {
         fetch(`/block-user/${userId}/`, {
             method: "POST",
-            headers: {
-                "X-CSRFToken": getCSRFToken(),
-                "Content-Type": "application/json"
-            }
+            headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" }
         })
         .then(r => r.json())
         .then(data => {
-            if (data.is_blocked) {
-                btnElement.innerText = "✅ Unblock User";
-            } else {
-                btnElement.innerText = "🚫 Block User";
-            }
+            btnElement.innerText = data.is_blocked ? "✅ Unblock User" : "🚫 Block User";
         })
         .catch(err => console.error("Error:", err));
     }
 </script>
-  
 
 </body>
 </html>
