@@ -16,13 +16,32 @@
             --text-main: #262626;
             --text-muted: #8e8e8e;
             --soft-green: #eaffea;
+            /* Add your image URL here */
+            --feed-bg-image: url('https://images.unsplash.com/photo-1557683316-973673baf926'); 
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg-color);
             margin: 0;
             padding-top: 80px;
+            /* Background implementation */
+            background-image: var(--feed-bg-image);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* Optional: Add a slight overlay to the body if the image makes text hard to read */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(244, 255, 246, 0.8); /* Matches your --bg-color with transparency */
+            z-index: -1;
         }
 
         /* Navbar */
@@ -53,6 +72,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            position: relative;
         }
 
         .post {
@@ -119,7 +139,6 @@
             right: 0;
             pointer-events: none;
             z-index: 2;
-            /* Multi-color linear gradient background */
             background: linear-gradient(90deg, 
                 #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, 
                 #00ff7f, #00ffff, #007fff, #0000ff, #7f00ff, 
@@ -130,7 +149,7 @@
         .v-bar { 
             flex: 1; 
             height: 100%; 
-            background: rgba(34, 34, 34, 0.85); /* The dark mask */
+            background: rgba(34, 34, 34, 0.85); 
             transition: height 0.08s ease; 
         }
 
@@ -195,7 +214,7 @@
             justify-content: flex-start;
             gap: 25px;
             padding: 15px 20px;
-            background: rgba(0, 0, 0, 0.02);
+            background: rgba(255, 255, 255, 0.9); /* Slightly opaque for visibility over BG */
             border-top: 1px solid rgba(0, 0, 0, 0.05);
             width: 100%;
             box-sizing: border-box;
@@ -448,6 +467,7 @@
 <a href="/create_post/" class="floating-btn">+</a>
 
 <script>
+    // All original script logic preserved below
     function getCSRFToken(){
         return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
     }
@@ -465,7 +485,6 @@
         });
     }
 
-    // UPDATED PROGRESS AND VISUALIZER LOGIC
     function updateAudioProgress(id) {
         const audio = document.getElementById("audio" + id);
         const progressBar = document.getElementById("progress" + id);
@@ -475,15 +494,11 @@
         if (audio.duration) {
             const percent = (audio.currentTime / audio.duration) * 100;
             progressBar.style.width = percent + "%";
-            
-            // Update time
             let mins = Math.floor(audio.currentTime / 60);
             let secs = Math.floor(audio.currentTime % 60);
             timeDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-
-            // Animate bars by shrinking the dark mask to reveal the 20-color background
             bars.forEach(bar => {
-                let vol = Math.random() * 75 + 5; // Simulating wave movement
+                let vol = Math.random() * 75 + 5;
                 bar.style.height = (100 - vol) + "%";
             });
         }
@@ -505,7 +520,6 @@
         let bars = document.querySelectorAll(`#viz${id} .v-bar`);
 
         if (audio.paused) {
-            // Pause all other audios
             document.querySelectorAll('audio').forEach(otherAudio => {
                 if (otherAudio !== audio) {
                     otherAudio.pause();
@@ -516,7 +530,6 @@
                     if (otherBars) otherBars.forEach(bar => bar.style.height = "100%");
                 }
             });
-
             audio.play();
             btn.innerHTML = "⏸";
             fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
@@ -537,7 +550,6 @@
         .then(() => document.getElementById(`post-card-${id}`).remove());
     }
 
-    // Initialize the visualizer bars for all posts
     document.querySelectorAll('.visualizer-bars').forEach(v => {
         for(let i=0; i < 50; i++) {
             let bar = document.createElement("div");
@@ -546,7 +558,6 @@
         }
     });
 
-    // Follow functionality
     document.querySelectorAll('.follow-btn').forEach(button => {
         button.addEventListener('click', function() {
             const userId = this.getAttribute('data-user-id');
@@ -575,7 +586,6 @@
         });
     });
 
-    // Share functionality
     let currentShareUrl = ""; let currentPostId = null;
     function openShareMenu(postId, url) { currentPostId = postId; currentShareUrl = url; document.getElementById('shareModal').style.display = 'flex'; }
     function closeShareMenu() { document.getElementById('shareModal').style.display = 'none'; }
@@ -625,6 +635,5 @@
         .catch(err => console.error("Error:", err));
     }
 </script>
-
 </body>
 </html>
