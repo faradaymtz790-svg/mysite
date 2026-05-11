@@ -13,12 +13,11 @@
             --bg-color:#f4fff6;
             --border-color:#dbdbdb;
             --text-main:#262626;
-            --bright-blue: #007bff; /* Bright Blue for Progress */
+            --bright-blue: #007bff; 
         }
 
         body { font-family:'Inter', sans-serif; background:var(--bg-color); margin:0; padding-top:80px; }
 
-        /* ... Your Navbar & Wrapper Styles ... */
         .navbar { position:fixed; top:0; width:100%; height:65px; background:white; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); z-index:1000; padding: 0 5%; box-sizing: border-box; }
         .profile-wrapper { width: 100%; max-width: 100%; margin: 0; background: white; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px; }
         .cover { height: 250px; background: #d0f0d8; }
@@ -27,7 +26,8 @@
         .badge-verified { display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-green); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; margin-left: 8px; vertical-align: middle; }
         .avatar-main { width: 130px; height: 130px; border-radius: 50%; border: 5px solid white; margin-top: -85px; background: white; object-fit: cover; display: block; }
         .info-section { margin-top: 15px; text-transform: capitalize; }
-        .info-label { font-weight: 700; color: var(--text-main); margin-top: 12px; display: block; }
+        .info-label { font-weight: 700; color: #888; font-size: 11px; text-transform: uppercase; margin-top: 15px; display: block; letter-spacing: 0.5px; }
+        .info-value { color: var(--text-main); font-weight: 500; margin-top: 2px; }
         .underlined-text { text-decoration: underline; color: #444; }
         .blue-link { color: #0044cc; text-decoration: underline; }
         .stats-bar { display: flex; gap: 25px; margin: 20px 0; border-top: 1px solid #eee; padding-top: 15px; }
@@ -47,41 +47,23 @@
         
         .audio-visual-container { height:320px; position:relative; background-size:cover; background-position:center; background-color: #222; overflow:hidden; }
         .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
-        .v-bar { flex:1; height:5px; border-radius:3px; transition:0.05s; }
+        .v-bar { flex:1; height:5px; border-radius:3px; transition:0.1s ease; opacity: 0.6; }
 
-        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 40px; left: 20px; z-index: 10; }
+        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 40px; left: 20px; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
-        /* PROGRESS BAR STYLES */
-        .progress-wrapper {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 12px;
-            background: rgba(0,0,0,0.3); z-index: 20; cursor: pointer;
-        }
-        .progress-bar-fill {
-            height: 100%; width: 0%; background: var(--bright-blue); position: relative; transition: width 0.1s linear;
-        }
-        .progress-arrow {
-            position: absolute; right: -8px; top: -10px; width: 0; height: 0;
-            border-left: 8px solid transparent; border-right: 8px solid transparent;
-            border-bottom: 12px solid var(--bright-blue); /* Upward Arrow */
-        }
+        .progress-wrapper { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: rgba(0,0,0,0.3); z-index: 20; cursor: pointer; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--bright-blue); position: relative; transition: width 0.1s linear; }
+        .progress-arrow { position: absolute; right: -8px; top: -10px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 12px solid var(--bright-blue); }
 
         .post-actions-row { display: flex; align-items: center; gap: 25px; padding: 15px 20px; background: rgba(0, 0, 0, 0.02); }
         .heart-btn { background:none; border:none; font-size:22px; cursor:pointer; color: #ccc; transition: 0.3s; }
         .heart-btn.is-liked { color: var(--primary-green); transform: scale(1.1); }
 
-        /* UPDATED BEAUTIFUL MODAL UI */
-        #editModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-body { 
-            background: white; padding: 35px; border-radius: 30px; width: 92%; max-width: 480px; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-        }
-        .modal-body h2 { font-weight: 800; font-size: 24px; margin-bottom: 25px; color: var(--text-main); }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 700; font-size: 12px; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-group input, .form-group textarea { 
-            width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 14px; 
-            background: #f8fafc; font-family: inherit; font-size: 14px; box-sizing: border-box; transition: 0.2s;
-        }
+        /* CLEANER MODAL UI */
+        #editModal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: 0.3s; }
+        .modal-body { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .form-group label { display: block; font-weight: 700; font-size: 11px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1.5px solid #edf2f7; border-radius: 12px; background: #f8fafc; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
         .form-group input:focus { border-color: var(--primary-green); outline: none; background: white; }
         
         .fab-add-post { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background-color: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 35px; font-weight: bold; box-shadow: 0 10px 25px rgba(0, 168, 107, 0.3); z-index: 9999; }
@@ -94,7 +76,7 @@
 <a href="{% url 'create_post' %}" class="fab-add-post" title="Create Post">+</a>
 
 <div class="profile-wrapper">
-    <div class="cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
+    <div class="cover" id="display-cover">{% if profile.cover_photo %}<img src="{{ profile.cover_photo.url }}">{% endif %}</div>
 
     <div class="profile-header-main">
         {% if request.user == profile.user %}
@@ -105,21 +87,21 @@
             </button>
         {% endif %}
         
-        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main">
+        <img src="{% if profile.image %}{{ profile.image.url }}{% else %}https://via.placeholder.com/130{% endif %}" class="avatar-main" id="display-avatar">
         
         <div class="info-section">
             <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
-                {{ profile.user.username|capfirst }}
+                <span id="display-username">{{ profile.user.username|capfirst }}</span>
                 <span class="badge-verified" title="Verified Member">✓</span>
             </h1>
             <span class="info-label">Bio</span>
-            <div class="underlined-text">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
+            <div class="underlined-text info-value" id="display-bio">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
             
             <span class="info-label">Location</span>
-            <div style="color: #666;">{{ profile.location|default:"Not specified" }}</div>
+            <div class="info-value" id="display-location" style="color: #666;">{{ profile.location|default:"Not specified" }}</div>
 
             <span class="info-label">Link</span>
-            <div class="blue-link"><a href="{{ profile.links }}" target="_blank">{{ profile.links|default:"No link provided" }}</a></div>
+            <div class="blue-link info-value"><a href="{{ profile.links }}" id="display-link" target="_blank">{{ profile.links|default:"No link provided" }}</a></div>
         </div>
 
         <div class="stats-bar">
@@ -181,23 +163,23 @@
 <div id="editModal">
     <div class="modal-body">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0;">Update Profile</h2>
-            <span onclick="closeModal()" style="cursor:pointer; font-size: 28px; color: #94a3b8;">&times;</span>
+            <h2 style="margin: 0; font-weight: 800;">Edit Profile</h2>
+            <span onclick="closeModal()" style="cursor:pointer; font-size: 28px; color: #cbd5e1;">&times;</span>
         </div>
         <form id="profileUpdateForm" enctype="multipart/form-data">
             {% csrf_token %}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group"><label>Avatar</label><input type="file" name="image" accept="image/*"></div>
-                <div class="form-group"><label>Cover</label><input type="file" name="cover_photo" accept="image/*"></div>
+                <div class="form-group"><label>Profile Image</label><input type="file" name="image" accept="image/*"></div>
+                <div class="form-group"><label>Cover Photo</label><input type="file" name="cover_photo" accept="image/*"></div>
             </div>
-            <div class="form-group"><label>Biography</label><textarea name="bio" rows="3">{{ profile.bio }}</textarea></div>
+            <div class="form-group"><label>Bio</label><textarea name="bio" rows="3">{{ profile.bio }}</textarea></div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group"><label>Location</label><input type="text" name="location" value="{{ profile.location }}"></div>
-                <div class="form-group"><label>Website Link</label><input type="url" name="links" value="{{ profile.links }}"></div>
+                <div class="form-group"><label>Website</label><input type="url" name="links" value="{{ profile.links }}"></div>
             </div>
             <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 10px;">
-                <button type="button" class="btn-edit" style="background:#e2e8f0; color:#475569;" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn-edit" id="saveBtn" style="margin:0;">Update Profile</button>
+                <button type="button" class="btn-edit" style="background:#f1f5f9; color:#64748b; float:none; margin:0;" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-edit" id="saveBtn" style="float:none; margin:0;">Save Changes</button>
             </div>
         </form>
     </div>
@@ -208,7 +190,7 @@
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
-    // PROGRESS BAR LOGIC
+    // PROGRESS BAR & VISUALIZER
     function updateProgress(id) {
         const audio = document.getElementById("audio" + id);
         const fill = document.getElementById("fill" + id);
@@ -218,9 +200,10 @@
             const progress = (audio.currentTime / audio.duration) * 100;
             fill.style.width = progress + "%";
             
-            // Visualizer pulse while playing
+            // Smoother randomized bounce
             bars.forEach(b => {
-                b.style.height = (Math.random() * 260 + 20) + "px";
+                const height = Math.random() * 280 + 20;
+                b.style.height = height + "px";
                 b.style.opacity = "1";
             });
         }
@@ -230,13 +213,12 @@
         const audio = document.getElementById("audio" + id);
         const rect = event.currentTarget.getBoundingClientRect();
         const x = event.clientX - rect.left;
-        const width = rect.width;
-        audio.currentTime = (x / width) * audio.duration;
+        audio.currentTime = (x / rect.width) * audio.duration;
     }
 
     function stopVisualizer(id) {
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.3"; });
+        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.4"; });
         const btn = document.getElementById('playBtn' + id);
         if(btn) btn.innerHTML = "▶";
         document.getElementById("fill" + id).style.width = "0%";
@@ -247,17 +229,18 @@
             btn = document.getElementById("playBtn" + id);
 
         if (audio.paused) {
-            // Your analytics fetch calls...
+            audio.play();
+            btn.innerHTML = "⏸";
+            
+            // Background analytics
             fetch(`/record-replay/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-            .then(r => r.json()).then(d => { document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+            .then(r => r.json()).then(d => { if(d.new_replay_count) document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
 
             if (!sessionStorage.getItem(`played_post_${id}`)) {
                 fetch(`/record-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-                .then(r => r.json()).then(d => { document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
+                .then(r => r.json()).then(d => { if(d.new_listener_count) document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
                 sessionStorage.setItem(`played_post_${id}`, "true");
             }
-            audio.play();
-            btn.innerHTML = "⏸";
         } else {
             audio.pause();
             btn.innerHTML = "▶";
@@ -266,7 +249,66 @@
         }
     }
 
-    // Preserve your Follow/Like/Delete/Update Fetch logic exactly
+    // FAST ASYNC PROFILE UPDATE
+    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
+        e.preventDefault(); 
+        const btn = document.getElementById('saveBtn'); 
+        btn.disabled = true; 
+        btn.innerText = "Saving...";
+
+        try {
+            const formData = new FormData(this);
+            const res = await fetch("{% url 'update_profile' %}", { 
+                method: 'POST', 
+                body: formData, 
+                headers: { 'X-CSRFToken': getCSRFToken() } 
+            });
+            const d = await res.json(); 
+
+            if(d.success) {
+                // Update UI instantly without full reload
+                if(d.bio) document.getElementById('display-bio').innerText = d.bio;
+                if(d.location) document.getElementById('display-location').innerText = d.location;
+                if(d.links) {
+                    const linkEl = document.getElementById('display-link');
+                    linkEl.href = d.links;
+                    linkEl.innerText = d.links;
+                }
+                // Only reload if images were changed to refresh the source
+                if(formData.get('image').size > 0 || formData.get('cover_photo').size > 0) {
+                    window.location.reload();
+                } else {
+                    closeModal();
+                    btn.disabled = false;
+                    btn.innerText = "Save Changes";
+                }
+            } else {
+                alert("Error updating profile.");
+                btn.disabled = false;
+                btn.innerText = "Save Changes";
+            }
+        } catch(err) {
+            console.error(err);
+            btn.disabled = false;
+        }
+    };
+
+    // VIBRANT COLOR PALETTE FOR VISUALIZER
+    const visualColors = [
+        '#00a86b', '#007bff', '#ff007f', '#7b2cbf', 
+        '#ffbe0b', '#fb5607', '#ff006e', '#8338ec', '#3a86ff'
+    ];
+    
+    document.querySelectorAll('.visualizer-bars').forEach(v => {
+        for(let i=0; i < 50; i++) { 
+            let b = document.createElement("div"); 
+            b.className = "v-bar"; 
+            b.style.backgroundColor = visualColors[i % visualColors.length]; 
+            v.appendChild(b); 
+        }
+    });
+
+    // Follow Logic
     document.querySelectorAll('.follow-btn').forEach(button => {
         button.addEventListener('click', function() {
             const username = this.getAttribute('data-username'); 
@@ -297,29 +339,11 @@
     }
 
     function deletePost(id) {
-        if(confirm("Are you sure?")) { 
+        if(confirm("Permanently delete this post?")) { 
             fetch(`/delete-post/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
             .then(r => r.json()).then(d => { if(d.success) document.getElementById(`post-card-${id}`).remove(); }); 
         }
     }
-
-    document.getElementById('profileUpdateForm').onsubmit = async function(e) {
-        e.preventDefault(); 
-        const btn = document.getElementById('saveBtn'); btn.disabled = true; 
-        const res = await fetch("{% url 'update_profile' %}", { method: 'POST', body: new FormData(this), headers: { 'X-CSRFToken': getCSRFToken() } });
-        const d = await res.json(); 
-        if(d.success) window.location.reload(); else alert("Error updating profile."); 
-        btn.disabled = false;
-    };
-
-    // Waveform init
-    const colors = ['#00a86b', '#0044cc', '#ff69b4', '#ffd700'];
-    document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 45; i++) { 
-            let b = document.createElement("div"); b.className = "v-bar"; 
-            b.style.backgroundColor = colors[i % colors.length]; v.appendChild(b); 
-        }
-    });
 </script>
 </body>
 </html>
