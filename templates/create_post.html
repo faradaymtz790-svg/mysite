@@ -48,6 +48,20 @@
 
         .icon-box:hover { background: green; color: white; }
 
+        /* Recording Pulse Effect */
+        .recording-active {
+            background: #c62828 !important;
+            color: white !important;
+            border-style: solid !important;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
         .file-status {
             font-size: 13px; color: #2d5a27; text-align: center;
             margin: 10px 0; display: none; padding: 8px;
@@ -88,15 +102,13 @@
         <textarea id="title" name="title" placeholder="Describe your story..." required></textarea>
         <div class="counter" id="counter">0 / 350 words</div>
 
-        <!-- AUDIO SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('audioInput').click()">📁 Select Audio</div>
-            <div class="icon-box" id="recordBtn" onclick="startRecording()">🎤 Record Voice</div>
+            <div class="icon-box" id="recordBtn" onclick="toggleRecording()">🎤 Record Voice</div>
         </div>
         <div id="audioStatus" class="file-status"></div>
         <input type="file" id="audioInput" name="audio" accept="audio/*">
 
-        <!-- IMAGE SECTION -->
         <div class="upload-section">
             <div class="icon-box" onclick="document.getElementById('imageInput').click()">🖼 Set Cover Image</div>
         </div>
@@ -116,11 +128,13 @@ const postForm = document.getElementById('postForm');
 const submitBtn = document.getElementById('submitBtn');
 const jsError = document.getElementById('jsError');
 const recordBtn = document.getElementById('recordBtn');
+const audioStatus = document.getElementById('audioStatus');
 
 let mediaRecorder;
 let chunks = [];
 let isRecording = false;
 let maxTimer;
+let stream;
 
 // 1. Word counter logic
 textarea.addEventListener('input', () => {
@@ -128,7 +142,7 @@ textarea.addEventListener('input', () => {
     counter.textContent = `${words.length} / 350 words`;
 });
 
-// 2. File Manager selection logic
+// 2. File Status Logic
 imageInput.addEventListener('change', function () {
     if (this.files[0]) {
         document.getElementById('imageStatus').style.display = 'block';
@@ -138,57 +152,65 @@ imageInput.addEventListener('change', function () {
 
 audioInput.addEventListener('change', function () {
     if (this.files[0]) {
-        document.getElementById('audioStatus').style.display = 'block';
-        document.getElementById('audioStatus').innerText = "🎵 " + this.files[0].name;
+        audioStatus.style.display = 'block';
+        audioStatus.innerText = "🎵 " + this.files[0].name;
         if (isRecording) stopMediaRecorder(); 
     }
 });
 
-// 3. Audio Recording (Updated for better file compatibility)
-async function startRecording() {
-    if (isRecording) {
+// 3. Audio Recording Implementation
+async function toggleRecording() {
+    if (!isRecording) {
+        startRecording();
+    } else {
         stopMediaRecorder();
-        return;
     }
+}
 
+async function startRecording() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Use a common mime type that Cloudinary handles well as audio
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
         chunks = [];
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // Detect supported MIME types for cross-browser support
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+        
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
 
-        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) chunks.push(e.data);
+        };
 
         mediaRecorder.onstop = () => {
-            const blob = new Blob(chunks, { type: "audio/webm" });
-            // Naming it .webm or .mp3 helps Cloudinary auto-detect the resource type
-            const file = new File([blob], "voice_recording.webm", { type: "audio/webm" });
+            const blob = new Blob(chunks, { type: mimeType });
+            const extension = mimeType.split('/')[1];
+            const file = new File([blob], `voice_note_${Date.now()}.${extension}`, { type: mimeType });
             
+            // Transfer recorded file to the hidden input
             const dt = new DataTransfer();
             dt.items.add(file);
             audioInput.files = dt.files;
 
-            document.getElementById('audioStatus').style.display = 'block';
-            document.getElementById('audioStatus').innerText = "✅ Voice note recorded (" + (blob.size / 1024).toFixed(1) + " KB)";
-            clearTimeout(maxTimer);
+            audioStatus.style.display = 'block';
+            audioStatus.innerText = "✅ Voice note ready (" + (blob.size / 1024).toFixed(1) + " KB)";
+            
+            // Cleanup stream
+            stream.getTracks().forEach(track => track.stop());
         };
 
         mediaRecorder.start();
         isRecording = true;
         
         recordBtn.innerText = "🛑 Stop (Max 8:00)";
-        recordBtn.style.background = "#c62828";
-        recordBtn.style.color = "white";
+        recordBtn.classList.add('recording-active');
 
         maxTimer = setTimeout(() => {
-            if (isRecording) {
-                stopMediaRecorder();
-                alert("Maximum limit reached.");
-            }
+            if (isRecording) stopMediaRecorder();
         }, 480000); 
 
     } catch (err) {
-        alert("Microphone access denied.");
+        console.error(err);
+        alert("Microphone access denied or not supported.");
     }
 }
 
@@ -197,12 +219,12 @@ function stopMediaRecorder() {
         mediaRecorder.stop();
         isRecording = false;
         recordBtn.innerText = "🎤 Record Voice";
-        recordBtn.style.background = "rgba(255,255,255,0.5)";
-        recordBtn.style.color = "green";
+        recordBtn.classList.remove('recording-active');
+        clearTimeout(maxTimer);
     }
 }
 
-// 4. Submission Logic (Updated to ensure files are captured)
+// 4. Submission Logic
 postForm.addEventListener("submit", async function (e) {
     e.preventDefault();
     jsError.style.display = 'none';
@@ -216,8 +238,12 @@ postForm.addEventListener("submit", async function (e) {
     submitBtn.innerText = "Uploading to post...";
 
     try {
-        // Creating FormData directly from the form captures the audio input even if populated via JS
-        const formData = new FormData(postForm);
+        const formData = new FormData(this);
+
+        // Explicitly ensure the audio file from the hidden input is included
+        if (audioInput.files[0]) {
+            formData.set('audio', audioInput.files[0]);
+        }
 
         const res = await fetch(window.location.href, {
             method: "POST",

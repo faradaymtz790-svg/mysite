@@ -429,7 +429,6 @@
         return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
     }
 
-    // NEW PROGRESS & SEEK LOGIC
     function updateProgress(id) {
         const audio = document.getElementById("audio" + id);
         const fill = document.getElementById("fill" + id);
@@ -439,7 +438,6 @@
             const percent = (audio.currentTime / audio.duration) * 100;
             fill.style.width = percent + "%";
             
-            // Visualizer logic integrated here
             bars.forEach(bar => { 
                 bar.style.height = (Math.random() * 260 + 20) + "px"; 
                 bar.style.opacity = "1"; 
@@ -455,22 +453,23 @@
     }
 
     function resetUI(id) {
-        document.getElementById("playBtn" + id).innerHTML = "▶";
-        document.getElementById("fill" + id).style.width = "0%";
+        const btn = document.getElementById("playBtn" + id);
+        if (btn) btn.innerHTML = "▶";
+        const fill = document.getElementById("fill" + id);
+        if (fill) fill.style.width = "0%";
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
         bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
     }
 
-    function handleLike(element, postId) {
-        const countLabel = document.getElementById(`like-count-${postId}`);
-        fetch(`/like-post/${postId}/`, { 
-            method: "POST", 
-            headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" } 
-        })
-        .then(r => r.json())
-        .then(data => {
-            countLabel.innerText = data.count;
-            data.liked ? element.classList.add('is-liked') : element.classList.remove('is-liked');
+    // NEW: Stop all other audio tracks when a new one starts
+    function stopAllOtherAudio(currentId) {
+        const allAudios = document.querySelectorAll('audio');
+        allAudios.forEach(audio => {
+            const audioId = audio.id.replace('audio', '');
+            if (audioId !== currentId.toString() && !audio.paused) {
+                audio.pause();
+                resetUI(audioId);
+            }
         });
     }
 
@@ -481,6 +480,9 @@
         let listenerSpan = document.getElementById(`unique-listeners-${id}`);
 
         if (audio.paused) {
+            // STOP any other playing audio before starting this one
+            stopAllOtherAudio(id);
+            
             audio.play();
             btn.innerHTML = "⏸";
             fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
@@ -494,6 +496,19 @@
             const bars = document.querySelectorAll(`#viz${id} .v-bar`);
             bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
         }
+    }
+
+    function handleLike(element, postId) {
+        const countLabel = document.getElementById(`like-count-${postId}`);
+        fetch(`/like-post/${postId}/`, { 
+            method: "POST", 
+            headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" } 
+        })
+        .then(r => r.json())
+        .then(data => {
+            countLabel.innerText = data.count;
+            data.liked ? element.classList.add('is-liked') : element.classList.remove('is-liked');
+        });
     }
 
     function deletePost(id){

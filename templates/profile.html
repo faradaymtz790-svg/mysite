@@ -221,7 +221,20 @@
         bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.4"; });
         const btn = document.getElementById('playBtn' + id);
         if(btn) btn.innerHTML = "▶";
-        document.getElementById("fill" + id).style.width = "0%";
+        const fill = document.getElementById("fill" + id);
+        if(fill) fill.style.width = "0%";
+    }
+
+    // NEW: Stop all other audio tracks when a new one starts
+    function stopAllOtherAudio(currentId) {
+        const allAudios = document.querySelectorAll('audio');
+        allAudios.forEach(audio => {
+            const audioId = audio.id.replace('audio', '');
+            if (audioId !== currentId.toString() && !audio.paused) {
+                audio.pause();
+                stopVisualizer(audioId);
+            }
+        });
     }
 
     function togglePlay(id) {
@@ -229,6 +242,9 @@
             btn = document.getElementById("playBtn" + id);
 
         if (audio.paused) {
+            // STOP other audios before playing
+            stopAllOtherAudio(id);
+
             audio.play();
             btn.innerHTML = "⏸";
             

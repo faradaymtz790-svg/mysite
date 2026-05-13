@@ -22,7 +22,7 @@
         position: sticky;
         top: 0;
         z-index: 1000;
-        padding: 12px 0 8px 0;
+        padding: 16px 0 12px 0; /* Increased padding for breathing room */
         font-family: 'Inter', sans-serif;
     }
 
@@ -40,33 +40,36 @@
         font-size: 34px;
         color: var(--primary-green);
         text-decoration: none;
-        transition: transform 0.2s;
+        transition: transform 0.2s, opacity 0.3s;
         z-index: 10;
     }
 
     /* 🔍 EXPANDABLE SEARCH BAR LOGIC */
     .search-wrapper-form {
         position: absolute;
-        right: 120px; /* Adjust based on your settings icons width */
+        right: 140px; /* Increased offset to separate from settings */
         display: flex;
         align-items: center;
         justify-content: flex-end;
         width: 40px; 
+        height: 40px;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
+        border-radius: 50px;
     }
 
     /* When the search bar is focused/active */
     .search-wrapper-form:focus-within {
-        width: 85%;
-        right: 7.5%; /* Centers it at 85% width */
+        width: 70%; /* Reduced from 85% to prevent crowding the logo too much */
+        right: 15%; 
         z-index: 100;
     }
 
     .search-input {
         width: 100%;
-        padding: 20px 20px 20px 50px;
-        border-radius: 50px; /* Round Circle */
+        height: 100%;
+        padding: 0 20px 0 50px;
+        border-radius: 50px;
         border: 2px solid var(--primary-green);
         background: white;
         outline: none;
@@ -86,7 +89,8 @@
         left: 10px;
         color: #65676b;
         pointer-events: none;
-        transition: color 0.3s;
+        transition: all 0.3s;
+        z-index: 5;
     }
 
     .search-wrapper-form:focus-within .search-icon-trigger {
@@ -94,7 +98,7 @@
         left: 20px;
     }
 
-    /* Hide logo and settings when searching on small screens (Optional) */
+    /* Hide logo and settings when searching */
     .navbar-container:has(.search-input:focus) .nav-logo,
     .navbar-container:has(.search-input:focus) .settings-wrapper {
         opacity: 0;
@@ -104,7 +108,7 @@
     .settings-wrapper {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 16px; /* More space between lang select and gear icon */
         z-index: 10;
         transition: opacity 0.3s;
     }
@@ -113,7 +117,7 @@
         border: none;
         background: var(--soft-gray);
         border-radius: 15px;
-        padding: 6px 12px;
+        padding: 8px 14px;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
@@ -123,35 +127,44 @@
     .settings-icon-btn {
         text-decoration: none;
         background: var(--soft-gray);
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        font-size: 18px;
+        font-size: 20px;
+        transition: background 0.2s;
     }
 
+    .settings-icon-btn:hover {
+        background: #e4e6eb;
+    }
+
+    /* 🏠 BOTTOM NAV SPACING */
     .nav-bottom-row {
         display: flex;
         justify-content: center;
         width: 100%;
         max-width: 600px;
-        gap: 45px;
-        margin-top: 10px;
+        gap: 80px; /* Significantly increased spacing between bottom icons */
+        margin-top: 15px;
+        padding-bottom: 5px;
     }
 
     .nav-link {
         text-decoration: none;
         color: #65676b;
-        font-size: 24px;
-        padding: 8px;
+        font-size: 26px; /* Slightly larger for better touch targets */
+        padding: 10px;
         transition: 0.2s;
+        border-radius: 12px;
     }
 
     .nav-link:hover {
         color: var(--primary-green);
-        transform: translateY(-2px);
+        background: var(--soft-gray);
+        transform: translateY(-3px);
     }
 </style>
 
@@ -165,7 +178,7 @@
                     <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
             </div>
-            <input type="text" name="q" class="search-input" placeholder="Search now......!" value="{{ request.GET.q }}">
+            <input type="text" name="q" class="search-input" placeholder="Search now...!" value="{{ request.GET.q }}">
         </form>
 
         <div class="settings-wrapper">
@@ -188,11 +201,11 @@
 
     <div class="nav-bottom-row">
         {% if request.user.is_authenticated %}
-            <a href="{% url 'profile' username=request.user.username %}" class="nav-link">🏠</a>
+            <a href="{% url 'profile' username=request.user.username %}" class="nav-link" title="Home">🏠</a>
         {% else %}
-            <a href="{% url 'account_login' %}" class="nav-link">🏠</a>
+            <a href="{% url 'account_login' %}" class="nav-link" title="Login">🏠</a>
         {% endif %}
-        <a href="{% url 'feed' %}" class="nav-link">🎧</a>
-        <a href="{% url 'notifications' %}" class="nav-link">🔔</a>
+        <a href="{% url 'feed' %}" class="nav-link" title="Feed">🎧</a>
+        <a href="{% url 'notifications' %}" class="nav-link" title="Notifications">🔔</a>
     </div>
 </div>
