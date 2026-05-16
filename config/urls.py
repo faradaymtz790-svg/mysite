@@ -55,7 +55,7 @@ urlpatterns += i18n_patterns(
     path('create_post/', views.create_post, name='create_post'),
     path('delete-post/<int:id>/', views.delete_post),
     path('like-post/<int:post_id>/', views.like_post),
-    path('like-comment/<int:comment_id>/', views.like_comment, name='like_comment'),
+    path('comment/<int:comment_id>/like/', views.like_comment, name='like_comment'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
     
     # --- TRACKING & REPLAYS ---

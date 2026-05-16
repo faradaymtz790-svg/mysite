@@ -1201,12 +1201,15 @@ def like_comment(request, comment_id):
             
             # Send a notification to the person who wrote the comment
             if user != comment.user:
+                # SAFE CHECK: Get the post from the comment, or fall back to its parent's post if it's a reply
+                associated_post = comment.post if comment.post else (comment.parent.post if comment.parent else None)
+
                 Notification.objects.create(
-                    recipient=comment.user, # The owner of the comment
-                    sender=user,            # The person clicking "Like"
+                    recipient=comment.user, 
+                    sender=user,            
                     notification_type='comment_like',
-                    post=comment.post,       # The parent post
-                    comment=comment,         # The specific comment liked
+                    post=associated_post,    # Now handles replies safely!
+                    comment=comment,         
                     text="liked your comment."
                 )
                 
@@ -1216,4 +1219,3 @@ def like_comment(request, comment_id):
         })
     
     return JsonResponse({'error': 'Invalid request method'}, status=400)
-
