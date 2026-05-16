@@ -210,13 +210,13 @@
                         {% elif notification.notification_type == 'comment' %}
                             commented on your post: 
                             <span class="comment-preview">
-                                "{% if notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
+                                "{% if notification.comment.title %}{{ notification.comment.title|truncatechars:60 }}{% elif notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
                             </span>
                         
                         {% elif notification.notification_type == 'reply' %}
                             replied to your comment: 
                             <span class="comment-preview">
-                                "{% if notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
+                                "{% if notification.comment.title %}{{ notification.comment.title|truncatechars:60 }}{% elif notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
                             </span>
                         
                         {% elif notification.notification_type == 'post_add' %}
@@ -226,7 +226,7 @@
                             liked your comment:
                             {% if notification.comment %}
                                 <span class="comment-preview">
-                                    "{% if notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
+                                    "{% if notification.comment.title %}{{ notification.comment.title|truncatechars:60 }}{% elif notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
                                 </span>
                             {% else %}
                                 <span>(View interaction)</span>

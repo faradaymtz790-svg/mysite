@@ -881,7 +881,25 @@ def post_detail(request, pk):
         'is_liked': is_liked,
     })
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Notification  # Adjust this import to match your app structure
 
+@login_required
+def notifications_view(request):
+    # 1. Fetch all notifications for the current logged-in user
+    notifications = Notification.objects.filter(recipient=request.user)\
+                                      .select_related('sender', 'sender__profile', 'post', 'comment')\
+                                      .order_by('-timestamp')
+    
+    # 2. Calculate dynamically how many are unread for the green badge counter
+    unread_count = notifications.filter(is_read=False).count()
+
+    # 3. Render the template with both the list and the unread count context variables
+    return render(request, 'notifications.html', {
+        'notifications': notifications,
+        'unread_count': unread_count
+    })
 
 
 def profile(request, username):
@@ -1154,31 +1172,48 @@ def account_view(request):
     return render(request, 'account.html')
 
 
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Comment, Notification
 
 @login_required
 def like_comment(request, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
-    
-    # Assuming you track comment likes via a ManyToMany or Join Table layout
-    like_relation, created = CommentLikes.objects.get_or_create(user=request.user, comment=comment)
-
-    if not created:
-        like_relation.delete()
-        liked = False
-    else:
-        liked = True
+    if request.method == "POST":
+        comment = get_object_or_404(Comment, id=comment_id)
+        user = request.user
         
-        # --- COMMENT LIKE NOTIFICATION TRIGGER ---
-        if request.user != comment.user:
-            Notification.objects.create(
-                recipient=comment.user,
-                sender=request.user,
-                notification_type='comment_like',
-                post=comment.post, # Link it back to the overarching post container
-                comment=comment,   # Link to the liked comment text instance
-                text="liked your comment."
-            )
+        # Toggle the like status in the ManyToMany field
+        if comment.likes.filter(id=user.id).exists():
+            comment.likes.remove(user)
+            liked = False
             
-    return JsonResponse({'liked': liked})
-
+            # Clean up notification if they unlike the comment
+            Notification.objects.filter(
+                sender=user,
+                recipient=comment.user,
+                notification_type='comment_like',
+                comment=comment
+            ).delete()
+        else:
+            comment.likes.add(user)
+            liked = True
+            
+            # Send a notification to the person who wrote the comment
+            if user != comment.user:
+                Notification.objects.create(
+                    recipient=comment.user, # The owner of the comment
+                    sender=user,            # The person clicking "Like"
+                    notification_type='comment_like',
+                    post=comment.post,       # The parent post
+                    comment=comment,         # The specific comment liked
+                    text="liked your comment."
+                )
+                
+        return JsonResponse({
+            'liked': liked,
+            'likes_count': comment.likes.count()
+        })
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
