@@ -172,21 +172,38 @@ async function startRecording() {
         chunks = [];
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        // Detect supported MIME types for cross-browser support
-        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+        // Comprehensive fallback checking for cross-device compatibility (Safari/Chrome/Firefox)
+        let mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported('audio/webm')) {
+            if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                mimeType = 'audio/mp4'; // Fallback for iOS Safari
+            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+                mimeType = 'audio/ogg';
+            } else {
+                mimeType = ''; // Let browser choose the default working container type
+            }
+        }
         
-        mediaRecorder = new MediaRecorder(stream, { mimeType });
+        const options = mimeType ? { mimeType } : {};
+        mediaRecorder = new MediaRecorder(stream, options);
 
         mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) chunks.push(e.data);
+            if (e.data && e.data.size > 0) chunks.push(e.data);
         };
 
         mediaRecorder.onstop = () => {
-            const blob = new Blob(chunks, { type: mimeType });
-            const extension = mimeType.split('/')[1];
-            const file = new File([blob], `voice_note_${Date.now()}.${extension}`, { type: mimeType });
+            const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+            const blob = new Blob(chunks, { type: actualMimeType });
             
-            // Transfer recorded file to the hidden input
+            // Extract accurate extension type from browser settings
+            let extension = 'webm';
+            if (actualMimeType.includes('mp4')) extension = 'mp4';
+            else if (actualMimeType.includes('ogg')) extension = 'ogg';
+            else if (actualMimeType.includes('wav')) extension = 'wav';
+
+            const file = new File([blob], `voice_note_${Date.now()}.${extension}`, { type: actualMimeType });
+            
+            // Transfer recorded file safely to the hidden input fields
             const dt = new DataTransfer();
             dt.items.add(file);
             audioInput.files = dt.files;
@@ -194,11 +211,14 @@ async function startRecording() {
             audioStatus.style.display = 'block';
             audioStatus.innerText = "✅ Voice note ready (" + (blob.size / 1024).toFixed(1) + " KB)";
             
-            // Cleanup stream
-            stream.getTracks().forEach(track => track.stop());
+            // Cleanup media stream channels completely
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
         };
 
-        mediaRecorder.start();
+        // Collect audio fragments continuously every 250ms for performance stability
+        mediaRecorder.start(250);
         isRecording = true;
         
         recordBtn.innerText = "🛑 Stop (Max 8:00)";
@@ -234,14 +254,21 @@ postForm.addEventListener("submit", async function (e) {
         return;
     }
 
+    // CRITICAL FIX: If user hits click submit while still recording, auto-stop and wait
+    if (isRecording) {
+        stopMediaRecorder();
+        // A short micro-delay allows the asynchronous 'onstop' loop execution to save files
+        await new Promise(resolve => setTimeout(resolve, 300));
+    }
+
     submitBtn.disabled = true;
     submitBtn.innerText = "Uploading to post...";
 
     try {
         const formData = new FormData(this);
 
-        // Explicitly ensure the audio file from the hidden input is included
-        if (audioInput.files[0]) {
+        // Explicitly check and mount our audio payload
+        if (audioInput.files && audioInput.files[0]) {
             formData.set('audio', audioInput.files[0]);
         }
 

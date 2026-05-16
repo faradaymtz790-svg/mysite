@@ -160,3 +160,19 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 # Keep your other existing allauth settings here
 ACCOUNT_EMAIL_VERIFICATION = 'none' 
 # ... etc
+
+
+# ==============================================================================
+# COOKIE & SESSION MANAGEMENT
+# ==============================================================================
+
+# Keeps the user logged in even after they close their browser window
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# The duration a session remains valid (in seconds). 
+# 1209600 seconds is exactly 2 weeks.
+SESSION_COOKIE_AGE = 1209600
+
+# Save the session to the database on every single request 
+# (this refreshes the expiration timer so active users never get kicked out)
+SESSION_SAVE_EVERY_REQUEST = True

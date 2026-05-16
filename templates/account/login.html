@@ -13,6 +13,7 @@
             --hover-blue: #1d4ed8;
             --glass-white: rgba(255, 255, 255, 0.85);
             --border-blue: #3b82f6;
+            --text-dark: #1e293b;
         }
 
         * {
@@ -82,33 +83,35 @@
             font-size: 22px;
             font-weight: 700;
             color: #144890;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             margin-top: 15px;
         }
 
         .form-group {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* Enhanced separation for minimalist lines */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
+        /* Modern Bottom Line Styling */
         input {
-            width: 85% !important;
-            padding: 20px !important; 
-            border-radius: 18px;
-            border: 2px solid var(--border-blue);
-            background: rgba(255, 255, 255, 1);
+            width: 90% !important; /* Updated to 90% */
+            padding: 14px 10px !important; 
+            border-radius: 0px !important; /* Removed rounded edges */
+            border: none !important;
+            border-bottom: 2px solid var(--border-blue) !important; /* Pure bottom line design */
+            background: transparent !important; /* Transparent for seamless look */
             font-size: 16px;
-            color: #1e293b;
+            color: var(--text-dark);
             outline: none;
         }
 
         input:focus {
-            transform: scale(1.03);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-            border-color: var(--hover-blue);
+            transform: translateY(-2px); /* Sleek vertical floating animation */
+            box-shadow: none !important; /* Removed heavy boxes for clean look */
+            border-bottom-color: var(--hover-blue) !important;
         }
 
         .password-wrapper {
@@ -120,7 +123,7 @@
 
         .toggle-password {
             position: absolute;
-            right: 12%;
+            right: 8%; /* Balanced relative positioning for 90% input width */
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
@@ -129,7 +132,7 @@
         }
 
         button {
-            width: 85%;
+            width: 90%; /* Synchronized button width with fields */
             padding: 20px;
             border-radius: 18px;
             border: none;
@@ -137,7 +140,7 @@
             color: white;
             font-size: 18px;
             font-weight: 700;
-            margin-top: 10px;
+            margin-top: 20px;
             cursor: pointer;
             box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
         }
@@ -149,7 +152,7 @@
         }
 
         .signup-link {
-            margin-top: 25px;
+            margin-top: 30px;
             font-size: 15px;
             color: #475569;
         }
@@ -166,7 +169,7 @@
             padding: 10px;
             border-radius: 12px;
             font-size: 14px;
-            width: 85%;
+            width: 90%;
             margin: 0 auto 15px;
             display: none;
             border: 1px solid #fda4af;

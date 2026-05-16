@@ -204,8 +204,9 @@ def signup(request):
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
-from .models import Profile, Post, Follow
+from django.contrib.auth.decorators import login_required  # Added missing import
 from django.contrib.auth.models import User
+from .models import Profile, Post, Follow
 
 @login_required
 def profile_view(request, username=None):
@@ -213,8 +214,7 @@ def profile_view(request, username=None):
     if username:
         viewed_user = get_object_or_404(User, username=username)
     else:
-        if not request.user.is_authenticated:
-            return redirect('login')
+        # Guaranteed to be authenticated because of @login_required decorator
         viewed_user = request.user
 
     # 2. Get or create the profile
@@ -229,7 +229,7 @@ def profile_view(request, username=None):
 
     # 5. Check follow status
     is_following = False
-    if request.user.is_authenticated and request.user != viewed_user:
+    if request.user != viewed_user:
         is_following = Follow.objects.filter(
             follower=request.user, 
             following=viewed_user
@@ -254,7 +254,6 @@ def profile_view(request, username=None):
 
 
 
-
 # =========================
 # NICHES
 # =========================
@@ -264,7 +263,17 @@ def profile_view(request, username=None):
 # POSTS
 # =========================
 
+from django.shortcuts import render, redirect
 
+def home_landing_view(request):
+    # 1. If the user is already logged in, skip the welcome page completely
+    if request.user.is_authenticated:
+        return redirect('profile', username=request.user.username)
+        
+    # 2. If they are a guest, show them your beautiful welcoming page
+    return render(request, 'home.html')
+
+# ... your other views like profile_view or post_comments ...
 
 
 @login_required
@@ -344,17 +353,13 @@ from django.contrib.auth import get_user_model
 from .models import Follow # Ensure this is your Follow model
 
 User = get_user_model()
-
-
 @login_required
 def follow_user(request, username):
     target_user = get_object_or_404(User, username=username)
 
-    # 1. Prevent self-following
     if request.user == target_user:
         return JsonResponse({'error': 'You cannot follow yourself'}, status=400)
 
-    # 2. Check for Blocking Relationship
     is_blocked = (
         request.user.profile.blocked_users.filter(username=target_user.username).exists() or
         target_user.profile.blocked_users.filter(username=request.user.username).exists()
@@ -363,27 +368,40 @@ def follow_user(request, username):
     if is_blocked:
         return JsonResponse({'error': 'Action not allowed: Blocked relationship exists'}, status=403)
 
-    # 3. Handle Follow/Unfollow
     follow, created = Follow.objects.get_or_create(
         follower=request.user,
         following=target_user
     )
 
     if not created:
+        # If they already followed them, remove it (Unfollow)
         follow.delete()
-        status = 'unfollowed' # Changed from 'following = False'
+        status = 'unfollowed'
+        
+        # Optional cleanup: Delete the notification record if they unfollow right away
+        Notification.objects.filter(
+            sender=request.user, 
+            recipient=target_user, 
+            notification_type='follow'
+        ).delete()
     else:
-        status = 'followed'   # Changed from 'following = True'
+        status = 'followed'
+        
+        # --- NEW FOLLOW NOTIFICATION TRIGGER ---
+        Notification.objects.create(
+            recipient=target_user,
+            sender=request.user,
+            notification_type='follow',
+            text="started following you."
+        )
+        # --- END NOTIFICATION TRIGGER ---
 
-    # 4. CRITICAL: Get the new count to send back to the JavaScript
     followers_count = Follow.objects.filter(following=target_user).count()
 
-    # 5. Return the keys that the JavaScript is looking for
     return JsonResponse({
         'status': status, 
         'followers_count': followers_count
     })
-
 
 
 
@@ -417,14 +435,9 @@ def following_list(request, username):
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from .models import Post, Comment
-from .forms import CommentForm
-
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
 from .models import Post, Comment, Notification
-
 @login_required
 def post_comments(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -450,10 +463,11 @@ def post_comments(request, post_id):
                 # Only notify if you are replying to someone else
                 if request.user != parent_comment.user:
                     Notification.objects.create(
-                        recipient=parent_comment.user, # Updated to 'recipient' based on previous schema
+                        recipient=parent_comment.user, 
                         sender=request.user,
-                        notification_type='comment',
+                        notification_type='reply',  # FIX 1: Set type to 'reply' instead of 'comment'
                         post=post,
+                        comment=new_comment,        # FIX 2: Links the comment instance object
                         text=f"replied to your comment: {text_data[:20]}"
                     )
             except Comment.DoesNotExist:
@@ -466,13 +480,13 @@ def post_comments(request, post_id):
                 sender=request.user,
                 notification_type='comment',
                 post=post,
+                comment=new_comment,            # FIX 3: Links the comment instance object
                 text=f"commented on your post: {text_data[:20]}"
             )
         
         return redirect('post_comments', post_id=post.id)
 
     # 3. GET Logic (Optimized Query)
-    # Use select_related to grab user profiles in one single database trip
     comments = Comment.objects.filter(post=post, parent=None)\
                               .select_related('user', 'user__profile')\
                               .order_by('-created_at')
@@ -483,41 +497,26 @@ def post_comments(request, post_id):
     })
 
 
-# --- ENHANCED LIKE LOGIC ---
 
 @login_required
-def like_comment(request, comment_id):
+@require_POST
+def delete_comment(request, comment_id):
+    """
+    Deletes a comment via an AJAX POST request.
+    Ensures that only the comment author (or an admin) can delete it.
+    """
     comment = get_object_or_404(Comment, id=comment_id)
     
-    # toggle the like status
-    if comment.likes.filter(id=request.user.id).exists():
-        comment.likes.remove(request.user)
-        liked = False
-    else:
-        comment.likes.add(request.user)
-        liked = True
-        
-        # --- NOTIFICATION LOGIC ---
-        # Notify the comment creator (if it's not the person liking)
-        if request.user != comment.user:
-            Notification.objects.create(
-                user=comment.user,                # Recipient: Comment owner
-                sender=request.user,             # Actor: Liker
-                notification_type='like',        # Type
-                post=comment.post,               # Link to the post where the comment is
-                text_preview=f"liked your comment: {comment.content[:30]}"
-            )
-        # --- END LOGIC ---
+    # Check ownership or admin status
+    if comment.user == request.user or request.user.is_staff:
+        comment.delete()
+        return JsonResponse({'status': 'success', 'message': 'Comment deleted successfully.'})
     
-    return JsonResponse({
-        'liked': liked, 
-        'count': comment.likes.count(),
-        'status': 'success'
-    })
+    return JsonResponse({'status': 'error', 'message': 'Permission denied.'}, status=403)
 
 
 
-# =========================
+
 # NOTIFICATIONS
 # =========================
 # @login_required  <-- Add a '#' to the start of this line
@@ -780,18 +779,74 @@ def delete_account(request):
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Notification
+
+
 @login_required
 def notifications(request):
-    # Fetch all, ordered by date
-    user_notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
-    
-    # Calculate unread count to pass to the template
+    # Optimized using select_related so templates can read post/comment/sender info instantly
+    user_notifications = Notification.objects.filter(recipient=request.user)\
+                                           .select_related('sender', 'sender__profile', 'post', 'comment')\
+                                           .order_by('-timestamp')
+                                           
     unread_count = user_notifications.filter(is_read=False).count()
     
     return render(request, 'notifications.html', {
         'notifications': user_notifications,
         'unread_count': unread_count
     })
+
+
+@login_required
+def click_notification(request, notification_id):
+    """
+    Marks a notification as read and routes the user to the specific content.
+    """
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+    
+    notification.is_read = True
+    notification.save()
+
+    # --- ROUTING LOGIC ---
+
+    # 1. FOLLOW: Go to the profile of the person who followed you
+    if notification.notification_type == 'follow':
+        return redirect('profile', username=notification.sender.username)
+
+    # 2. POST ACTIONS: (Likes, New Posts, Shares) -> Go to your comments page
+    elif notification.notification_type in ['post_like', 'post_add', 'share']:
+        if notification.post:
+            return redirect('post_comments', post_id=notification.post.id)
+
+    # 3. INTERACTION ACTIONS: (Comments, Replies, Comment Likes)
+    elif notification.notification_type in ['comment', 'reply', 'comment_like']:
+        # This checks if a specific sub-comment exists, and appends a CSS ID tag anchor 
+        # so the screen automatically smooth-scrolls down to that explicit comment.
+        if notification.comment and notification.post:
+            return redirect(f'/post/{notification.post.id}/comments/#comment-{notification.comment.id}')
+        elif notification.post:
+            return redirect('post_comments', post_id=notification.post.id)
+
+    # Default fallback
+    return redirect('notifications')
+
+
+def notification_count(request):
+    """
+    Context processor: Provides data to every page (like the navbar badge).
+    """
+    if request.user.is_authenticated:
+        # Changed fields from '-created_at' to '-timestamp' to match your schema update
+        notifs = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
+        return {
+            'unread_notifications_count': notifs.filter(is_read=False).count(),
+            'recent_notifications': notifs[:5]
+        }
+    return {}
+
+
+
+
+
 
 @login_required
 def mark_notifications_read(request, notification_id):
@@ -809,72 +864,6 @@ from .models import Notification  # This imports the model from models.py
 
 # In views.py
 from django.contrib.auth.decorators import login_required
-
-
-
-@login_required
-def notifications(request):
-    # Change 'created_at' to 'timestamp'
-    user_notifications = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
-    unread_count = user_notifications.filter(is_read=False).count()
-    
-    return render(request, 'notifications.html', {
-        'notifications': user_notifications,
-        'unread_count': unread_count
-    })
-
-@login_required
-def click_notification(request, notification_id):  # Changed pk back to notification_id
-    """
-    Marks a notification as read and routes the user to the specific content.
-    """
-    # Security: Ensure users can only click their own notifications
-    # We use notification_id here to match the argument above
-    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
-    
-    notification.is_read = True
-    notification.save()
-
-    # --- ROUTING LOGIC ---
-
-    # 1. FOLLOW: Go to the profile of the person who followed you
-    if notification.notification_type == 'follow':
-        return redirect('profile', username=notification.sender.username)
-
-    # 2. POST ACTIONS: (Likes, New Posts, Shares) -> Go to the post
-    elif notification.notification_type in ['post_like', 'post_add', 'share']:
-        if notification.post:
-            return redirect('post_detail', pk=notification.post.pk)
-
-    # 3. INTERACTION ACTIONS: (Comments, Replies, Comment Likes)
-    elif notification.notification_type in ['comment', 'reply', 'comment_like']:
-        if notification.comment and notification.post:
-            # Anchors the URL to #comment-ID so the browser scrolls to it automatically
-            return redirect(f'/post/{notification.post.pk}/#comment-{notification.comment.id}')
-        elif notification.post:
-            return redirect('post_detail', pk=notification.post.pk)
-
-    # Default fallback
-    return redirect('notifications')
-
-
-def notification_count(request):
-    """
-    Context processor: Provides data to every page (like the navbar badge).
-    """
-    if request.user.is_authenticated:
-        # Optimization: Pull notifications via the related name or direct filter
-        notifs = Notification.objects.filter(recipient=request.user).order_by('-created_at')
-        return {
-            'unread_notifications_count': notifs.filter(is_read=False).count(),
-            'recent_notifications': notifs[:5]  # Top 5 for a potential dropdown
-        }
-    return {}
-
-
-
-
-
 
 
 def post_detail(request, pk):
@@ -1163,5 +1152,33 @@ def niche_selection(request):
 
 def account_view(request):
     return render(request, 'account.html')
+
+
+
+@login_required
+def like_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Assuming you track comment likes via a ManyToMany or Join Table layout
+    like_relation, created = CommentLikes.objects.get_or_create(user=request.user, comment=comment)
+
+    if not created:
+        like_relation.delete()
+        liked = False
+    else:
+        liked = True
+        
+        # --- COMMENT LIKE NOTIFICATION TRIGGER ---
+        if request.user != comment.user:
+            Notification.objects.create(
+                recipient=comment.user,
+                sender=request.user,
+                notification_type='comment_like',
+                post=comment.post, # Link it back to the overarching post container
+                comment=comment,   # Link to the liked comment text instance
+                text="liked your comment."
+            )
+            
+    return JsonResponse({'liked': liked})
 
 

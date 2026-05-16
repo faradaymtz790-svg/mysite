@@ -1,63 +1,332 @@
 {% include 'navbar.html' %}
 
-<div class="feed" style="margin-top: 20px;">
+<style>
+    /* Clean, modern design system tokens */
+    :root {
+        --primary-green: #00a86b;
+        --primary-green-hover: #008754;
+        --glass-white: rgba(255, 255, 255, 0.75);
+        --glass-green: rgba(0, 168, 107, 0.08);
+        --text-main: #111111;
+        --text-muted: #666666;
+        --border-color: rgba(0, 0, 0, 0.06);
+        --shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.02);
+        --shadow-md: 0 12px 35px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Outer Wrapper sizing up to span beautifully across modern screens */
+    .search-feed-wrapper {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 24px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .search-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 32px;
+        letter-spacing: -0.5px;
+    }
+
+    .section-heading {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        font-weight: 700;
+    }
+
+    /* --- User Grid Slider Layout --- */
+    .user-results-container {
+        display: flex;
+        gap: 24px;
+        overflow-x: auto;
+        padding: 8px 4px 24px 4px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-green) transparent;
+    }
+
+    /* Webkit scrollbar customization for clean aesthetics */
+    .user-results-container::-webkit-scrollbar {
+        height: 5px;
+    }
+    .user-results-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .user-results-container::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 168, 107, 0.2);
+        border-radius: 20px;
+    }
+    .user-results-container::-webkit-scrollbar-thumb:hover {
+        background-color: var(--primary-green);
+    }
+
+    .user-profile-card {
+        text-decoration: none;
+        text-align: center;
+        min-width: 120px;
+        background: white;
+        padding: 20px 16px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    }
+
+    .user-profile-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-md);
+        border-color: rgba(0, 168, 107, 0.2);
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .user-avatar-lg {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-green);
+        padding: 3px;
+        background: white;
+    }
+
+    .username-txt {
+        color: var(--text-main);
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .follower-count-txt {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+        display: block;
+    }
+
+    /* --- Dynamic Post Results Grid --- */
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+    }
+
+    .post-card-premium {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .post-card-premium:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .post-header {
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        background: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .user-meta-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #f0f0f0;
+    }
+
+    .meta-details b {
+        font-size: 14px;
+        color: var(--text-main);
+        font-weight: 600;
+        display: block;
+    }
+
+    .match-tag {
+        font-size: 12px;
+        color: var(--primary-green);
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    /* --- Audio Canvas Visual Container --- */
+    .audio-visual-container {
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        height: 240px;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    .overlay-ui {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.9;
+        transition: opacity 0.2s ease;
+    }
+
+    .post-card-premium:hover .overlay-ui {
+        opacity: 1;
+    }
+
+    .play-trigger {
+        width: 56px;
+        height: 56px;
+        background: white;
+        color: var(--primary-green);
+        border: none;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
+        padding-left: 4px; /* Fix structural centering for standard play icons */
+    }
+
+    .play-trigger:hover {
+        transform: scale(1.12);
+        background: #fafffc;
+        color: var(--primary-green-hover);
+    }
+
+    /* --- Clean State Viewports --- */
+    .divider-line {
+        border: 0;
+        height: 1px;
+        background: radial-gradient(circle, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 100%);
+        margin: 40px 0;
+    }
+
+    .empty-state-box {
+        text-align: center;
+        padding: 100px 24px;
+        background: white;
+        border-radius: 30px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        max-width: 500px;
+        margin: 40px auto;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .empty-state-box h3 {
+        margin: 0 0 8px 0;
+        color: var(--text-main);
+        font-size: 20px;
+    }
+
+    .empty-state-box p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+</style>
+
+<div class="search-feed-wrapper">
+    <!-- Context Query Label Header -->
     {% if query %}
-        <h2 style="font-size: 18px; color: var(--text-muted); margin-bottom: 20px;">
-            Results for <span style="color: var(--primary-green);">"{{ query }}"</span>
+        <h2 class="search-title">
+            Search results for <span style="color: var(--primary-green); font-weight: 800;">"{{ query }}"</span>
         </h2>
     {% endif %}
 
+    <!-- User Profile Blocks Section -->
     {% if user_results %}
-        <div class="user-results-container" style="display: flex; gap: 20px; overflow-x: auto; padding: 10px 0 25px 0; scrollbar-width: none;">
+        <h3 class="section-heading">Matching Accounts</h3>
+        <div class="user-results-container">
             {% for profile_user in user_results %}
-                <a href="{% url 'profile' profile_user.username %}" style="text-decoration: none; text-align: center; min-width: 100px;">
-                    <div style="position: relative; display: inline-block;">
-                        <img src="{% if profile_user.profile.image %}{{ profile_user.profile.image.url }}{% else %}https://via.placeholder.com/80{% endif %}" 
-                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-green); padding: 2px; background: white; transition: 0.3s;"
-                             onmouseover="this.style.transform='scale(1.05)'" 
-                             onmouseout="this.style.transform='scale(1)'">
+                <a href="{% url 'profile' profile_user.username %}" class="user-profile-card">
+                    <div class="avatar-wrapper">
+                        <img src="{% if profile_user.profile.image %}{{ profile_user.profile.image.url }}{% else %}https://via.placeholder.com/80{% endif %}" class="user-avatar-lg" alt="{{ profile_user.username }}">
                     </div>
-                    <div style="margin-top: 8px;">
-                        <b style="color: var(--text-main); font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            {{ profile_user.username }}
-                        </b>
-                        <span style="font-size: 11px; color: var(--text-muted);">
-                            {{ profile_user.followers.count }} followers
-                        </span>
+                    <div>
+                        <b class="username-txt">@{{ profile_user.username }}</b>
+                        <span class="follower-count-txt">{{ profile_user.followers.count }} followers</span>
                     </div>
                 </a>
             {% endfor %}
         </div>
-        <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 30px;">
+        
+        {% if post_results %}
+            <hr class="divider-line">
+        {% endif %}
     {% endif %}
 
+    <!-- Audio Track / Content Grid Cards Section -->
     {% if post_results %}
-        {% for post in post_results %}
-            <div class="post" id="post-card-{{ post.id }}">
-                <div class="post-header">
-                    <div class="user-meta">
-                        <a href="{% url 'profile' post.user.username %}" style="text-decoration: none;">
-                            <img class="avatar" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}">
-                        </a>
-                        <div>
-                            <b>{{ post.user.username }}</b>
-                            <div style="font-size:11px; color:green;">Matches: {{ post.title }}</div>
+        <h3 class="section-heading">Matching Audio Posts</h3>
+        <div class="posts-grid">
+            {% for post in post_results %}
+                <div class="post-card-premium" id="post-card-{{ post.id }}">
+                    <div class="post-header">
+                        <div class="user-meta">
+                            <a href="{% url 'profile' post.user.username %}" class="user-meta-link">
+                                <img class="avatar-sm" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}" alt="Avatar">
+                                <div class="meta-details">
+                                    <b>{{ post.user.username }}</b>
+                                    <div class="match-tag">{{ post.title }}</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="audio-visual-container" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/400x240{% endif %}');">
+                        <div class="overlay-ui">
+                            <button class="play-trigger" onclick="togglePlay({{ post.id }})">▶</button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="audio-visual-container" style="background-image:url('{{ post.image.url }}'); height: 200px;">
-                     <div class="overlay-ui">
-                        <button class="play-trigger" onclick="togglePlay({{post.id}})">▶</button>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     {% else %}
+        <!-- Universal Fallback Screen Empty Container Block -->
         {% if not user_results %}
-            <div style="text-align:center; padding:100px; color:gray;">
+            <div class="empty-state-box">
+                <span class="empty-icon">🔍</span>
                 <h3>No matches found</h3>
-                <p>Try searching for a different username or post title.</p>
+                <p>We couldn't find what you're looking for. Try checking for misspellings or looking up a different username or audio title.</p>
             </div>
         {% endif %}
     {% endif %}

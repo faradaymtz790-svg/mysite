@@ -209,11 +209,15 @@
                         
                         {% elif notification.notification_type == 'comment' %}
                             commented on your post: 
-                            <span class="comment-preview">"{{ notification.comment.content|truncatechars:60 }}"</span>
+                            <span class="comment-preview">
+                                "{% if notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
+                            </span>
                         
                         {% elif notification.notification_type == 'reply' %}
                             replied to your comment: 
-                            <span class="comment-preview">"{{ notification.comment.content|truncatechars:60 }}"</span>
+                            <span class="comment-preview">
+                                "{% if notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
+                            </span>
                         
                         {% elif notification.notification_type == 'post_add' %}
                             shared a new post <span class="post-link">{{ notification.post.title|truncatechars:20 }}</span>
@@ -221,7 +225,9 @@
                         {% elif notification.notification_type == 'comment_like' %}
                             liked your comment:
                             {% if notification.comment %}
-                                <span class="comment-preview">"{{ notification.comment.content|truncatechars:60 }}"</span>
+                                <span class="comment-preview">
+                                    "{% if notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
+                                </span>
                             {% else %}
                                 <span>(View interaction)</span>
                             {% endif %}
