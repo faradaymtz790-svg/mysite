@@ -432,6 +432,10 @@ def following_list(request, username):
 
  # Redirect back to the same page to see the new comment
   
+# ==========================================
+# FILE: views.py
+# ==========================================
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -484,9 +488,10 @@ def post_comments(request, post_id):
         
         return redirect('post_comments', post_id=post.id)
 
-    # 3. GET Logic (Optimized Query)
+    # 3. GET Logic (Optimized Query fetching the prefetch relation for likes)
     comments = Comment.objects.filter(post=post, parent=None)\
                               .select_related('user', 'user__profile')\
+                              .prefetch_related('likes', 'replies__user', 'replies__user__profile')\
                               .order_by('-created_at')
                               
     return render(request, 'comments.html', {
@@ -494,7 +499,6 @@ def post_comments(request, post_id):
         'comments': comments
     })
 
-# --- ADD THIS NEW LIKING ENDPOINT BELOW ---
 
 @login_required
 @require_POST
@@ -514,7 +518,7 @@ def like_comment(request, comment_id):
             Notification.objects.create(
                 recipient=comment.user,
                 sender=request.user,
-                notification_type='like', # Make sure 'like' is a choice in your Notification model
+                notification_type='like', 
                 post=comment.post,
                 comment=comment,
                 text="liked your comment."
@@ -524,8 +528,6 @@ def like_comment(request, comment_id):
         'liked': liked,
         'count': comment.likes.count()
     })
-
-
 
 
 @login_required
@@ -1202,8 +1204,4 @@ def account_view(request):
     return render(request, 'account.html')
 
 
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Comment, Notification
 

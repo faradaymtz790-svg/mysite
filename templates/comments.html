@@ -1,3 +1,6 @@
+<!-- ==========================================
+     FILE: comments.html
+     ========================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,7 +135,6 @@
             transition: 0.2s;
         }
 
-        /* FIX 1: Change target to match the .like-btn class definition used on comments */
         .like-btn.is-liked { color: var(--primary-green) !important; transform: scale(1.1); }
         .reply-trigger { font-size: 12px; color: var(--primary-green); font-weight: 700; cursor: pointer; }
         
@@ -214,9 +216,9 @@
             {% endif %}
 
             <div class="comment-footer">
-                <!-- Reconfigured Like Button Interface -->
+                <!-- FIX: Passing the dynamically generated Django URL directly to the listener function -->
                 <button class="like-btn {% if request.user in comment.likes.all %}is-liked{% endif %}" 
-                        onclick="toggleCommentLike(this, {{ comment.id }})">
+                        onclick="toggleCommentLike(this, '{% url 'like-comment' comment.id %}')">
                     ❤ <span class="count">{{ comment.likes.count }}</span>
                 </button>
                 <span class="reply-trigger" onclick="showReplyForm({{ comment.id }})">Reply</span>
@@ -262,7 +264,6 @@
 </div>
 
 <script>
-    // Bulletproof CSRF token extractor matching the Meta tag setup
     function getCSRFToken() {
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         return metaTag ? metaTag.getAttribute('content') : '';
@@ -273,9 +274,9 @@
         form.style.display = (form.style.display === 'block') ? 'none' : 'block';
     }
 
-    // Fully updated interaction function pointing exactly to 'like-comment/<int:comment_id>/'
-    function toggleCommentLike(btn, id) {
-        fetch(`/like-comment/${id}/`, {
+    // FIX: Using precise parameter target values passed directly from the element listener
+    function toggleCommentLike(btn, endpointUrl) {
+        fetch(endpointUrl, {
             method: "POST",
             headers: { 
                 "X-CSRFToken": getCSRFToken(),
@@ -287,7 +288,6 @@
             return r.json();
         })
         .then(data => {
-            // FIX 2: Swapped data.likes_count to data.count to process properties returned from views.py
             btn.querySelector('.count').innerText = data.count;
             if (data.liked) {
                 btn.classList.add('is-liked');
