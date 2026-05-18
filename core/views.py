@@ -460,7 +460,7 @@ def post_comments(request, post_id):
             parent_id=parent_id if parent_id else None
         )
 
-        # 2. Notification Logic
+        # 2. Notification Logic for Replies/Comments
         if parent_id:
             try:
                 parent_comment = Comment.objects.get(id=parent_id)
@@ -513,21 +513,26 @@ def like_comment(request, comment_id):
         comment.likes.add(request.user)
         liked = True
         
-        # Optional: Send a notification to the comment owner if someone else likes it
+        # Send a notification to the comment owner if someone else likes it
         if request.user != comment.user:
-            Notification.objects.create(
-                recipient=comment.user,
-                sender=request.user,
-                notification_type='like', 
-                post=comment.post,
-                comment=comment,
-                text="liked your comment."
-            )
+            try:
+                Notification.objects.create(
+                    recipient=comment.user,
+                    sender=request.user,
+                    notification_type='like', 
+                    post=comment.post,  # Connects back to the primary thread post ID
+                    comment=comment,     # Attaches the specific comment instance
+                    text="liked your comment."
+                )
+            except Exception as e:
+                # Catching hidden database constraint issues (e.g., if model doesn't allow comment field)
+                print(f"Error creating notification: {e}")
             
     return JsonResponse({
         'liked': liked,
         'count': comment.likes.count()
     })
+
 
 
 @login_required
