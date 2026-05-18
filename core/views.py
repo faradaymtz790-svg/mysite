@@ -432,12 +432,12 @@ def following_list(request, username):
 
  # Redirect back to the same page to see the new comment
   
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from .models import Post, Comment, Notification
+
 @login_required
 def post_comments(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -460,27 +460,25 @@ def post_comments(request, post_id):
         if parent_id:
             try:
                 parent_comment = Comment.objects.get(id=parent_id)
-                # Only notify if you are replying to someone else
                 if request.user != parent_comment.user:
                     Notification.objects.create(
                         recipient=parent_comment.user, 
                         sender=request.user,
-                        notification_type='reply',  # FIX 1: Set type to 'reply' instead of 'comment'
+                        notification_type='reply',
                         post=post,
-                        comment=new_comment,        # FIX 2: Links the comment instance object
+                        comment=new_comment,
                         text=f"replied to your comment: {text_data[:20]}"
                     )
             except Comment.DoesNotExist:
-                pass # Parent comment was likely deleted
+                pass
         
-        # Notify Post Owner (if they aren't the one commenting)
         elif request.user != post.user:
             Notification.objects.create(
                 recipient=post.user,
                 sender=request.user,
                 notification_type='comment',
                 post=post,
-                comment=new_comment,            # FIX 3: Links the comment instance object
+                comment=new_comment,
                 text=f"commented on your post: {text_data[:20]}"
             )
         
@@ -495,6 +493,38 @@ def post_comments(request, post_id):
         'post': post, 
         'comments': comments
     })
+
+# --- ADD THIS NEW LIKING ENDPOINT BELOW ---
+
+@login_required
+@require_POST
+def like_comment(request, comment_id):
+    """Toggles a user like on a comment and returns the new count via JSON"""
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    if request.user in comment.likes.all():
+        comment.likes.remove(request.user)
+        liked = False
+    else:
+        comment.likes.add(request.user)
+        liked = True
+        
+        # Optional: Send a notification to the comment owner if someone else likes it
+        if request.user != comment.user:
+            Notification.objects.create(
+                recipient=comment.user,
+                sender=request.user,
+                notification_type='like', # Make sure 'like' is a choice in your Notification model
+                post=comment.post,
+                comment=comment,
+                text="liked your comment."
+            )
+            
+    return JsonResponse({
+        'liked': liked,
+        'count': comment.likes.count()
+    })
+
 
 
 
@@ -1177,64 +1207,3 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Comment, Notification
 
-@login_required
-def like_comment(request, comment_id):
-    if request.method == "POST":
-        comment = get_object_or_404(Comment, id=comment_id)
-        user = request.user
-        
-        # Toggle the like status in the ManyToMany field
-        if comment.likes.filter(id=user.id).exists():
-            comment.likes.remove(user)
-            liked = False
-            
-            # Clean up notification safely if they unlike the comment
-            try:
-                Notification.objects.filter(
-                    sender=user,
-                    recipient=comment.user,
-                    notification_type='comment_like',
-                    comment=comment
-                ).delete()
-            except Exception as e:
-                # Fallback if 'comment' column does not exist on the Notification model
-                Notification.objects.filter(
-                    sender=user,
-                    recipient=comment.user,
-                    notification_type='comment_like'
-                ).delete()
-        else:
-            comment.likes.add(user)
-            liked = True
-            
-            # Send a notification to the person who wrote the comment
-            if user != comment.user:
-                # SAFE CHECK: Get the post from the comment, or fall back to its parent's post if it's a reply
-                associated_post = comment.post if getattr(comment, 'post', None) else (comment.parent.post if getattr(comment, 'parent', None) else None)
-
-                try:
-                    # Attempt to save with both post and comment parameters
-                    Notification.objects.create(
-                        recipient=comment.user, 
-                        sender=user,            
-                        notification_type='comment_like',
-                        post=associated_post,    
-                        comment=comment,         
-                        text="liked your comment."
-                    )
-                except Exception as e:
-                    # Fail-safe: If your Notification model lacks a 'comment' field, this saves it without crashing
-                    Notification.objects.create(
-                        recipient=comment.user, 
-                        sender=user,            
-                        notification_type='comment_like',
-                        post=associated_post,    
-                        text="liked your comment."
-                    )
-                
-        return JsonResponse({
-            'liked': liked,
-            'likes_count': comment.likes.count()
-        })
-    
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
