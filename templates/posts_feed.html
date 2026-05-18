@@ -130,6 +130,21 @@
             width: 100%;
             padding: 20px;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-sizing: border-box;
+        }
+
+        /* Duration Stamp Styles */
+        .time-stamp {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            border-radius: 6px;
+            user-select: none;
         }
 
         /* PROGRESS SYSTEM */
@@ -163,6 +178,7 @@
             justify-content: center;
             position: relative;
             z-index: 11;
+            flex-shrink: 0;
         }
 
         /* Actions & UI Elements */
@@ -358,8 +374,9 @@
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             <div class="overlay-ui">
                 {% if post.audio %}
-                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateProgress({{ post.id }})" onended="resetUI({{ post.id }})"></audio>
+                    <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateProgress({{ post.id }})" onended="resetUI({{ post.id }})" onloadedmetadata="initDuration({{ post.id }})"></audio>
                     <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                    <span class="time-stamp" id="time{{post.id}}">00:00 / 00:00</span>
                 {% else %}
                     <p style="color: white; font-size: 12px;">Audio missing</p>
                 {% endif %}
@@ -429,15 +446,37 @@
         return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
     }
 
+    // Helper to format time into MM:SS
+    function formatTime(secs) {
+        if (isNaN(secs)) return "00:00";
+        const m = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = Math.floor(secs % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // New configuration to display total metadata duration when audio structure loads
+    function initDuration(id) {
+        const audio = document.getElementById("audio" + id);
+        const timeStamp = document.getElementById("time" + id);
+        if (audio && timeStamp) {
+            timeStamp.innerText = `00:00 / ${formatTime(audio.duration)}`;
+        }
+    }
+
     function updateProgress(id) {
         const audio = document.getElementById("audio" + id);
         const fill = document.getElementById("fill" + id);
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
+        const timeStamp = document.getElementById("time" + id);
         
         if (audio.duration) {
             const percent = (audio.currentTime / audio.duration) * 100;
             fill.style.width = percent + "%";
             
+            if (timeStamp) {
+                timeStamp.innerText = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+            }
+
             bars.forEach(bar => { 
                 bar.style.height = (Math.random() * 260 + 20) + "px"; 
                 bar.style.opacity = "1"; 
@@ -459,6 +498,12 @@
         if (fill) fill.style.width = "0%";
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
         bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
+        
+        const audio = document.getElementById("audio" + id);
+        const timeStamp = document.getElementById("time" + id);
+        if (audio && timeStamp) {
+            timeStamp.innerText = `00:00 / ${formatTime(audio.duration)}`;
+        }
     }
 
     // NEW: Stop all other audio tracks when a new one starts

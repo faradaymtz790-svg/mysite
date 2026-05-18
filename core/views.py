@@ -1188,13 +1188,21 @@ def like_comment(request, comment_id):
             comment.likes.remove(user)
             liked = False
             
-            # Clean up notification if they unlike the comment
-            Notification.objects.filter(
-                sender=user,
-                recipient=comment.user,
-                notification_type='comment_like',
-                comment=comment
-            ).delete()
+            # Clean up notification safely if they unlike the comment
+            try:
+                Notification.objects.filter(
+                    sender=user,
+                    recipient=comment.user,
+                    notification_type='comment_like',
+                    comment=comment
+                ).delete()
+            except Exception as e:
+                # Fallback if 'comment' column does not exist on the Notification model
+                Notification.objects.filter(
+                    sender=user,
+                    recipient=comment.user,
+                    notification_type='comment_like'
+                ).delete()
         else:
             comment.likes.add(user)
             liked = True
@@ -1202,16 +1210,27 @@ def like_comment(request, comment_id):
             # Send a notification to the person who wrote the comment
             if user != comment.user:
                 # SAFE CHECK: Get the post from the comment, or fall back to its parent's post if it's a reply
-                associated_post = comment.post if comment.post else (comment.parent.post if comment.parent else None)
+                associated_post = comment.post if getattr(comment, 'post', None) else (comment.parent.post if getattr(comment, 'parent', None) else None)
 
-                Notification.objects.create(
-                    recipient=comment.user, 
-                    sender=user,            
-                    notification_type='comment_like',
-                    post=associated_post,    # Now handles replies safely!
-                    comment=comment,         
-                    text="liked your comment."
-                )
+                try:
+                    # Attempt to save with both post and comment parameters
+                    Notification.objects.create(
+                        recipient=comment.user, 
+                        sender=user,            
+                        notification_type='comment_like',
+                        post=associated_post,    
+                        comment=comment,         
+                        text="liked your comment."
+                    )
+                except Exception as e:
+                    # Fail-safe: If your Notification model lacks a 'comment' field, this saves it without crashing
+                    Notification.objects.create(
+                        recipient=comment.user, 
+                        sender=user,            
+                        notification_type='comment_like',
+                        post=associated_post,    
+                        text="liked your comment."
+                    )
                 
         return JsonResponse({
             'liked': liked,

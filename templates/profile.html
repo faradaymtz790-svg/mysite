@@ -49,7 +49,10 @@
         .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
         .v-bar { flex:1; height:5px; border-radius:3px; transition:0.1s ease; opacity: 0.6; }
 
-        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; position: absolute; bottom: 40px; left: 20px; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        /* AUDIO TIME DISPLAY LAYOUT CONTAINER */
+        .player-controls-wrapper { position: absolute; bottom: 40px; left: 20px; z-index: 10; display: flex; align-items: center; gap: 12px; }
+        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .audio-time-display { background: rgba(0, 0, 0, 0.6); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; backdrop-filter: blur(5px); font-variant-numeric: tabular-nums; }
 
         .progress-wrapper { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: rgba(0,0,0,0.3); z-index: 20; cursor: pointer; }
         .progress-bar-fill { height: 100%; width: 0%; background: var(--bright-blue); position: relative; transition: width 0.1s linear; }
@@ -136,8 +139,13 @@
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             {% if post.audio %}
-                <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
-                <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                <!-- Updated Audio Tag with dynamic loadedmetadata hook -->
+                <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onloadedmetadata="initDuration({{post.id}})" ontimeupdate="updateProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
+                <div class="player-controls-wrapper">
+                    <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                    <!-- Audio Track Runtime Display Element -->
+                    <div class="audio-time-display" id="time{{post.id}}">0:00 / 0:00</div>
+                </div>
             {% endif %}
 
             <div class="progress-wrapper" onclick="seekAudio(event, {{post.id}})">
@@ -190,15 +198,37 @@
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
+    // TIME PARSER HELPER
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // INITIALIZE TRACK RUNTIME BEFORE PLAYBACK
+    function initDuration(id) {
+        const audio = document.getElementById("audio" + id);
+        const timeDisplay = document.getElementById("time" + id);
+        if (audio && timeDisplay) {
+            timeDisplay.innerText = `0:00 / ${formatTime(audio.duration)}`;
+        }
+    }
+
     // PROGRESS BAR & VISUALIZER
     function updateProgress(id) {
         const audio = document.getElementById("audio" + id);
         const fill = document.getElementById("fill" + id);
+        const timeDisplay = document.getElementById("time" + id);
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
         
         if (audio.duration) {
             const progress = (audio.currentTime / audio.duration) * 100;
             fill.style.width = progress + "%";
+            
+            if (timeDisplay) {
+                timeDisplay.innerText = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+            }
             
             // Smoother randomized bounce
             bars.forEach(b => {
@@ -223,9 +253,14 @@
         if(btn) btn.innerHTML = "▶";
         const fill = document.getElementById("fill" + id);
         if(fill) fill.style.width = "0%";
+        const timeDisplay = document.getElementById("time" + id);
+        const audio = document.getElementById("audio" + id);
+        if (timeDisplay && audio) {
+            timeDisplay.innerText = `0:00 / ${formatTime(audio.duration)}`;
+        }
     }
 
-    // NEW: Stop all other audio tracks when a new one starts
+    // Stop all other audio tracks when a new one starts
     function stopAllOtherAudio(currentId) {
         const allAudios = document.querySelectorAll('audio');
         allAudios.forEach(audio => {
@@ -265,7 +300,7 @@
         }
     }
 
-    // FAST ASYNC PROFILE UPDATE
+    // INSTANT ASYNC PROFILE UPDATE (NO FULL RE_LOADS OPTIMIZATION)
     document.getElementById('profileUpdateForm').onsubmit = async function(e) {
         e.preventDefault(); 
         const btn = document.getElementById('saveBtn'); 
@@ -274,6 +309,9 @@
 
         try {
             const formData = new FormData(this);
+            const imageInput = this.querySelector('input[name="image"]');
+            const coverInput = this.querySelector('input[name="cover_photo"]');
+
             const res = await fetch("{% url 'update_profile' %}", { 
                 method: 'POST', 
                 body: formData, 
@@ -282,7 +320,7 @@
             const d = await res.json(); 
 
             if(d.success) {
-                // Update UI instantly without full reload
+                // Update text configurations instantly without full reload
                 if(d.bio) document.getElementById('display-bio').innerText = d.bio;
                 if(d.location) document.getElementById('display-location').innerText = d.location;
                 if(d.links) {
@@ -290,14 +328,22 @@
                     linkEl.href = d.links;
                     linkEl.innerText = d.links;
                 }
-                // Only reload if images were changed to refresh the source
-                if(formData.get('image').size > 0 || formData.get('cover_photo').size > 0) {
-                    window.location.reload();
-                } else {
-                    closeModal();
-                    btn.disabled = false;
-                    btn.innerText = "Save Changes";
+                
+                // Swap media files directly using localized ObjectURLs (Blazing Fast UI Update)
+                if(imageInput && imageInput.files.length > 0) {
+                    const avatarUrl = URL.createObjectURL(imageInput.files[0]);
+                    document.getElementById('display-avatar').src = avatarUrl;
+                    document.querySelectorAll('.post-avatar').forEach(img => img.src = avatarUrl);
                 }
+                if(coverInput && coverInput.files.length > 0) {
+                    const coverUrl = URL.createObjectURL(coverInput.files[0]);
+                    const coverContainer = document.getElementById('display-cover');
+                    coverContainer.innerHTML = `<img src="${coverUrl}">`;
+                }
+
+                closeModal();
+                btn.disabled = false;
+                btn.innerText = "Save Changes";
             } else {
                 alert("Error updating profile.");
                 btn.disabled = false;
@@ -306,6 +352,7 @@
         } catch(err) {
             console.error(err);
             btn.disabled = false;
+            btn.innerText = "Save Changes";
         }
     };
 
