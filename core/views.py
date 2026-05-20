@@ -1209,4 +1209,70 @@ def account_view(request):
     return render(request, 'account.html')
 
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .models import RadioNetwork, RadioPost
 
+def radio_network_profile(request, pk=None):
+    """
+    Renders the radio profile page. If a pk is provided, it serves as a public view.
+    If no pk is provided, it falls back to the logged-in user's personal channel.
+    """
+    # 1. Fallback Route: If no ID is requested, try to show the user's own channel
+    if pk is None:
+        if not request.user.is_authenticated:
+            return redirect('login') # Protect the personal dashboard fallback route
+            
+        network, created = RadioNetwork.objects.get_or_create(
+            owner=request.user,
+            defaults={'channel_name': f"{request.user.username}'s Live Network"}
+        )
+    # 2. Public Route: Anyone can view any network by its ID
+    else:
+        network = get_object_or_404(RadioNetwork, pk=pk)
+    
+    # Extract historical post entities tied to this network
+    posts = network.posts.all()
+    
+    context = {
+        'network': network, # <-- CRITICAL: Passed to HTML for the {% if request.user == network.owner %} block
+        'channel_name': network.channel_name,
+        'owner_name': network.owner.get_full_name() or network.owner.username,
+        'location': network.location,
+        'postal_address': network.postal_address,
+        'topics': network.topics,
+        'station_logo': network.station_logo.url if network.station_logo else None,
+        'posts': posts,
+    }
+    return render(request, 'radio_networks.html', context)
+
+
+@login_required
+@require_POST
+def update_station_profile(request):
+    """
+    Intercepts POST data from the in-page form editor module, verifies
+    ownership matching implicitly, and updates database records.
+    """
+    # Explicitly locks modification access to the actual owner of the network profile
+    network = get_object_or_404(RadioNetwork, owner=request.user)
+    
+    network.channel_name = request.POST.get('channel_name', network.channel_name)
+    network.location = request.POST.get('location', network.location)
+    network.postal_address = request.POST.get('postal_address', network.postal_address)
+    network.topics = request.POST.get('topics', network.topics)
+    
+    if 'station_logo' in request.FILES:
+        network.station_logo = request.FILES['station_logo']
+        
+    owner_name_input = request.POST.get('owner_name', '').strip()
+    if owner_name_input:
+        name_parts = owner_name_input.split(' ', 1)
+        request.user.first_name = name_parts[0]
+        if len(name_parts) > 1:
+            request.user.last_name = name_parts[1]
+        request.user.save()
+
+    network.save()
+    return redirect('radio_profile')

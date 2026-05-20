@@ -69,6 +69,12 @@ urlpatterns += i18n_patterns(
     path('notification/<int:notification_id>/click/', views.click_notification, name='click_notification'),
     path('search/', views.search, name='search'),
 
+     # --- RADIO ---
+    
+    path('radio/dashboard/', views.radio_network_profile, name='radio_profile'),
+    path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
+    path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
+
     # --- SETTINGS & HELP ---
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),

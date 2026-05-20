@@ -214,3 +214,43 @@ class Report(models.Model):
 
 
 
+
+class RadioNetwork(models.Model):
+    """
+    Stores core metadata profile information for real-time audio channel networks.
+    """
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='radio_network')
+    channel_name = models.CharField(max_length=150, default="Plugbar Premium Station")
+    station_logo = models.ImageField(upload_upload_to='station_logos/', blank=True, null=True)
+    location = models.CharField(max_length=200, default="Global Network Platform")
+    postal_address = models.CharField(max_length=255, default="No Mailing Code")
+    topics = models.TextField(default="This broadcasting channel network operator hasn't published their summary strategy agenda logs details yet.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.channel_name} ({self.owner.username})"
+
+
+class RadioPost(models.Model):
+    """
+    Stores text dispatches and audio podcast releases published on a station's activity wall.
+    """
+    POST_TYPES = [
+        ('TEXT', 'Live Broadcast Summary'),
+        ('AUDIO', 'Podcast Update'),
+    ]
+
+    network = models.ForeignKey(RadioNetwork, on_delete=models.CASCADE, related_name='posts')
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    post_type = models.CharField(max_length=10, choices=POST_TYPES, default='TEXT')
+    likes_count = models.IntegerField(default=0)
+    comments_count = models.IntegerField(default=0)
+    published_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-published_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.network.channel_name}"

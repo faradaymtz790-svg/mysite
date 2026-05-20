@@ -1,274 +1,470 @@
-{% extends 'base.html' %}
-{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launch Your Radio Station Network</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Logos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-{% block content %}
-<style>
-    :root {
-        --primary-green: #00a86b;
-        --bg-light: #f8f9fa;
-        --text-dark: #262626;
-        --text-muted: #8e8e8e;
-        --border-color: #eee;
-        --danger: #ff4d4d;
-        --danger-bg: #fff5f5;
-    }
+    <style>
+        :root {
+            --primary-green: #00a86b;
+            --dark-green: #007749;
+            --soft-green-alpha: rgba(0, 168, 107, 0.08);
+            --border-green: rgba(0, 168, 107, 0.4);
+            --text-dark: #0f172a;
+        }
 
-    /* Account Page Layout */
-    .account-page-wrapper {
-        width: 100%;
-        min-height: 100vh;
-        background-color: white;
-        padding-bottom: 50px;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
 
-    .account-header {
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid var(--border-color);
-        background: white;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
+        body {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
 
-    .back-link {
-        font-size: 24px;
-        text-decoration: none;
-        color: var(--text-dark);
-        margin-right: 15px;
-        display: flex;
-        align-items: center;
-    }
+        /* 1. Django/Backend Navbar Template Inclusion Container */
+        .navbar-global-container {
+            width: 100%;
+        }
 
-    .account-header h1 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 800;
-        text-transform: uppercase;
-        color: var(--text-dark);
-    }
+        /* 2. Full Width Top Header & Plugbar Layout */
+        .top-utility-bar {
+            width: 100%;
+            background: #1e293b;
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
 
-    .account-container {
-        padding: 20px;
-        max-width: 600px;
-        margin: 0 auto;
-    }
+        /* Back Arrow Navigation Link to Feed */
+        .back-navigation-link {
+            color: #ffffff;
+            font-size: 1.25rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    .section-label {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        margin: 24px 0 12px;
-        letter-spacing: 0.5px;
-    }
+        .back-navigation-link:hover {
+            color: var(--primary-green);
+            transform: translateX(-4px);
+        }
 
-    /* Information Cards */
-    .info-card-group {
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        overflow: hidden;
-        background: white;
-    }
+        .plugbar-branding-zone {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
-    .info-item {
-        padding: 18px 20px;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        flex-direction: column;
-    }
+        .brand-logo-img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
 
-    .info-item:last-child {
-        border-bottom: none;
-    }
+        .plugbar-text {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            line-height: 1;
+        }
 
-    .info-label {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-bottom: 4px;
-    }
+        /* 3. 100% Full Width Dynamic Glassmorphism Workspace Container */
+        .full-width-workspace {
+            width: 100%;
+            padding: 60px 10%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            
+            /* Initial Top State: Solid Clean White */
+            background-color: #ffffff;
+            transition: background-color 0.5s ease, backdrop-filter 0.5s ease, box-shadow 0.5s ease;
+        }
 
-    .info-value {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--text-dark);
-    }
+        /* Scrolled Glassmorphism State at the Bottom */
+        .full-width-workspace.scrolled {
+            background-color: var(--soft-green-alpha);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: inset 0 0 80px rgba(0, 168, 107, 0.05);
+        }
 
-    /* Danger Zone */
-    .danger-section {
-        margin-top: 40px;
-        padding: 24px;
-        background-color: var(--danger-bg);
-        border-radius: 20px;
-        border: 1px solid #ffdbdb;
-    }
+        /* Form Content Inner Boundary Matrix (Covers 100% within layouts) */
+        .creation-form-core {
+            width: 100%;
+            max-width: 1200px;
+        }
 
-    .danger-section h2 {
-        color: var(--danger);
-        font-size: 18px;
-        font-weight: 800;
-        margin: 0 0 10px 0;
-    }
+        .form-section-headline {
+            margin-bottom: 48px;
+            text-align: left;
+        }
 
-    .danger-section p {
-        font-size: 14px;
-        color: #555;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
+        .form-section-headline h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
 
-    /* Buttons */
-    .btn-action {
-        width: 100%;
-        padding: 16px;
-        border-radius: 14px;
-        font-weight: 700;
-        font-size: 15px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
-        display: block;
-    }
+        /* 4. Inputs, Green Capitalized Labels, and 90% Custom Width Borders */
+        .form-field-block {
+            margin-bottom: 36px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .btn-delete-trigger {
-        background-color: var(--danger);
-        color: white;
-        box-shadow: 0 4px 12px rgba(255, 77, 77, 0.2);
-    }
+        .form-grid-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+        }
 
-    .btn-delete-trigger:hover {
-        background-color: #e64545;
-        transform: translateY(-1px);
-    }
+        /* Green Capitalized Label Elements */
+        .form-field-block label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase; /* Force CAPITALIZE text transformation */
+            color: var(--primary-green);
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
 
-    .btn-cancel {
-        background: white;
-        border: 1px solid var(--border-color);
-        color: var(--text-dark);
-        margin-top: 12px;
-    }
+        /* 2px Green Input Styles covering 90% layout width */
+        .custom-input-element, 
+        .custom-textarea-element {
+            width: 90%; /* Fixed constraint requested */
+            padding: 16px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border-green); /* 2px Green Frame Line */
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            outline: none;
+            border-radius: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    /* Confirmation Modal */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
+        /* Green Capitalized Placeholder Layout Adjustments */
+        .custom-input-element::placeholder,
+        .custom-textarea-element::placeholder {
+            color: rgba(0, 168, 107, 0.5);
+            text-transform: uppercase; /* Force placeholder to render in CAPITALIZE */
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
 
-    .modal-box {
-        background: white;
-        border-radius: 28px;
-        padding: 32px;
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        animation: modalIn 0.3s ease-out;
-    }
+        .custom-input-element:focus,
+        .custom-textarea-element:focus {
+            border-bottom-color: var(--primary-green);
+            padding-left: 8px;
+            background: rgba(0, 168, 107, 0.02);
+        }
 
-    @keyframes modalIn {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
+        .custom-textarea-element {
+            min-height: 120px;
+            resize: vertical;
+        }
 
-    .modal-icon {
-        font-size: 48px;
-        margin-bottom: 15px;
-    }
-</style>
+        /* Image Profile Artwork Interface Block */
+        .brand-artwork-uploader {
+            width: 90%;
+            border: 2px dashed var(--border-green);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
 
-<div class="account-page-wrapper">
-    <header class="account-header">
-        <a href="{% url 'settings' %}" class="back-link">⬅</a>
-        <h1>{% trans "Account Information" %}</h1>
-    </header>
+        .brand-artwork-uploader:hover {
+            border-color: var(--primary-green);
+            background: rgba(0, 168, 107, 0.03);
+        }
 
-    <div class="account-container">
+        .brand-artwork-uploader i {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 12px;
+        }
+
+        /* Social Connection Layout */
+        .social-matrix-headline {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 48px 0 24px 0;
+            color: var(--text-dark);
+        }
+
+        .social-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .social-input-wrapper i {
+            position: absolute;
+            left: 0;
+            font-size: 1.25rem;
+        }
+
+        .social-input-wrapper input {
+            padding-left: 36px;
+        }
+
+        .fa-youtube { color: #ff0000; }
+        .fa-instagram { color: #e1306c; }
+        .fa-spotify { color: #1ed760; }
+        .fa-tiktok { color: #010101; }
+        .fa-facebook { color: #1877f2; }
+
+        /* 5. Animated Submit Button Feature */
+        .interactive-submit-container {
+            width: 90%;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 40px;
+        }
+
+        .magnetic-submit-btn {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 18px 48px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0, 168, 107, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Hover Pulse Animation Layer Effect */
+        .magnetic-submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .magnetic-submit-btn:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 168, 107, 0.35);
+        }
+
+        .magnetic-submit-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .magnetic-submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive Breakpoints Override */
+        @media (max-width: 900px) {
+            .form-grid-split {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .custom-input-element, .custom-textarea-element, .brand-artwork-uploader, .interactive-submit-container {
+                width: 100%; /* Expands to full screen width container bounds on mobile devices */
+            }
+            .top-utility-bar {
+                padding: 16px 20px;
+            }
+            .plugbar-text {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Server Side Navbar Injection Hook -->
+    <div class="navbar-global-container">
+        {% include 'navbar.html' %}
+    </div>
+
+    <!-- 2. Header Utility Bar Layout with Brand Logo, Back Arrow, and Plugbar Text -->
+    <div class="top-utility-bar">
+        <a href="posts_feed.html" class="back-navigation-link">
+            <i class="fa-solid fa-arrow-left"></i> Feed
+        </a>
         
-        <div class="section-label">{% trans "Profile Details" %}</div>
-        <div class="info-card-group">
-            <div class="info-item">
-                <span class="info-label">{% trans "Username" %}</span>
-                <span class="info-value">@{{ user.username }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">{% trans "Email Address" %}</span>
-                <span class="info-value">{{ user.email }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">{% trans "Account Status" %}</span>
-                <span class="info-value" style="color: var(--primary-green);">{% trans "Active" %}</span>
-            </div>
+        <div class="plugbar-branding-zone">
+            <!-- Ensure mylogo.png is stored inside your correct static media path asset folder -->
+            <img src="mylogo.png" alt="Radio Network Logo" class="brand-logo-img" onerror="this.style.display='none'">
+            <span class="plugbar-text">plugbar</span>
         </div>
+        
+        <div style="width: 60px;"></div> <!-- Clear alignment balancing element block -->
+    </div>
 
-        <div class="section-label">{% trans "Security" %}</div>
-        <div class="info-card-group">
-            <div class="info-item">
-                <span class="info-label">{% trans "Member Since" %}</span>
-                <span class="info-value">{{ user.date_joined|date:"F d, Y" }}</span>
+    <!-- 3. Full 100% Width Workspace Base Sheet -->
+    <div class="full-width-workspace" id="glassWorkspace">
+        <div class="creation-form-core">
+            
+            <div class="form-section-headline">
+                <h1>Network Configurations</h1>
             </div>
-        </div>
 
-        <div class="danger-section">
-            <h2>{% trans "Delete Account" %}</h2>
-            <p>{% trans "Warning: Deleting your account is permanent. All your posts, followers, and settings will be removed forever." %}</p>
-            <button onclick="toggleModal(true)" class="btn-action btn-delete-trigger">
-                {% trans "Delete My Account" %}
-            </button>
+            <form action="#" method="POST" enctype="multipart/form-data">
+                
+                <!-- Inner Grid Section Split -->
+                <div class="form-grid-split">
+                    
+                    <!-- Left Column Elements Stack -->
+                    <div class="form-column">
+                        <div class="form-field-block">
+                            <label for="channelName">Channel Name</label>
+                            <input type="text" class="custom-input-element" id="channelName" name="channel_name" maxlength="100" placeholder="ENTER CHANNEL REGISTRATION NAME" required>
+                        </div>
+
+                        <div class="form-field-block">
+                            <label for="ownerName">Owner Name</label>
+                            <input type="text" class="custom-input-element" id="ownerName" name="owner_name" maxlength="100" placeholder="ENTER FOUNDER IDENTIFICATION NAME" required>
+                        </div>
+
+                        <div class="form-field-block">
+                            <label for="location">Location</label>
+                            <input type="text" class="custom-input-element" id="location" name="location" maxlength="100" placeholder="ENTER CITY AND REGIONAL COUNTRY" required>
+                        </div>
+                    </div>
+
+                    <!-- Right Column Elements Stack -->
+                    <div class="form-column">
+                        <div class="form-field-block">
+                            <label for="postalAddress">Postal Address</label>
+                            <input type="text" class="custom-input-element" id="postalAddress" name="postal_address" maxlength="100" placeholder="ENTER POSTAL ZONE AND MAILING CODE" required>
+                        </div>
+
+                        <div class="form-field-block">
+                            <label for="topics">Topics</label>
+                            <textarea class="custom-textarea-element" id="topics" name="topics" maxlength="150" placeholder="DESCRIBE THE CORE CONVERSATIONAL BROADCAST TOPICS STRATEGY" required></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Profile Graphic Image Document Handler -->
+                <div class="form-field-block">
+                    <label>Station Network Profile Image or Brand Artwork</label>
+                    <div class="brand-artwork-uploader" onclick="document.getElementById('fileSourceInput').click()">
+                        <i class="fa-solid fa-image"></i>
+                        <p style="color: var(--primary-green); font-weight:600; font-size:0.9rem;">CLICK TO LOAD ATTACHED MEDIA ASSET</p>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">PNG OR JPG SYSTEM GRAPHIC ONLY</p>
+                        <input type="file" id="fileSourceInput" name="station_logo" accept=".jpg, .jpeg, .png" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- Connected Social Media Form Matrices -->
+                <h2 class="social-matrix-headline">Syndicated Social Interfaces</h2>
+                
+                <div class="form-grid-split">
+                    <div class="form-column">
+                        <div class="form-field-block">
+                            <label>YouTube Link</label>
+                            <div class="social-input-wrapper">
+                                <i class="fa-brands fa-youtube"></i>
+                                <input type="text" class="custom-input-element" name="youtube_url" placeholder="PASTE YOUTUBE DISPATCH ENDPOINT CHANNEL">
+                            </div>
+                        </div>
+
+                        <div class="form-field-block">
+                            <label>Instagram Link</label>
+                            <div class="social-input-wrapper">
+                                <i class="fa-brands fa-instagram"></i>
+                                <input type="text" class="custom-input-element" name="instagram_url" placeholder="PASTE INSTAGRAM ACCOUNT MATRIX">
+                            </div>
+                        </div>
+
+                        <div class="form-field-block">
+                            <label>Spotify Link</label>
+                            <div class="social-input-wrapper">
+                                <i class="fa-brands fa-spotify"></i>
+                                <input type="text" class="custom-input-element" name="spotify_url" placeholder="PASTE SPOTIFY PROFILE IDENTIFIER">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-column">
+                        <div class="form-field-block">
+                            <label>TikTok Link</label>
+                            <div class="social-input-wrapper">
+                                <i class="fa-brands fa-tiktok"></i>
+                                <input type="text" class="custom-input-element" name="tiktok_url" placeholder="PASTE TIKTOK CREATOR ADDRESS">
+                            </div>
+                        </div>
+
+                        <div class="form-field-block">
+                            <label>Facebook Link</label>
+                            <div class="social-input-wrapper">
+                                <i class="fa-brands fa-facebook"></i>
+                                <input type="text" class="custom-input-element" name="facebook_url" placeholder="PASTE FACEBOOK STATION PAGE DESTINATION">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button Container block inside width matrix -->
+                <div class="interactive-submit-container">
+                    <button type="submit" class="magnetic-submit-btn">Initialize Broadcast Server</button>
+                </div>
+
+            </form>
         </div>
     </div>
-</div>
 
-<!-- Permanent Delete Confirmation Modal -->
-<div id="deleteModal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-icon">⚠️</div>
-        <h3 style="margin-top: 0; font-size: 22px; font-weight: 800;">{% trans "Are you sure?" %}</h3>
-        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.5;">
-            {% trans "This action cannot be undone. Please confirm you want to permanently delete your Plugbar account." %}
-        </p>
-
-        <form action="{% url 'delete_account' %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn-action btn-delete-trigger" style="box-shadow: none;">
-                {% trans "Confirm Delete" %}
-            </button>
-            <button type="button" onclick="toggleModal(false)" class="btn-action btn-cancel">
-                {% trans "Go Back" %}
-            </button>
-        </form>
-    </div>
-</div>
-
-<script>
-    function toggleModal(show) {
-        const modal = document.getElementById('deleteModal');
-        if (show) {
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        } else {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    // Close modal if user clicks outside the white box
-    window.onclick = function(event) {
-        const modal = document.getElementById('deleteModal');
-        if (event.target == modal) {
-            toggleModal(false);
-        }
-    }
-</script>
-{% endblock %}
+    <!-- Glassmorphism Scrolling Engine Logic script -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const workspace = document.getElementById('glassWorkspace');
+            // Check if scroll positioning moved beyond the top boundary
+            if (window.scrollY > 40) {
+                workspace.classList.add('scrolled');
+            } else {
+                workspace.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2,12 +2,13 @@
 {% load i18n %}
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
         --primary-green: #00a86b;
         --glass-bg: rgba(255, 255, 255, 0.95);
         --soft-gray: #f0f2f5;
+        --active-text: #00a86b;
     }
 
     .navbar-container {
@@ -22,7 +23,7 @@
         position: sticky;
         top: 0;
         z-index: 1000;
-        padding: 16px 0 12px 0; /* Increased padding for breathing room */
+        padding: 16px 0 12px 0;
         font-family: 'Inter', sans-serif;
     }
 
@@ -44,10 +45,9 @@
         z-index: 10;
     }
 
-    /* 🔍 EXPANDABLE SEARCH BAR LOGIC */
     .search-wrapper-form {
         position: absolute;
-        right: 140px; /* Increased offset to separate from settings */
+        right: 140px;
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -58,9 +58,8 @@
         border-radius: 50px;
     }
 
-    /* When the search bar is focused/active */
     .search-wrapper-form:focus-within {
-        width: 70%; /* Reduced from 85% to prevent crowding the logo too much */
+        width: 60%; 
         right: 15%; 
         z-index: 100;
     }
@@ -98,7 +97,6 @@
         left: 20px;
     }
 
-    /* Hide logo and settings when searching */
     .navbar-container:has(.search-input:focus) .nav-logo,
     .navbar-container:has(.search-input:focus) .settings-wrapper {
         opacity: 0;
@@ -108,7 +106,7 @@
     .settings-wrapper {
         display: flex;
         align-items: center;
-        gap: 16px; /* More space between lang select and gear icon */
+        gap: 16px;
         z-index: 10;
         transition: opacity 0.3s;
     }
@@ -141,13 +139,12 @@
         background: #e4e6eb;
     }
 
-    /* 🏠 BOTTOM NAV SPACING */
     .nav-bottom-row {
         display: flex;
         justify-content: center;
         width: 100%;
         max-width: 600px;
-        gap: 80px; /* Significantly increased spacing between bottom icons */
+        gap: 50px; /* Adjusted for 4 icons */
         margin-top: 15px;
         padding-bottom: 5px;
     }
@@ -155,16 +152,17 @@
     .nav-link {
         text-decoration: none;
         color: #65676b;
-        font-size: 26px; /* Slightly larger for better touch targets */
-        padding: 10px;
-        transition: 0.2s;
+        font-size: 24px;
+        padding: 8px 12px;
+        transition: all 0.2s ease;
         border-radius: 12px;
+        position: relative;
     }
 
-    .nav-link:hover {
+    .nav-link:hover, .nav-link.active {
         color: var(--primary-green);
         background: var(--soft-gray);
-        transform: translateY(-3px);
+        transform: translateY(-2px);
     }
 </style>
 
@@ -201,11 +199,15 @@
 
     <div class="nav-bottom-row">
         {% if request.user.is_authenticated %}
-            <a href="{% url 'profile' username=request.user.username %}" class="nav-link" title="Home">🏠</a>
+            <a href="{% url 'profile' username=request.user.username %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" title="Home">🏠</a>
         {% else %}
             <a href="{% url 'account_login' %}" class="nav-link" title="Login">🏠</a>
         {% endif %}
-        <a href="{% url 'feed' %}" class="nav-link" title="Feed">🎧</a>
-        <a href="{% url 'notifications' %}" class="nav-link" title="Notifications">🔔</a>
+        
+        <a href="{% url 'feed' %}" class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}" title="Feed">🎧</a>
+        
+        <a href="{% url 'radio_networks' %}" class="nav-link {% if request.resolver_match.url_name == 'radio_networks' %}active{% endif %}" title="Radio Networks">📻</a>
+        
+        <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" title="Notifications">🔔</a>
     </div>
 </div>
