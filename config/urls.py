@@ -74,7 +74,7 @@ urlpatterns += i18n_patterns(
     path('radio/dashboard/', views.radio_network_profile, name='radio_profile'),
     path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
     path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
-
+    path('radio-networks/', views.radio_networks_view, name='radio_networks'),
     # --- SETTINGS & HELP ---
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),

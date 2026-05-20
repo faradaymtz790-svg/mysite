@@ -1276,3 +1276,10 @@ def update_station_profile(request):
 
     network.save()
     return redirect('radio_profile')
+
+
+    # core/views.py
+from django.shortcuts import render
+
+def radio_networks_view(request):
+    return render(request, 'radio_networks.html')
