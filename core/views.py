@@ -1279,6 +1279,8 @@ def update_station_profile(request):
 
 
     # core/views.py
+# ... (rest of your existing code above) ...
+
 def radio_networks_view(request):
     # Fetch the channel associated with the current logged-in user
     user_channel = None
@@ -1288,11 +1290,11 @@ def radio_networks_view(request):
     
     context = {
         'user_channel': user_channel,
-        'radio_posts': RadioPost.objects.all(), # Ensure this is defined
+        'radio_posts': RadioPost.objects.all(),
     }
     return render(request, 'radio_networks.html', context)
 
-
-    def radio_creation_networks(request):
+# Ensure this is at the same level as other function definitions (no indentation)
+def radio_creation_networks(request):
     # This view handles the creation form logic
     return render(request, 'radio_creation.html')
