@@ -4,31 +4,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Radio Networks | plugbar</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <style>
-/* ================= YOUR ORIGINAL CSS (UNCHANGED) ================= */
-/* KEEP ALL YOUR 800+ LINES HERE EXACTLY AS YOU WROTE */
-
-/* ADD SMALL ENHANCEMENTS */
-.like-btn.active i {
-    color: red;
-    transform: scale(1.1);
-}
-
-.hidden {
-    display:none;
-}
+.like-btn.active i { color: red; transform: scale(1.1); }
+.hidden { display:none; }
+.create-channel-wrapper { text-align: center; padding: 50px; }
+.create-channel-btn { padding: 15px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 25px; }
 </style>
 </head>
-
 <body>
 
 <!-- HEADER -->
@@ -40,212 +26,107 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 <!-- CHANNEL -->
 {% if user_channel %}
 <div class="channel-profile">
-
     <div class="channel-cover">
-
         {% if user_channel.cover_video %}
-        <video autoplay muted loop playsinline>
-            <source src="{{ user_channel.cover_video.url }}">
-        </video>
+        <video autoplay muted loop playsinline><source src="{{ user_channel.cover_video.url }}"></video>
         {% else %}
         <img src="{{ user_channel.cover_image.url }}">
         {% endif %}
-
         <div class="cover-overlay"></div>
-
-        <!-- CHANNEL INFO (CLICKABLE PROFILE) -->
         <div class="channel-info">
-
             <a href="{% url 'public_radio_profile' user_channel.id %}">
                 <img src="{{ user_channel.station_logo.url }}" class="station-logo">
             </a>
-
             <div class="channel-details">
-
-                <a href="{% url 'public_radio_profile' user_channel.id %}"
-                   style="color:white;text-decoration:none;">
-                    <div class="channel-name">
-                        {{ user_channel.channel_name }}
-                    </div>
+                <a href="{% url 'public_radio_profile' user_channel.id %}" style="color:white;text-decoration:none;">
+                    <div class="channel-name">{{ user_channel.channel_name }}</div>
                 </a>
-
-                <div class="channel-location">
-                    <i class="fa-solid fa-location-dot"></i>
-                    {{ user_channel.location }}
-                </div>
-
-                <div class="channel-topics">
-                    {{ user_channel.topics }}
-                </div>
-
+                <div class="channel-location"><i class="fa-solid fa-location-dot"></i> {{ user_channel.location }}</div>
+                <div class="channel-topics">{{ user_channel.topics }}</div>
             </div>
         </div>
     </div>
-
 </div>
+{% else %}
+    <!-- CREATE CHANNEL SECTION -->
+    <div class="create-channel-wrapper">
+        <a href="/radio-creation/" class="create-channel-btn">
+            <i class="fa-solid fa-radio"></i> Create Radio Channel
+        </a>
+    </div>
 {% endif %}
 
 <!-- POSTS -->
 <div class="radio-posts">
-
 {% for post in radio_posts %}
-
 <div class="post-card" id="post-{{ post.id }}">
-
-    <!-- BACKGROUND -->
     <div class="post-bg">
-        {% if post.background_video %}
-        <video autoplay muted loop playsinline>
-            <source src="{{ post.background_video.url }}">
-        </video>
-        {% else %}
-        <img src="{{ post.background_image.url }}">
-        {% endif %}
+        {% if post.background_video %}<video autoplay muted loop playsinline><source src="{{ post.background_video.url }}"></video>
+        {% else %}<img src="{{ post.background_image.url }}">{% endif %}
         <div class="post-overlay"></div>
     </div>
-
-    <!-- HEADER -->
     <div class="post-header">
-
         <div class="post-user">
-
-            <!-- CHANNEL LINK -->
-            <a href="{% url 'public_radio_profile' post.channel.id %}">
-                <img src="{{ post.channel.station_logo.url }}">
-            </a>
-
+            <a href="{% url 'public_radio_profile' post.channel.id %}"><img src="{{ post.channel.station_logo.url }}"></a>
             <div class="post-user-details">
-
-                <a href="{% url 'public_radio_profile' post.channel.id %}"
-                   style="color:white;text-decoration:none;">
+                <a href="{% url 'public_radio_profile' post.channel.id %}" style="color:white;text-decoration:none;">
                     <h3>{{ post.channel.channel_name }}</h3>
                 </a>
-
                 <span>{{ post.created_at|timesince }} ago</span>
-
             </div>
-
         </div>
-
-        <!-- SUBSCRIBE (HIDE IF OWNER) -->
-        {% if request.user != post.channel.owner %}
-        <button class="subscribe-btn">Subscribe</button>
-        {% endif %}
-
+        {% if request.user != post.channel.owner %}<button class="subscribe-btn">Subscribe</button>{% endif %}
     </div>
-
-    <!-- TOPIC -->
-    <div class="topic-section">
-        <strong>TOPIC:</strong>
-        <span class="topic-title">{{ post.topic }}</span>
-    </div>
-
-    <!-- AUDIO -->
-    <div class="audio-section">
-        <audio controls>
-            <source src="{{ post.audio.url }}">
-        </audio>
-    </div>
-
-    <!-- POST ACTIONS -->
+    <div class="topic-section"><strong>TOPIC:</strong> <span class="topic-title">{{ post.topic }}</span></div>
+    <div class="audio-section"><audio controls><source src="{{ post.audio.url }}"></audio></div>
     <div class="post-stats">
-
-        <!-- LIKE SYSTEM -->
-        <div class="stat like-btn"
-             onclick="toggleLike({{ post.id }})"
-             id="like-btn-{{ post.id }}">
-
-            <i class="fa-solid fa-heart"></i>
-            <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
+        <div class="stat like-btn" onclick="toggleLike({{ post.id }})" id="like-btn-{{ post.id }}">
+            <i class="fa-solid fa-heart"></i> <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
         </div>
-
-        <a href="{% url 'comments' post.id %}" class="stat">
-            <i class="fa-solid fa-comment"></i>
-            {{ post.comments.count }}
+        <!-- FIXED: URL pattern is 'post_comments' in your urls.py -->
+        <a href="{% url 'post_comments' post.id %}" class="stat">
+            <i class="fa-solid fa-comment"></i> {{ post.comments.count }}
         </a>
-
-        <!-- DELETE ONLY OWNER -->
         {% if request.user == post.channel.owner %}
         <div class="stat">
-            <button onclick="confirmDelete({{ post.id }})"
-                    style="background:red;border:none;color:white;padding:8px 12px;border-radius:20px;">
-                Delete
-            </button>
+            <button onclick="confirmDelete({{ post.id }})" style="background:red;border:none;color:white;padding:8px 12px;border-radius:20px;">Delete</button>
         </div>
         {% endif %}
-
     </div>
-
 </div>
-
 {% endfor %}
 </div>
 
 <!-- FLOATING BUTTON -->
 {% if user_channel %}
-<a href="{% url 'create_radio_post' %}" class="floating-btn">
-    <i class="fa-solid fa-plus"></i>
-</a>
+<a href="{% url 'create_radio_post' %}" class="floating-btn"><i class="fa-solid fa-plus"></i></a>
 {% endif %}
 
-<!-- ================= JAVASCRIPT ================= -->
 <script>
-
-// CSRF
 function getCSRF() {
     let cookieValue = null;
     let cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
         let c = cookies[i].trim();
-        if (c.startsWith('csrftoken=')) {
-            cookieValue = c.substring("csrftoken=".length);
-        }
+        if (c.startsWith('csrftoken=')) { cookieValue = c.substring("csrftoken=".length); }
     }
     return cookieValue;
 }
-
-/* ================= LIKE SYSTEM ================= */
 function toggleLike(postId) {
-
-    fetch(`/like-post/${postId}/`, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRF(),
-        }
-    })
+    fetch(`/like-post/${postId}/`, { method: "POST", headers: { "X-CSRFToken": getCSRF() } })
     .then(res => res.json())
     .then(data => {
-
         document.getElementById(`like-count-${postId}`).innerText = data.likes;
-
         let btn = document.getElementById(`like-btn-${postId}`);
         btn.classList.toggle("active", data.liked);
     });
 }
-
-/* ================= CONFIRM DELETE ================= */
 function confirmDelete(postId) {
-
-    if (!confirm("Are you sure you want to delete this post?")) {
-        return;
-    }
-
-    fetch(`/delete-post/${postId}/`, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCSRF(),
-        }
-    })
+    if (!confirm("Are you sure you want to delete this post?")) return;
+    fetch(`/delete-post/${postId}/`, { method: "POST", headers: { "X-CSRFToken": getCSRF() } })
     .then(res => res.json())
-    .then(data => {
-
-        if (data.success) {
-            document.getElementById(`post-${postId}`).remove();
-        }
-    });
+    .then(data => { if (data.success) document.getElementById(`post-${postId}`).remove(); });
 }
-
 </script>
-
 </body>
 </html>
