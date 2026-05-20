@@ -23,7 +23,6 @@
         .cover { height: 250px; background: #d0f0d8; }
         .cover img { width: 100%; height: 100%; object-fit: cover; }
         .profile-header-main { padding: 20px 5%; }
-        .badge-verified { display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-green); color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; margin-left: 8px; vertical-align: middle; }
         .avatar-main { width: 130px; height: 130px; border-radius: 50%; border: 5px solid white; margin-top: -85px; background: white; object-fit: cover; display: block; }
         .info-section { margin-top: 15px; text-transform: capitalize; }
         .info-label { font-weight: 700; color: #888; font-size: 11px; text-transform: uppercase; margin-top: 15px; display: block; letter-spacing: 0.5px; }
@@ -95,7 +94,6 @@
         <div class="info-section">
             <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
                 <span id="display-username">{{ profile.user.username|capfirst }}</span>
-                <span class="badge-verified" title="Verified Member">✓</span>
             </h1>
             <span class="info-label">Bio</span>
             <div class="underlined-text info-value" id="display-bio">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
@@ -125,7 +123,6 @@
                 <div>
                     <div style="display: flex; align-items: center;">
                         <b>{{ profile.user.username|capfirst }}</b>
-                        <span class="badge-verified" style="width: 12px; height: 12px; font-size: 8px;">✓</span>
                     </div>
                     <div style="font-size:12px;color:gray;">{{ post.created_at|timesince }} ago</div>
                     <div style="margin-top: 5px; font-size: 13px;">POST TITLE: <span class="db-post-title">{{ post.title }}</span></div>

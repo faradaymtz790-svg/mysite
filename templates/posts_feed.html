@@ -327,7 +327,6 @@
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <a href="{% url 'profile' post.user.username %}" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
                             <b style="cursor: pointer; font-size: 15px;">{{ post.user.username }}</b>
-                            <span style="display: inline-flex; align-items: center; justify-content: center; background-color: var(--primary-green); color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 8px; font-weight: bold; margin-left: 4px;" title="Verified Member">✓</span>
                         </a>
                         
                         <span class="follower-badge" id="follower-count-{{ post.user.id }}">
