@@ -221,7 +221,7 @@ class RadioNetwork(models.Model):
     """
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='radio_network')
     channel_name = models.CharField(max_length=150, default="Plugbar Premium Station")
-    station_logo = models.ImageField(upload_upload_to='station_logos/', blank=True, null=True)
+    station_logo = models.ImageField(upload_to='station_logos/', blank=True, null=True)
     location = models.CharField(max_length=200, default="Global Network Platform")
     postal_address = models.CharField(max_length=255, default="No Mailing Code")
     topics = models.TextField(default="This broadcasting channel network operator hasn't published their summary strategy agenda logs details yet.")
