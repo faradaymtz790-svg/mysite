@@ -1279,15 +1279,15 @@ def update_station_profile(request):
 
 
     # core/views.py
-from django.shortcuts import render
-
 def radio_networks_view(request):
-    return render(request, 'radio_networks.html')
-
-
-    def radio_creation_networks(request):
-
-    return render(
-        request,
-        "radio_creation_networks.html"
-    )
+    # Fetch the channel associated with the current logged-in user
+    user_channel = None
+    if request.user.is_authenticated:
+        # Assuming you have a OneToOneField or similar relationship
+        user_channel = getattr(request.user, 'radio_channel', None) 
+    
+    context = {
+        'user_channel': user_channel,
+        'radio_posts': RadioPost.objects.all(), # Ensure this is defined
+    }
+    return render(request, 'radio_networks.html', context)
