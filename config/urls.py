@@ -14,7 +14,7 @@ from core import views
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
-
+     
     path('serviceworker.js', TemplateView.as_view(
         template_name="js/serviceworker.js",
         content_type='application/javascript'
@@ -28,6 +28,9 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(
         url=settings.STATIC_URL + 'favicon.ico'
     )),
+
+    path("radio-creation/", views.radio_creation_networks, name="radio_creation_networks"),
+    
 ]
 
 urlpatterns += i18n_patterns(
@@ -78,8 +81,6 @@ urlpatterns += i18n_patterns(
     path('radio/dashboard/', views.radio_network_profile, name='radio_dashboard'),
     path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
     path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
-    path("radio-creation/", views.radio_creation_networks, name="radio_creation_networks"),
-    
     path('radio/<int:pk>/edit/', views.edit_radio_channel, name='edit_radio_channel'),
     path('radio/<int:pk>/delete/', views.delete_radio_channel, name='delete_radio_channel'),
     path('radio/post/create/', views.create_radio_post, name='create_radio_post'),
