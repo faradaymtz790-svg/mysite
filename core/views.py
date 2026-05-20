@@ -1283,3 +1283,11 @@ from django.shortcuts import render
 
 def radio_networks_view(request):
     return render(request, 'radio_networks.html')
+
+
+    def radio_creation_networks(request):
+
+    return render(
+        request,
+        "radio_creation_networks.html"
+    )
