@@ -83,7 +83,6 @@ urlpatterns += i18n_patterns(
     path('radio/<int:pk>/edit/', views.edit_radio_channel, name='edit_radio_channel'),
     path('radio/<int:pk>/delete/', views.delete_radio_channel, name='delete_radio_channel'),
     path('radio/post/create/', views.create_radio_post, name='create_radio_post'),
-
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),

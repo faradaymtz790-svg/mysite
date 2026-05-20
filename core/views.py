@@ -1275,7 +1275,7 @@ def update_station_profile(request):
         request.user.save()
 
     network.save()
-    return redirect('radio_profile')
+    return redirect('radio_dashboard')
 
 
     # core/views.py
@@ -1291,3 +1291,8 @@ def radio_networks_view(request):
         'radio_posts': RadioPost.objects.all(), # Ensure this is defined
     }
     return render(request, 'radio_networks.html', context)
+
+
+    def radio_creation_networks(request):
+    # This view handles the creation form logic
+    return render(request, 'radio_creation.html')
