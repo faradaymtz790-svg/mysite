@@ -60,14 +60,18 @@ urlpatterns += i18n_patterns(
     path('search/', views.search, name='search'),
 
     # RADIO
+    # RADIO
     path('radio/dashboard/', views.radio_network_profile, name='radio_dashboard'),
     path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
     path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
-    path("radio-creation/", views.radio_creation_networks, name="radio_creation_networks"),
+    
+    # Give them unique names:
+    path("radio-creation/", views.radio_creation_networks, name="radio_creation_simple"),
+    path("radio-creation-networks/", views.radio_creation_networks, name="radio_creation_networks"),
+    
     path('radio/<int:pk>/edit/', views.edit_radio_channel, name='edit_radio_channel'),
     path('radio/<int:pk>/delete/', views.delete_radio_channel, name='delete_radio_channel'),
     path('radio/post/create/', views.create_radio_post, name='create_radio_post'),
-    path("radio-creation-networks/", views.radio_creation_networks, name="radio_creation_networks"),
 
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),
