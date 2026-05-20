@@ -1,3 +1,17 @@
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.generic import TemplateView, RedirectView
+from django.conf.urls.i18n import i18n_patterns
+from core import views
+
+# Also, ensure 'my_profile_redirect' is imported or defined
+# If it is in views, use 'views.my_profile_redirect'
+
+
+
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 
@@ -59,7 +73,7 @@ urlpatterns += i18n_patterns(
     path('notification/<int:notification_id>/click/', views.click_notification, name='click_notification'),
     path('search/', views.search, name='search'),
 
-    # RADIO
+
     # RADIO
     path('radio/dashboard/', views.radio_network_profile, name='radio_dashboard'),
     path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
