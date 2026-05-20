@@ -702,10 +702,17 @@ RADIO POSTS
             <img src="{{ post.channel.station_logo.url }}">
 
             <div class="post-user-details">
+                
+<h3>
 
-                <h3>
-                    {{ post.channel.channel_name }}
-                </h3>
+    <a href="{% url 'radio_channel_profile' post.channel.id %}"
+    class="channel-link">
+
+        {{ post.channel.channel_name }}
+
+    </a>
+
+</h3>
 
                 <span>
                     {{ post.created_at|timesince }} ago
