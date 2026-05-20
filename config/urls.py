@@ -7,6 +7,7 @@ from django.views.generic import TemplateView, RedirectView
 from django.conf.urls.i18n import i18n_patterns
 from core import views
 
+from core.views import my_profile_redirect # Ensure this is imported
 # Also, ensure 'my_profile_redirect' is imported or defined
 # If it is in views, use 'views.my_profile_redirect'
 
@@ -28,8 +29,6 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(
         url=settings.STATIC_URL + 'favicon.ico'
     )),
-
-    path("radio-creation/", views.radio_creation_networks, name="radio_creation_networks"),
     
 ]
 
@@ -78,6 +77,7 @@ urlpatterns += i18n_patterns(
 
 
   # RADIO
+    path("radio-creation/", views.radio_creation_networks, name="radio_creation_networks"),
     path('radio/dashboard/', views.radio_network_profile, name='radio_dashboard'),
     path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
     path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
