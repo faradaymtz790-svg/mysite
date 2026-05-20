@@ -1,934 +1,872 @@
-<!-- =========================================================================
-     DJANGO/HTML CONTEXT: RADIO STATION PROFILE WITH OWNER ACCESSIBILITY RULES
-     TEMPLATE: radio_networks.html
-     ========================================================================= -->
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ channel_name|default:"Radio Profile" }} - plugbar</title>
-    
-    <!-- SYSTEM DEPENDENCIES LINK ASSETS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        /* =========================================================================
-            GLOBAL THEME STYLES (PURE CLEAN GLASSMORPHISM & EMERALD BLENDS)
-           ========================================================================= */
-        :root {
-            --primary-green: #00a86b;
-            --dark-green: #007749;
-            --soft-green-alpha: rgba(0, 168, 107, 0.06);
-            --border-light: #e2e8f0;
-            --border-green: rgba(0, 168, 107, 0.4);
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --surface-bg: #ffffff;
-            /* Added custom states variables */
-            --danger-red: #ef4444;
-            --dark-red: #dc2626;
-            --info-blue: #3b82f6;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #f8fafc;
-            color: var(--text-dark);
-            min-height: 100vh;
-        }
-
-        /* 1. Global Navbar Integration Container Frame */
-        .navbar-global-container {
-            width: 100%;
-        }
-
-        /* 2. Global Navigation Top Header Bar */
-        .top-utility-bar {
-            width: 100%;
-            background: #1e293b;
-            padding: 16px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-        }
-
-        .back-navigation-link {
-            color: #ffffff;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            transition: transform 0.2s ease;
-        }
-
-        .back-navigation-link:hover {
-            color: var(--primary-green);
-            transform: translateX(-4px);
-        }
-
-        .plugbar-text {
-            font-family: 'Great Vibes', cursive;
-            font-size: 2.3rem;
-            color: var(--primary-green);
-        }
-
-        /* 3. Primary Layout Workspace Framing */
-        .profile-workspace-wrapper {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        /* =========================================================================
-            🆕 NEW COMPONENT: LIVE BROADCAST INVITATION ACTION BANNER
-           ========================================================================= */
-        .invitation-action-banner {
-            background: var(--surface-bg);
-            border-left: 5px solid var(--info-blue);
-            border-top: 1px solid var(--border-light);
-            border-right: 1px solid var(--border-light);
-            border-bottom: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .invitation-action-banner.banner-accepted {
-            border-left-color: var(--primary-green);
-        }
-
-        .invitation-action-banner.banner-rejected {
-            border-left-color: var(--danger-red);
-        }
-
-        .invitation-info-block {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .invitation-icon-frame {
-            width: 48px;
-            height: 48px;
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--info-blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-        }
-
-        .banner-accepted .invitation-icon-frame {
-            background: var(--soft-green-alpha);
-            color: var(--primary-green);
-        }
-
-        .banner-rejected .invitation-icon-frame {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger-red);
-        }
-
-        .invitation-text-details h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .invitation-text-details p {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-        }
-
-        .invitation-button-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .invite-btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-
-        .invite-btn-accept {
-            background: var(--primary-green);
-            color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0, 168, 107, 0.15);
-        }
-
-        .invite-btn-accept:hover {
-            background: var(--dark-green);
-            transform: translateY(-1px);
-        }
-
-        .invite-btn-reject {
-            background: var(--danger-red);
-            color: #ffffff;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);
-        }
-
-        .invite-btn-reject:hover {
-            background: var(--dark-red);
-            transform: translateY(-1px);
-        }
-
-        .invite-btn-live {
-            background: #1e293b;
-            color: #ffffff;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            animation: pulseGlow 2s infinite alternate;
-        }
-
-        .invite-btn-live:hover {
-            background: #0f172a;
-            transform: scale(1.03);
-        }
-
-        .status-badge-string {
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0px rgba(0, 168, 107, 0.4); }
-            100% { box-shadow: 0 0 0 8px rgba(0, 168, 107, 0); }
-        }
-
-        /* 4. Hero Identity Dashboard Card */
-        .identity-billboard-card {
-            background: var(--surface-bg);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.01);
-            position: relative;
-        }
-
-        .identity-view-state {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .identity-flex-block {
-            display: flex;
-            align-items: center;
-            gap: 36px;
-        }
-
-        .station-logo-frame {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            border: 3px solid var(--primary-green);
-            object-fit: cover;
-            background-color: #f1f5f9;
-            box-shadow: 0 4px 14px rgba(0, 168, 107, 0.15);
-        }
-
-        .station-metadata-details {
-            flex-grow: 1;
-        }
-
-        .station-metadata-details h1 {
-            font-size: 2.4rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .meta-tags-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 16px;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .meta-tags-row span i {
-            color: var(--primary-green);
-            margin-right: 6px;
-        }
-
-        .station-topics-summary {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #475569;
-            max-width: 800px;
-        }
-
-        /* Green Profile Action Update Trigger Buttons */
-        .edit-action-btn, .cancel-action-btn {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            background: var(--primary-green);
-            color: #ffffff;
-            border: none;
-            padding: 12px 24px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 168, 107, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .edit-action-btn:hover {
-            background: var(--dark-green);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(0, 168, 107, 0.35);
-        }
-
-        .cancel-action-btn {
-            background: #e2e8f0;
-            color: #475569;
-            box-shadow: none;
-        }
-
-        .cancel-action-btn:hover {
-            background: #cbd5e1;
-            color: var(--text-dark);
-        }
-
-        /* =========================================================================
-            5. IN-PAGE LIVE EDIT FORM STRUCTURAL DESIGN (90% Width / Capitalized Labels)
-           ========================================================================= */
-        .identity-edit-state {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .edit-state-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-bottom: 24px;
-            color: var(--text-dark);
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 12px;
-        }
-
-        .form-grid-split {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            width: 100%;
-        }
-
-        .form-field-block {
-            margin-bottom: 28px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-field-block label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--primary-green);
-            letter-spacing: 1.2px;
-            margin-bottom: 10px;
-        }
-
-        .custom-input-element, 
-        .custom-textarea-element {
-            width: 90%;
-            padding: 12px 0;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid var(--border-green);
-            font-size: 1.05rem;
-            color: var(--text-dark);
-            outline: none;
-            border-radius: 0;
-            transition: all 0.3s ease;
-        }
-
-        .custom-input-element:focus,
-        .custom-textarea-element:focus {
-            border-bottom-color: var(--primary-green);
-            padding-left: 6px;
-        }
-
-        .custom-textarea-element {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-submit-row {
-            width: 90%;
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .save-changes-submit-btn {
-            background-color: var(--primary-green);
-            color: white;
-            border: none;
-            padding: 14px 36px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 168, 107, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        .save-changes-submit-btn:hover {
-            background-color: var(--dark-green);
-            transform: scale(1.02);
-        }
-
-        /* 6. Scheduling Grid Dashboard Sub-Section Layout */
-        .schedule-dashboard-block {
-            background: var(--surface-bg);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 32px;
-        }
-
-        .block-section-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-dark);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .block-section-title i {
-            color: var(--primary-green);
-        }
-
-        .timeline-flex-scroller {
-            display: flex;
-            gap: 16px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-        }
-
-        .timeline-slot-badge {
-            background: var(--soft-green-alpha);
-            border: 1px solid rgba(0, 168, 107, 0.15);
-            padding: 16px 20px;
-            border-radius: 8px;
-            min-width: 240px;
-            flex-shrink: 0;
-        }
-
-        .slot-day-title {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--primary-green);
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .slot-hour-time {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .slot-details-string {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        /* =========================================================================
-            7. TIMELINE BLOCK HEADER WITH FLOATING ACTION COMPOSITION (+) BUTTON
-           ========================================================================= */
-        .timeline-header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0 8px 0;
-        }
-
-        .posts-feed-section-headline {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .create-post-action-circle {
-            width: 48px;
-            height: 48px;
-            background-color: var(--primary-green);
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            box-shadow: 0 4px 14px rgba(0, 168, 107, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .create-post-action-circle:hover {
-            background-color: var(--dark-green);
-            transform: rotate(90deg) scale(1.08);
-            box-shadow: 0 6px 20px rgba(0, 168, 107, 0.45);
-        }
-
-        .posts-grid-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .feed-post-card {
-            background: var(--surface-bg);
-            border: 1px solid var(--border-light);
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.01);
-            transition: transform 0.2s ease;
-        }
-
-        .feed-post-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .post-header-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .post-badge-type {
-            background: #edf2f7;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #4a5568;
-            letter-spacing: 0.5px;
-        }
-
-        .post-badge-type.audio-podcast {
-            background: rgba(0, 168, 107, 0.1);
-            color: var(--primary-green);
-        }
-
-        .post-timestamp-string {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .post-main-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text-dark);
-        }
-
-        .post-body-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #475569;
-            margin-bottom: 20px;
-        }
-
-        .post-metrics-footer {
-            display: flex;
-            gap: 24px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 16px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .metric-action-trigger {
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .metric-action-trigger:hover {
-            color: var(--primary-green);
-        }
-
-        .metric-action-trigger i {
-            margin-right: 6px;
-        }
-
-        .no-posts-placeholder {
-            text-align: center;
-            padding: 60px;
-            background: var(--surface-bg);
-            border: 2px dashed var(--border-light);
-            border-radius: 12px;
-            color: var(--text-muted);
-        }
-
-        .no-posts-placeholder i {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            color: #cbd5e1;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 8. Interface Adaptive Media Breakpoints Overrides */
-        @media (max-width: 900px) {
-            .form-grid-split {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            .custom-input-element, .custom-textarea-element, .form-submit-row {
-                width: 100%;
-            }
-            .identity-flex-block {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 20px;
-            }
-            .edit-action-btn, .cancel-action-btn {
-                position: static;
-                margin-top: 20px;
-                width: max-content;
-            }
-            .top-utility-bar {
-                padding: 16px 20px;
-            }
-            .invitation-action-banner {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .invitation-button-group {
-                width: 100%;
-                justify-content: flex-start;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Radio Networks | plugbar</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:
+    linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.97) 0%,
+    rgba(210,255,210,0.92) 35%,
+    rgba(0,110,0,0.86) 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+/* =============================
+HEADER
+============================= */
+
+.top-header{
+    position:sticky;
+    top:0;
+    z-index:999;
+    padding:20px 15px;
+    text-align:center;
+    backdrop-filter:blur(18px);
+    background:rgba(255,255,255,0.55);
+    border-bottom:1px solid rgba(255,255,255,0.25);
+}
+
+.main-title{
+    font-family:'Great Vibes',cursive;
+    font-size:4.2rem;
+    color:green;
+    text-shadow:0 0 15px rgba(0,255,0,0.2);
+}
+
+.sub-title{
+    margin-top:6px;
+    letter-spacing:4px;
+    font-size:1rem;
+    color:#333;
+    font-family:'Gill Sans','Gill Sans MT',Calibri,sans-serif;
+}
+
+/* =============================
+CREATE CHANNEL
+============================= */
+
+.create-channel-wrapper{
+    display:flex;
+    justify-content:center;
+    margin:25px 0;
+}
+
+.create-channel-btn{
+    background:linear-gradient(to right,#00c853,#00e676);
+    color:white;
+    text-decoration:none;
+    padding:15px 25px;
+    border-radius:50px;
+    font-weight:700;
+    box-shadow:0 8px 20px rgba(0,255,0,0.25);
+    transition:0.3s;
+}
+
+.create-channel-btn:hover{
+    transform:scale(1.05);
+}
+
+/* =============================
+CHANNEL PROFILE
+============================= */
+
+.channel-profile{
+    width:95%;
+    max-width:1050px;
+    margin:20px auto;
+    border-radius:35px;
+    overflow:hidden;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.2);
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* COVER */
+
+.channel-cover{
+    position:relative;
+    width:100%;
+    height:320px;
+    overflow:hidden;
+}
+
+.channel-cover video,
+.channel-cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.cover-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.45);
+}
+
+/* INFO */
+
+.channel-info{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    display:flex;
+    gap:18px;
+    align-items:center;
+    z-index:5;
+}
+
+.station-logo{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    border:4px solid white;
+    object-fit:cover;
+}
+
+.channel-details{
+    color:white;
+}
+
+.channel-name{
+    font-size:2.1rem;
+    font-weight:bold;
+}
+
+.channel-location,
+.channel-topics,
+.channel-schedule{
+    margin-top:6px;
+    font-size:0.95rem;
+}
+
+/* =============================
+CHANNEL STATS
+============================= */
+
+.channel-stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    padding:20px;
+}
+
+.channel-stat-box{
+    background:rgba(255,255,255,0.15);
+    border-radius:25px;
+    padding:18px;
+    text-align:center;
+    backdrop-filter:blur(10px);
+    color:white;
+    border:1px solid rgba(255,255,255,0.12);
+}
+
+.channel-stat-box i{
+    font-size:1.5rem;
+    margin-bottom:10px;
+    color:#9cff9c;
+}
+
+.channel-stat-number{
+    font-size:1.5rem;
+    font-weight:bold;
+}
+
+.channel-stat-label{
+    margin-top:5px;
+    font-size:0.9rem;
+}
+
+/* =============================
+CHANNEL ACTIONS
+============================= */
+
+.channel-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+    padding:0 20px 25px;
+}
+
+.edit-btn,
+.delete-btn{
+    padding:13px 24px;
+    border-radius:50px;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.edit-btn{
+    background:#00c853;
+}
+
+.delete-btn{
+    background:#d50000;
+}
+
+/* =============================
+POSTS SECTION
+============================= */
+
+.radio-posts{
+    width:95%;
+    max-width:1050px;
+    margin:30px auto 120px;
+}
+
+.post-card{
+    position:relative;
+    overflow:hidden;
+    border-radius:30px;
+    margin-bottom:35px;
+    background:rgba(255,255,255,0.13);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.18);
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* POST BACKGROUND */
+
+.post-bg{
+    position:absolute;
+    inset:0;
+    z-index:-2;
+}
+
+.post-bg video,
+.post-bg img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.post-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+}
+
+/* POST HEADER */
+
+.post-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px;
+}
+
+.post-user{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.post-user img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    border:3px solid white;
+    object-fit:cover;
+}
+
+.post-user-details{
+    color:white;
+}
+
+.post-user-details h3{
+    font-size:1.25rem;
+}
+
+.post-user-details span{
+    display:block;
+    margin-top:4px;
+    font-size:0.88rem;
+}
+
+/* SUBSCRIBE */
+
+.subscribe-btn{
+    border:none;
+    background:#00e676;
+    color:white;
+    padding:11px 22px;
+    border-radius:40px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* TOPIC */
+
+.topic-section{
+    padding:0 20px 18px;
+    color:white;
+}
+
+.topic-section strong{
+    color:#8cff8c;
+}
+
+.topic-title{
+    margin-left:8px;
+    font-size:1.2rem;
+    text-decoration:underline;
+}
+
+/* AUDIO */
+
+.audio-section{
+    padding:0 20px 20px;
+}
+
+audio{
+    width:100%;
+    border-radius:50px;
+}
+
+/* AUDIO INFO */
+
+.audio-info{
+    display:flex;
+    justify-content:space-between;
+    margin-top:12px;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.audio-info-box{
+    background:rgba(255,255,255,0.12);
+    padding:10px 16px;
+    border-radius:30px;
+    color:white;
+    font-size:0.9rem;
+}
+
+/* VISUALIZER */
+
+.visualizer{
+    margin-top:25px;
+    height:70px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:4px;
+}
+
+.visualizer span{
+    width:8px;
+    border-radius:20px;
+    animation:animate 1s infinite alternate;
+}
+
+.visualizer span:nth-child(1){height:20px;background:red;}
+.visualizer span:nth-child(2){height:50px;background:green;}
+.visualizer span:nth-child(3){height:30px;background:yellow;}
+.visualizer span:nth-child(4){height:60px;background:brown;}
+.visualizer span:nth-child(5){height:35px;background:pink;}
+.visualizer span:nth-child(6){height:55px;background:purple;}
+.visualizer span:nth-child(7){height:40px;background:black;}
+.visualizer span:nth-child(8){height:65px;background:white;}
+
+@keyframes animate{
+    from{
+        transform:scaleY(0.4);
+    }
+    to{
+        transform:scaleY(1.5);
+    }
+}
+
+/* POST STATS */
+
+.post-stats{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:18px;
+    padding:18px;
+    border-top:1px solid rgba(255,255,255,0.12);
+}
+
+.stat{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:white;
+    text-decoration:none;
+    font-size:0.95rem;
+}
+
+.stat i{
+    color:#8cff8c;
+}
+
+/* FLOATING BUTTON */
+
+.floating-btn{
+    position:fixed;
+    bottom:25px;
+    right:25px;
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    background:#00c853;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-decoration:none;
+    z-index:999;
+    box-shadow:0 10px 30px rgba(0,255,0,0.4);
+}
+
+.floating-btn i{
+    color:white;
+    font-size:2rem;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+.main-title{
+    font-size:3rem;
+}
+
+.channel-cover{
+    height:370px;
+}
+
+.channel-info{
+    flex-direction:column;
+    align-items:flex-start;
+}
+
+.post-header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+}
+
+.subscribe-btn{
+    width:100%;
+}
+
+.audio-info{
+    flex-direction:column;
+}
+
+}
+
+</style>
 </head>
+
 <body>
 
-    <!-- 1. DJANGO GLOBAL NAVBAR INCLUSION INJECTION HOOK -->
-    <div class="navbar-global-container">
-        {% include 'navbar.html' %}
+<!-- =============================
+HEADER
+============================= -->
+
+<div class="top-header">
+
+    <div class="main-title">
+        plugbar
     </div>
 
-    <!-- NAVIGATION UTILITY HEADER TOP BAR -->
-    <div class="top-utility-bar">
-        <a href="posts_feed.html" class="back-navigation-link">
-            <i class="fa-solid fa-house"></i> Home Feed
-        </a>
-        <span class="plugbar-text">plugbar</span>
-        <div style="width: 100px;"></div>
+    <div class="sub-title">
+        RADIO NETWORKS LIST
     </div>
 
-    <!-- MAIN PROFILE CANVAS TRACK WRAPPER LAYOUT CONTAINER -->
-    <div class="profile-workspace-wrapper">
-        
-        <!-- 🆕 NEW COMPONENT HOOK SECTION: REALTIME LIVE INVITATION CONTROLLER BANNER -->
-        <!-- Logic parameters expected from context: invitation (object), current_time, invitation.expires_at, invitation.status -->
-        {% if invitation and not invitation.is_expired %}
-        <div class="invitation-action-banner {% if invitation.status == 'ACCEPTED' %}banner-accepted{% elif invitation.status == 'REJECTED' %}banner-rejected{% endif %}">
-            <div class="invitation-info-block">
-                <div class="invitation-icon-frame">
-                    {% if invitation.status == 'ACCEPTED' %}
-                        <i class="fa-solid fa-circle-check"></i>
-                    {% elif invitation.status == 'REJECTED' %}
-                        <i class="fa-solid fa-circle-xmark"></i>
-                    {% else %}
-                        <i class="fa-solid fa-podcast"></i>
-                    {% endif %}
-                </div>
-                <div class="invitation-text-details">
-                    <h3>Live Studio Broadcast Request</h3>
-                    <p>
-                        {% if invitation.status == 'ACCEPTED' %}
-                            You have accepted this invitation. Your slot is ready on the grid!
-                        {% elif invitation.status == 'REJECTED' %}
-                            You declined this broadcasting request session.
-                        {% else %}
-                            You have been invited to participate as a live speaker stream component. This slot expires in less than 5 hours.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
+</div>
 
-            <div class="invitation-button-group">
-                {% if invitation.status == 'PENDING' %}
-                    <!-- Interactive Buttons displayed within the 5 hour window if pending -->
-                    <form action="{% url 'handle_invitation' invitation.id 'accept' %}" method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="invite-btn invite-btn-accept">
-                            <i class="fa-solid fa-microphone"></i> Accept & Join
-                        </button>
-                    </form>
-                    <form action="{% url 'handle_invitation' invitation.id 'reject' %}" method="POST" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="invite-btn invite-btn-reject">
-                            <i class="fa-solid fa-user-slash"></i> Decline
-                        </button>
-                    </form>
-                {% elif invitation.status == 'ACCEPTED' %}
-                    <!-- Active streaming route link visible exclusively upon acceptance -->
-                    <span class="status-badge-string" style="color: var(--primary-green); margin-right: 12px;">
-                        <i class="fa-solid fa-check"></i> Confirmed Team Host
-                    </span>
-                    <a href="radio.html" class="invite-btn invite-btn-live">
-                        <i class="fa-solid fa-tower-broadcast"></i> Enter Studio Live
-                    </a>
-                {% elif invitation.status == 'REJECTED' %}
-                    <span class="status-badge-string" style="color: var(--danger-red);">
-                        <i class="fa-solid fa-ban"></i> Invitation Declined
-                    </span>
-                {% endif %}
-            </div>
-        </div>
+<!-- =============================
+NO CHANNEL
+============================= -->
+
+{% if not user_channel %}
+
+<div class="create-channel-wrapper">
+
+    <a href="{% url 'radio_creation_networks' %}"
+    class="create-channel-btn">
+
+        <i class="fa-solid fa-radio"></i>
+        Create Radio Channel
+
+    </a>
+
+</div>
+
+{% endif %}
+
+<!-- =============================
+USER CHANNEL
+============================= -->
+
+{% if user_channel %}
+
+<div class="channel-profile">
+
+    <!-- COVER -->
+
+    <div class="channel-cover">
+
+        {% if user_channel.cover_video %}
+
+        <video autoplay muted loop playsinline>
+            <source src="{{ user_channel.cover_video.url }}">
+        </video>
+
+        {% elif user_channel.cover_image %}
+
+        <img src="{{ user_channel.cover_image.url }}">
+
         {% endif %}
-        
-        <!-- SECTION I: HERO IDENTITY BILLBOARD BLOCK CARD -->
-        <div class="identity-billboard-card">
-            
-            <!-- STATE A: STANDARD PROFILE CARD DATA DISPLAY RUNS -->
-            <div class="identity-view-state" id="profileViewPanel">
-                
-                <!-- 🔒 OWNER EXCLUSIVE VERIFICATION: EDIT BUTTON CONDITION -->
-                {% if request.user == network.owner %}
-                <button type="button" class="edit-action-btn" onclick="openProfileEditor()">
-                    <i class="fa-solid fa-pen-to-square"></i> Edit Profile
-                </button>
-                {% endif %}
 
-                <div class="identity-flex-block">
-                    <img src="{{ station_logo|default:'station_placeholder.png' }}" 
-                         alt="Station Avatar Brand Mark" 
-                         class="station-logo-frame" 
-                         onerror="this.src='https://api.dicebear.com/7.x/identicon/svg?seed={{ channel_name|urlencode }}'">
-                    
-                    <div class="station-metadata-details">
-                        <h1 id="displayChannelName">{{ channel_name|default:"Plugbar Premium Station" }}</h1>
-                        
-                        <div class="meta-tags-row">
-                            <span><i class="fa-solid fa-user-tie"></i> Host: <strong id="displayOwnerName">{{ owner_name|default:"Independent Operator" }}</strong></span>
-                            <span><i class="fa-solid fa-location-dot"></i> <span id="displayLocation">{{ location|default:"Global Network Platform" }}</span></span>
-                            <span><i class="fa-solid fa-envelopes-bulk"></i> <span id="displayPostal">{{ postal_address|default:"No Mailing Code" }}</span></span>
-                        </div>
+        <div class="cover-overlay"></div>
 
-                        <p class="station-topics-summary" id="displayTopics">
-                            {{ topics|default:"This broadcasting channel network operator hasn't published their summary strategy agenda logs details yet." }}
-                        </p>
-                    </div>
+        <!-- INFO -->
+
+        <div class="channel-info">
+
+            <img src="{{ user_channel.station_logo.url }}"
+            class="station-logo">
+
+            <div class="channel-details">
+
+                <div class="channel-name">
+                    {{ user_channel.channel_name }}
                 </div>
+
+                <div class="channel-location">
+                    <i class="fa-solid fa-location-dot"></i>
+                    {{ user_channel.location }}
+                </div>
+
+                <div class="channel-location">
+                    {{ user_channel.postal_address }}
+                </div>
+
+                <div class="channel-topics">
+                    {{ user_channel.topics }}
+                </div>
+
+                <div class="channel-schedule">
+                    Schedule:
+                    {{ user_channel.radio_schedule }}
+                </div>
+
             </div>
 
-            <!-- STATE B: IN-PAGE SYSTEM RECORD MODIFICATION FORM -->
-            <!-- Wrapped as an added layer of fallback platform protection -->
-            {% if request.user == network.owner %}
-            <div class="identity-edit-state" id="profileEditFormPanel">
-                
-                <button type="button" class="cancel-action-btn" onclick="closeProfileEditor()">
-                    <i class="fa-solid fa-xmark"></i> Cancel
-                </button>
-
-                <h2 class="edit-state-title">Update Network Parameters</h2>
-
-                <form action="/update-station-profile/" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="form-grid-split">
-                        <div class="form-column">
-                            <div class="form-field-block">
-                                <label for="inputChannelName">Channel Name</label>
-                                <input type="text" class="custom-input-element" id="inputChannelName" name="channel_name" value="{{ channel_name|default:'Plugbar Premium Station' }}" required>
-                            </div>
-
-                            <div class="form-field-block">
-                                <label for="inputOwnerName">Owner Name</label>
-                                <input type="text" class="custom-input-element" id="inputOwnerName" name="owner_name" value="{{ owner_name|default:'Independent Operator' }}" required>
-                            </div>
-
-                            <div class="form-field-block">
-                                <label for="inputLocation">Location</label>
-                                <input type="text" class="custom-input-element" id="inputLocation" name="location" value="{{ location|default:'Global Network Platform' }}" required>
-                            </div>
-                        </div>
-
-                        <div class="form-column">
-                            <div class="form-field-block">
-                                <label for="inputPostal">Postal Address</label>
-                                <input type="text" class="custom-input-element" id="inputPostal" name="postal_address" value="{{ postal_address|default:'No Mailing Code' }}" required>
-                            </div>
-
-                            <div class="form-field-block">
-                                <label for="inputTopics">Topics Strategy Summary</label>
-                                <textarea class="custom-textarea-element" id="inputTopics" name="topics" required>{{ topics|default:"This broadcasting channel network operator hasn't published their summary strategy agenda logs details yet." }}</textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-submit-row">
-                        <button type="submit" class="save-changes-submit-btn">Save Station Changes</button>
-                    </div>
-                </form>
-            </div>
-            {% endif %}
-
-        </div>
-
-        <!-- SECTION II: GRID TIMETABLE WEEK BROADCAST SCHEDULE BLOCK CARD -->
-        <div class="schedule-dashboard-block">
-            <h2 class="block-section-title"><i class="fa-solid fa-calendar-days"></i> Transmission Calendar Blocks Schedule</h2>
-            
-            <div class="timeline-flex-scroller">
-                <div class="timeline-slot-badge">
-                    <div class="slot-day-title">Monday</div>
-                    <div class="slot-hour-time">09:00 AM</div>
-                    <div class="slot-details-string">
-                        <p>🎙️ <strong>3 Speakers Panel Grid</strong></p>
-                        <p style="margin-top:4px; font-size:0.8rem;">Focus: Morning News Syndication & Reviews</p>
-                    </div>
-                </div>
-
-                <div class="timeline-slot-badge">
-                    <div class="slot-day-title">Wednesday</div>
-                    <div class="slot-hour-time">02:00 PM</div>
-                    <div class="slot-details-string">
-                        <p>🎙️ <strong>2 Speakers Dialogue</strong></p>
-                        <p style="margin-top:4px; font-size:0.8rem;">Focus: Interactive Mid-Week Tech Discussions</p>
-                    </div>
-                </div>
-
-                <div class="timeline-slot-badge">
-                    <div class="slot-day-title">Friday</div>
-                    <div class="slot-hour-time">08:00 PM</div>
-                    <div class="slot-details-string">
-                        <p>🎙️ <strong>5+ Hosts Open Line Forum</strong></p>
-                        <p style="margin-top:4px; font-size:0.8rem;">Focus: Weekend Live Urban Music Segment Runs</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECTION III: BOTTOM TIMELINE SOCIAL POSTS WALLED HOUSING HUB -->
-        <div>
-            <div class="timeline-header-flex">
-                <h2 class="posts-feed-section-headline">Station Timeline Activity Wall</h2>
-                
-                <!-- 🔒 OWNER EXCLUSIVE VERIFICATION: FLOATING CREATION FAB (+) LOGIC ROUTER -->
-                {% if request.user == network.owner %}
-                <a href="create_radio_post.html" class="create-post-action-circle" title="Create Radio Post">
-                    <i class="fa-solid fa-plus"></i>
-                </a>
-                {% endif %}
-            </div>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Latest dispatch updates, live radio show summaries, and recurrent podcast releases.</p>
-            
-            <div class="posts-grid-layout">
-                {% for post in posts %}
-                <div class="feed-post-card">
-                    <div class="post-header-meta">
-                        {% if post.post_type == 'AUDIO' %}
-                            <span class="post-badge-type audio-podcast"><i class="fa-solid fa-microphone-lines"></i> Podcast Update</span>
-                        {% else %}
-                            <span class="post-badge-type"><i class="fa-solid fa-bullhorn"></i> Live Broadcast Summary</span>
-                        {% endif %}
-                        <span class="post-timestamp-string">{{ post.published_at|timesince }} ago</span>
-                    </div>
-                    <h3 class="post-main-title">{{ post.title }}</h3>
-                    <p class="post-body-text">{{ post.content }}</p>
-                    <div class="post-metrics-footer">
-                        <span class="metric-action-trigger"><i class="fa-regular fa-heart"></i> {{ post.likes_count }} Likes</span>
-                        <span class="metric-action-trigger"><i class="fa-regular fa-comment"></i> {{ post.comments_count }} Comments</span>
-                        <span class="metric-action-trigger"><i class="fa-solid fa-share-nodes"></i> Share Dispatch</span>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="no-posts-placeholder">
-                    <i class="fa-solid fa-radio"></i>
-                    <p style="margin-top: 10px; font-weight: 500;">No live broadcasts or text updates have been posted to this channel yet.</p>
-                </div>
-                {% endfor %}
-            </div>
         </div>
 
     </div>
 
-    <!-- IN-PAGE UI WORKSPACE TOGGLE CONTROLLER SCRIPTS -->
-    <script>
-        const profileDisplayPanel = document.getElementById('profileViewPanel');
-        const profileEditorFormPanel = document.getElementById('profileEditFormPanel');
+    <!-- CHANNEL STATS -->
 
-        /** Opens Update Configurations Form View Layout Dashboard */
-        function openProfileEditor() {
-            if (profileEditorFormPanel) {
-                profileDisplayPanel.style.display = 'none';
-                profileEditorFormPanel.style.display = 'block';
-            }
-        }
+    <div class="channel-stats">
 
-        /** Closes Modification Forms Matrix And Restores Default Display View Layouts */
-        function closeProfileEditor() {
-            if (profileEditorFormPanel) {
-                profileEditorFormPanel.style.display = 'none';
-                profileDisplayPanel.style.display = 'block';
-            }
-        }
-    </script>
+        <!-- SUBSCRIBERS -->
+
+        <div class="channel-stat-box">
+
+            <i class="fa-solid fa-bell"></i>
+
+            <div class="channel-stat-number">
+                {{ user_channel.subscribers.count }}
+            </div>
+
+            <div class="channel-stat-label">
+                Subscribers
+            </div>
+
+        </div>
+
+        <!-- TOTAL POSTS -->
+
+        <div class="channel-stat-box">
+
+            <i class="fa-solid fa-radio"></i>
+
+            <div class="channel-stat-number">
+                {{ user_channel.radio_posts.count }}
+            </div>
+
+            <div class="channel-stat-label">
+                Total Radio Talks
+            </div>
+
+        </div>
+
+        <!-- TOTAL AUDIO LENGTH -->
+
+        <div class="channel-stat-box">
+
+            <i class="fa-solid fa-wave-square"></i>
+
+            <div class="channel-stat-number">
+                {{ total_audio_length }}
+            </div>
+
+            <div class="channel-stat-label">
+                Total Audio Length
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ACTIONS -->
+
+    <div class="channel-actions">
+
+        <a href="{% url 'edit_radio_channel' user_channel.id %}"
+        class="edit-btn">
+
+            Edit Channel Info
+
+        </a>
+
+        <a href="{% url 'delete_radio_channel' user_channel.id %}"
+        class="delete-btn">
+
+            Delete My Channel
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+<!-- =============================
+RADIO POSTS
+============================= -->
+
+<div class="radio-posts">
+
+{% for post in radio_posts %}
+
+<div class="post-card">
+
+    <!-- BACKGROUND -->
+
+    <div class="post-bg">
+
+        {% if post.background_video %}
+
+        <video autoplay muted loop playsinline>
+            <source src="{{ post.background_video.url }}">
+        </video>
+
+        {% elif post.background_image %}
+
+        <img src="{{ post.background_image.url }}">
+
+        {% endif %}
+
+        <div class="post-overlay"></div>
+
+    </div>
+
+    <!-- HEADER -->
+
+    <div class="post-header">
+
+        <div class="post-user">
+
+            <img src="{{ post.channel.station_logo.url }}">
+
+            <div class="post-user-details">
+
+                <h3>
+                    {{ post.channel.channel_name }}
+                </h3>
+
+                <span>
+                    {{ post.created_at|timesince }} ago
+                </span>
+
+                <span>
+                    Audio Length:
+                    {{ post.voice_length }}
+                </span>
+
+            </div>
+
+        </div>
+
+        <button class="subscribe-btn">
+
+            Subscribe
+
+        </button>
+
+    </div>
+
+    <!-- TOPIC -->
+
+    <div class="topic-section">
+
+        <strong>TOPIC:</strong>
+
+        <span class="topic-title">
+
+            {{ post.topic }}
+
+        </span>
+
+    </div>
+
+    <!-- AUDIO -->
+
+    <div class="audio-section">
+
+        <audio controls>
+
+            <source src="{{ post.audio.url }}">
+
+        </audio>
+
+        <!-- AUDIO INFO -->
+
+        <div class="audio-info">
+
+            <div class="audio-info-box">
+
+                <i class="fa-solid fa-clock"></i>
+
+                {{ post.voice_length }}
+
+            </div>
+
+            <div class="audio-info-box">
+
+                <i class="fa-solid fa-calendar"></i>
+
+                {{ post.created_at|date:"M d, Y" }}
+
+            </div>
+
+        </div>
+
+        <!-- VISUALIZER -->
+
+        <div class="visualizer">
+
+            {% for i in "12345678901234567890" %}
+
+            <span></span>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <!-- POST STATS -->
+
+    <div class="post-stats">
+
+        <div class="stat">
+
+            <i class="fa-solid fa-headphones"></i>
+
+            {{ post.listeners_count }}
+
+        </div>
+
+        <div class="stat">
+
+            <i class="fa-solid fa-ear-listen"></i>
+
+            {{ post.replay_count }}
+
+        </div>
+
+        <div class="stat">
+
+            <i class="fa-solid fa-bell"></i>
+
+            {{ post.channel.subscribers.count }}
+
+        </div>
+
+        <a href="{% url 'comments' post.id %}"
+        class="stat">
+
+            <i class="fa-solid fa-comment"></i>
+
+            {{ post.comments.count }}
+
+        </a>
+
+        <div class="stat">
+
+            <i class="fa-solid fa-share-nodes"></i>
+
+            {{ post.shares_count }}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% empty %}
+
+<div style="
+text-align:center;
+padding:60px;
+font-size:1.2rem;
+color:white;">
+
+No radio talks posted yet.
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<!-- =============================
+FLOATING BUTTON
+============================= -->
+
+{% if user_channel %}
+
+<a href="{% url 'create_radio_post' %}"
+class="floating-btn">
+
+    <i class="fa-solid fa-plus"></i>
+
+</a>
+
+{% endif %}
+
 </body>
 </html>
