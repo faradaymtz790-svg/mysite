@@ -80,7 +80,6 @@ urlpatterns += i18n_patterns(
     path('radio-networks/', views.radio_networks, name='radio_networks'),
     path('create-channel/', views.create_channel, name='create_channel'),
     path('delete-channel/<int:channel_id>/', views.delete_channel, name='delete_channel'),
-
     # --- User Interaction (Toggles & Counts) ---
     path('subscribe/<int:channel_id>/', views.toggle_subscribe, name='toggle_subscribe'),
     path('like/<int:post_id>/', views.toggle_like, name='toggle_like'),

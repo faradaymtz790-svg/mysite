@@ -214,46 +214,6 @@ class Report(models.Model):
 
 
 
-# models.py
-
-
-
-class RadioChannel(models.Model):
-    owner = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    channel_name = models.CharField(max_length=200)
-
-    profile_image = models.ImageField(
-        upload_to='radio_channel_profiles/',
-        blank=True,
-        null=True
-    )
-
-    location = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
-
-    email = models.EmailField(
-        blank=True,
-        null=True
-    )
-
-    topics = models.TextField()
-
-    schedule = models.TextField()
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    def __str__(self):
-        return self.channel_name
-
 
 class RadioPost(models.Model):
 
@@ -367,3 +327,75 @@ class RadioSubscriber(models.Model):
 
     def __str__(self):
         return f"{self.user.username} subscribed to {self.channel.channel_name}"
+
+
+
+     class RadioChannel(models.Model):
+
+    owner = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    channel_name = models.CharField(
+        max_length=100
+    )
+
+    profile_image = models.ImageField(
+        upload_to='radio_channel_profiles/',
+        blank=True,
+        null=True
+    )
+
+    location = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    owner_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    topics = models.TextField(
+        max_length=150
+    )
+
+    frequency = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    spotify_link = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    youtube_link = models.URLField(
+        blank=True,
+        null=True
+    )
+
+    schedule = models.TextField()
+
+    subscribers = models.ManyToManyField(
+        User,
+        through='RadioSubscriber',
+        related_name='subscribed_radio_channels',
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.channel_name   

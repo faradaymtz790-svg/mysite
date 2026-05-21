@@ -464,7 +464,6 @@ audio{
 </section>
 
 {% if channel %}
-
 <section class="channel-card">
 
     <div class="channel-top">
@@ -481,17 +480,31 @@ audio{
                 </a>
             </h2>
 
-            <div class="channel-meta">📍 {{ channel.location }}</div>
-            <div class="channel-meta">👤 {{ channel.owner.username }}</div>
+            <div class="channel-meta">
+                📍 {{ channel.location }}
+            </div>
+
+            <div class="channel-meta">
+                👤 {{ channel.owner_name }}
+            </div>
+
+            {% if channel.frequency %}
+            <div class="channel-meta">
+                📻 Frequency : {{ channel.frequency }}
+            </div>
+            {% endif %}
 
             {% if channel.email %}
-            <div class="channel-meta">✉ {{ channel.email }}</div>
+            <div class="channel-meta">
+                ✉ {{ channel.email }}
+            </div>
             {% endif %}
 
         </div>
 
     </div>
 
+    <!-- SUBSCRIBE -->
     <div class="subscribe-section">
 
         {% if request.user != channel.owner %}
@@ -500,7 +513,12 @@ audio{
            class="subscribe-btn {% if is_subscribed %}subscribed-btn{% endif %}">
 
             🔔
-            {% if is_subscribed %}SUBSCRIBED{% else %}SUBSCRIBE{% endif %}
+
+            {% if is_subscribed %}
+                SUBSCRIBED
+            {% else %}
+                SUBSCRIBE
+            {% endif %}
 
         </a>
 
@@ -512,7 +530,116 @@ audio{
 
     </div>
 
+    <!-- TOPICS -->
+    <div class="topic-box">
+
+        <div class="topic-title">
+            TOPICS
+        </div>
+
+        <div class="topic-text">
+            {{ channel.topics }}
+        </div>
+
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="topic-box">
+
+        <div class="topic-title">
+            CHANNEL SCHEDULE
+        </div>
+
+        <div class="topic-text">
+            {{ channel.schedule|linebreaks }}
+        </div>
+
+    </div>
+
+    <!-- SOCIAL LINKS -->
+    {% if channel.spotify_link or channel.youtube_link %}
+
+    <div class="topic-box">
+
+        <div class="topic-title">
+            CHANNEL LINKS
+        </div>
+
+        <div class="topic-text">
+
+            {% if channel.spotify_link %}
+            <div style="margin-bottom:20px;">
+
+                🎵 Spotify :
+
+                <a href="{{ channel.spotify_link }}"
+                   target="_blank"
+                   style="
+                   color:green;
+                   font-weight:bold;
+                   text-decoration:none;
+                   word-break:break-word;
+                   ">
+
+                   OPEN SPOTIFY
+
+                </a>
+
+            </div>
+            {% endif %}
+
+            {% if channel.youtube_link %}
+            <div>
+
+                ▶ YouTube :
+
+                <a href="{{ channel.youtube_link }}"
+                   target="_blank"
+                   style="
+                   color:red;
+                   font-weight:bold;
+                   text-decoration:none;
+                   word-break:break-word;
+                   ">
+
+                   OPEN YOUTUBE
+
+                </a>
+
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <!-- OWNER ACTIONS -->
+    {% if request.user == channel.owner %}
+
+    <div class="action-buttons">
+
+        <a href="{% url 'create_channel' %}"
+           class="edit-btn">
+
+           EDIT CHANNEL INFO
+
+        </a>
+
+        <a href="{% url 'delete_channel' channel.id %}"
+           class="delete-btn">
+
+           DELETE CHANNEL
+
+        </a>
+
+    </div>
+
+    {% endif %}
+
 </section>
+    
 
 {% endif %}
 

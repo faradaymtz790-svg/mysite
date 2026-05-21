@@ -1257,61 +1257,6 @@ def radio_networks(request):
     )
 
 
-@login_required
-def create_channel(request):
-
-    channel = RadioChannel.objects.filter(
-        owner=request.user
-    ).first()
-
-    if request.method == 'POST':
-
-        if channel:
-            form = RadioChannelForm(
-                request.POST,
-                request.FILES,
-                instance=channel
-            )
-
-        else:
-            form = RadioChannelForm(
-                request.POST,
-                request.FILES
-            )
-
-        if form.is_valid():
-
-            new_channel = form.save(
-                commit=False
-            )
-
-            new_channel.owner = request.user
-
-            new_channel.save()
-
-            messages.success(
-                request,
-                'Channel saved successfully.'
-            )
-
-            return redirect(
-                'radio_networks'
-            )
-
-    else:
-
-        form = RadioChannelForm(
-            instance=channel
-        )
-
-    return render(
-        request,
-        'create_channel.html',
-        {
-            'form': form
-        }
-    )
-
 
 @login_required
 def delete_channel(request, channel_id):
@@ -1468,3 +1413,36 @@ def increment_listen(request, post_id):
     return JsonResponse({
         "listeners": post.listeners_count
     })
+
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+
+@login_required
+def create_channel(request):
+
+    if request.method == "POST":
+
+        RadioChannel.objects.create(
+            owner=request.user,
+            profile_image=request.FILES.get("profile_image"),
+            channel_name=request.POST.get("channel_name"),
+            location=request.POST.get("location"),
+            topics=request.POST.get("topics"),
+            frequency=request.POST.get("frequency"),
+            email=request.POST.get("email"),
+            spotify_link=request.POST.get("spotify_link"),
+            youtube_link=request.POST.get("youtube_link"),
+            schedule=request.POST.get("schedule"),
+        )
+
+        messages.success(
+            request,
+            "SUCCESSFULLY CREATED. TURN TO RADIO NETWORKS TO VIEW PROFILE."
+        )
+
+        return redirect("radio_networks")
+
+    return render(request, "create_channel.html")
