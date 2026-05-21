@@ -1233,29 +1233,21 @@ from .forms import (
     RadioPostForm
 )
 
+from django.shortcuts import render
+from .models import RadioChannel, RadioPost
 
 @login_required
 def radio_networks(request):
-
-    channel = RadioChannel.objects.filter(
-        owner=request.user
-    ).first()
-
-    radio_posts = RadioPost.objects.all().order_by(
-        '-created_at'
-    )
+    channel = RadioChannel.objects.filter(owner=request.user).first()
+    radio_posts = RadioPost.objects.all()
 
     context = {
-        'channel': channel,
-        'radio_posts': radio_posts,
+        "channel": channel,
+        "radio_posts": radio_posts,
+        "is_subscribed": False,
     }
 
-    return render(
-        request,
-        'radio_networks.html',
-        context
-    )
-
+    return render(request, "radio_networks.html", context)
 
 
 @login_required
@@ -1430,9 +1422,9 @@ def create_channel(request):
             profile_image=request.FILES.get("profile_image"),
             channel_name=request.POST.get("channel_name"),
             location=request.POST.get("location"),
+            owner_name=request.POST.get("owner_name"),
             topics=request.POST.get("topics"),
             frequency=request.POST.get("frequency"),
-            email=request.POST.get("email"),
             spotify_link=request.POST.get("spotify_link"),
             youtube_link=request.POST.get("youtube_link"),
             schedule=request.POST.get("schedule"),

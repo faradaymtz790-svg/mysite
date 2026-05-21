@@ -215,101 +215,34 @@ class Report(models.Model):
 
 
 class RadioChannel(models.Model):
-    owner = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE
-    )
-
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
     channel_name = models.CharField(max_length=100)
-
-    profile_image = models.ImageField(
-        upload_to='radio_channel_profiles/',
-        blank=True,
-        null=True
-    )
-
-    location = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    owner_name = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    email = models.EmailField(
-        max_length=254,
-        blank=True,
-        null=True
-    )
-
+    profile_image = models.ImageField(upload_to='radio_channel_profiles/', blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
+    owner_name = models.CharField(max_length=100, blank=True, null=True)
     topics = models.CharField(max_length=150)
-
-    frequency = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
+    frequency = models.CharField(max_length=100, blank=True, null=True)
     spotify_link = models.URLField(blank=True, null=True)
     youtube_link = models.URLField(blank=True, null=True)
-
     schedule = models.TextField()
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.channel_name
 
 
-
 class RadioPost(models.Model):
-
-    channel = models.ForeignKey(
-        RadioChannel,
-        on_delete=models.CASCADE,
-        related_name='radio_posts'
-    )
-
-    topic = models.CharField(max_length=255)
-
-    title = models.CharField(max_length=255)
-
-    audio_file = models.FileField(
-        upload_to='radio_audio/'
-    )
-
-    background_image = models.ImageField(
-        upload_to='radio_background_images/',
-        blank=True,
-        null=True
-    )
-
-    background_video = models.FileField(
-        upload_to='radio_background_videos/',
-        blank=True,
-        null=True
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    listeners_count = models.PositiveIntegerField(
-        default=0
-    )
-
-    def total_likes(self):
-        return self.likes.count()
-
-    def total_comments(self):
-        return self.comments.count()
+    channel = models.ForeignKey(RadioChannel, on_delete=models.CASCADE)  # MUST EXIST
+    title = models.CharField(max_length=200)
+    topic = models.CharField(max_length=100)
+    audio_file = models.FileField(upload_to='radio_audio/')
+    background_image = models.ImageField(upload_to='radio_images/', blank=True, null=True)
+    background_video = models.FileField(upload_to='radio_videos/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
 
 
 class RadioLike(models.Model):
