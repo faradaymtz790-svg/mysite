@@ -13,7 +13,8 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-
+from core import views 
+# Then use: views.radio_creation_networks
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import gettext as _
 
