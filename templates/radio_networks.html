@@ -2,18 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Radio Networks | plugbar</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-<style>
-.like-btn.active i { color: red; transform: scale(1.1); }
-.hidden { display:none; }
-.create-channel-wrapper { text-align: center; padding: 50px; }
-.create-channel-btn { padding: 15px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 25px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Networks | plugbar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <style>
+        .like-btn.active i { color: red; transform: scale(1.1); }
+        .hidden { display:none; }
+        .create-channel-wrapper { text-align: center; padding: 50px; }
+        .create-channel-btn { padding: 15px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 25px; }
+    </style>
 </head>
 <body>
 
@@ -50,7 +50,8 @@
 {% else %}
     <!-- CREATE CHANNEL SECTION -->
     <div class="create-channel-wrapper">
-   <a href="/radio-creation/" class="create-channel-btn">
+        <!-- FIXED: Updated to 'account' name. Ensure this matches your urls.py -->
+        <a href="{% url 'account' %}" class="create-channel-btn">
             <i class="fa-solid fa-radio"></i> Create Radio Channel
         </a>
     </div>
@@ -83,7 +84,6 @@
         <div class="stat like-btn" onclick="toggleLike({{ post.id }})" id="like-btn-{{ post.id }}">
             <i class="fa-solid fa-heart"></i> <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
         </div>
-        <!-- FIXED: URL pattern is 'post_comments' in your urls.py -->
         <a href="{% url 'post_comments' post.id %}" class="stat">
             <i class="fa-solid fa-comment"></i> {{ post.comments.count }}
         </a>
