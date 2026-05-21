@@ -1298,3 +1298,10 @@ def radio_networks_view(request):
 def radio_creation_networks(request):
     # This view handles the creation form logic
     return render(request, 'radio_creation.html')
+
+
+from django.shortcuts import redirect # Add this import at the top
+
+def edit_radio_channel(request, pk):
+    # This redirects the user to your account page
+    return redirect('account')
