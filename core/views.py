@@ -24,7 +24,13 @@ from .forms import CommentForm
 
 import cloudinary.uploader
 
-
+from .models import (
+    RadioChannel,
+    RadioPost,
+    RadioLike,
+    RadioComment,
+    RadioSubscriber
+)
 # This line must be at the very far left (no spaces)
 
  # Use 'core' (or whatever your app name is)
@@ -1455,3 +1461,82 @@ def comments(request, post_id):
         'comments.html',
         context
     )
+
+    @login_required
+def subscribe_channel(request, channel_id):
+
+    channel = get_object_or_404(
+        RadioChannel,
+        id=channel_id
+    )
+
+    subscription = RadioSubscriber.objects.filter(
+        user=request.user,
+        channel=channel
+    )
+
+    if subscription.exists():
+
+        subscription.delete()
+
+    else:
+
+        RadioSubscriber.objects.create(
+            user=request.user,
+            channel=channel
+        )
+
+    return redirect('radio_networks')
+
+
+@login_required
+def channel_profile(request, channel_id):
+
+    channel = get_object_or_404(
+        RadioChannel,
+        id=channel_id
+    )
+
+    posts = RadioPost.objects.filter(
+        channel=channel
+    ).order_by('-created_at')
+
+    is_subscribed = False
+
+    if request.user.is_authenticated:
+
+        is_subscribed = RadioSubscriber.objects.filter(
+            user=request.user,
+            channel=channel
+        ).exists()
+
+    context = {
+        'channel': channel,
+        'radio_posts': posts,
+        'is_subscribed': is_subscribed,
+    }
+
+    return render(
+        request,
+        'radio_networks.html',
+        context
+    )
+
+
+@login_required
+def delete_radio_post(request, post_id):
+
+    post = get_object_or_404(
+        RadioPost,
+        id=post_id
+    )
+
+    if post.channel.owner != request.user:
+
+        return HttpResponseForbidden(
+            "You cannot delete this post."
+        )
+
+    post.delete()
+
+    return redirect('radio_networks')

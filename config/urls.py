@@ -79,13 +79,16 @@ urlpatterns += i18n_patterns(
 
     path('radio-networks/', views.radio_networks, name='radio_networks'),
     path('create-channel/', views.create_channel, name='create_channel'),
+    path('channel-profile/<int:channel_id>/', views.channel_profile, name='channel_profile'),
+    path('subscribe-channel/<int:channel_id>/', views.subscribe_channel, name='subscribe_channel'),
     path('delete-channel/<int:channel_id>/', views.delete_channel, name='delete_channel'),
 
     # --- Radio Content & Interaction ---
     path('create-radio-post/', views.create_radio_post, name='create_radio_post'),
+    path('delete-radio-post/<int:post_id>/', views.delete_radio_post, name='delete_radio_post'),
     path('like-radio-post/<int:post_id>/', views.like_radio_post, name='like_radio_post'),
     path('radio-comments/<int:post_id>/', views.comments, name='comments'),
-
+    
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),
