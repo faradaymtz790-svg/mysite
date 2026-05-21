@@ -70,9 +70,14 @@ class RadioChannelForm(forms.ModelForm):
             'channel_name',
             'profile_image',
             'location',
+            'owner_name',
             'email',
             'topics',
+            'frequency',
+            'spotify_link',
+            'youtube_link',
             'schedule',
+
         ]
 
 
