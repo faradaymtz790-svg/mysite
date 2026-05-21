@@ -1445,3 +1445,17 @@ def create_channel(request):
         return redirect("radio_networks")
 
     return render(request, "create_channel.html")
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import RadioChannel, RadioPost
+
+def channel_profile(request, id):
+    channel = get_object_or_404(RadioChannel, id=id)
+
+    posts = RadioPost.objects.filter(channel=channel).order_by("-created_at")
+
+    return render(request, "channel_profile.html", {
+        "channel": channel,
+        "posts": posts,
+    })
