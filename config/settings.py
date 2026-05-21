@@ -8,9 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'False' #was true here
 
-ALLOWED_HOSTS = ['"mysite-1-jhw2.onrender.com",']
-# Essential for Render to allow form submissions (like creating a post)
-CSRF_TRUSTED_ORIGINS = ['https://mysite-1-jhw2.onrender.com']  # was star sign inside
+ALLOWED_HOSTS = ["mysite-1-jhw2.onrender.com"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://mysite-1-jhw2.onrender.com"
+]
 
 INSTALLED_APPS = [
     'cloudinary_storage', # Must be at the top

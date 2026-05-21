@@ -1438,23 +1438,12 @@ def comments(request, post_id):
 
 @login_required
 def toggle_subscribe(request, channel_id):
-    channel = get_object_or_404(RadioChannel, id=channel_id)
+    ...
 
-    sub = RadioSubscriber.objects.filter(user=request.user, channel=channel)
+    return JsonResponse(...)
 
-    if sub.exists():
-        sub.delete()
-        status = "unsubscribed"
-    else:
-        RadioSubscriber.objects.create(user=request.user, channel=channel)
-        status = "subscribed"
 
-    return JsonResponse({
-        "status": status,
-        "count": channel.subscribers.count()
-    })
-
-    @login_required
+@login_required
 def toggle_like(request, post_id):
     post = get_object_or_404(RadioPost, id=post_id)
 
@@ -1468,7 +1457,9 @@ def toggle_like(request, post_id):
     return JsonResponse({
         "likes": post.likes.count()
     })
-    @login_required
+
+
+@login_required
 def increment_listen(request, post_id):
     post = get_object_or_404(RadioPost, id=post_id)
     post.listeners_count += 1
