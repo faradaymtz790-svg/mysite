@@ -330,62 +330,18 @@ class RadioSubscriber(models.Model):
 
 
 
-    class RadioChannel(models.Model):
-    owner = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE
-    )
-
+ class RadioChannel(models.Model):
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
     channel_name = models.CharField(max_length=100)
-
-    profile_image = models.ImageField(
-        upload_to='radio_channel_profiles/',
-        blank=True,
-        null=True
-    )
-
-    location = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    owner_name = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    topics = models.CharField(
-        max_length=150
-    )
-
-    frequency = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    spotify_link = models.URLField(
-        blank=True,
-        null=True
-    )
-
-    youtube_link = models.URLField(
-        blank=True,
-        null=True
-    )
-
+    profile_image = models.ImageField(upload_to='radio_channel_profiles/', blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
+    owner_name = models.CharField(max_length=100, blank=True, null=True)
+    topics = models.CharField(max_length=150)
+    frequency = models.CharField(max_length=100, blank=True, null=True)
+    spotify_link = models.URLField(blank=True, null=True)
+    youtube_link = models.URLField(blank=True, null=True)
     schedule = models.TextField()
-
-    email = models.EmailField(
-        blank=True,
-        null=True
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.channel_name
