@@ -345,8 +345,7 @@ class RadioComment(models.Model):
         return f"{self.user.username} - {self.post.title}"
 
 
-
-        class RadioSubscriber(models.Model):
+class RadioSubscriber(models.Model):
 
     user = models.ForeignKey(
         User,

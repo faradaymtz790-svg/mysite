@@ -1462,31 +1462,37 @@ def comments(request, post_id):
         context
     )
 
-    @login_required
+
+@login_required
+def radio_networks(request):
+    ...
+
+
+@login_required
+def create_channel(request):
+    ...
+
+
+@login_required
 def subscribe_channel(request, channel_id):
+    channel = get_object_or_404(RadioChannel, id=channel_id)
 
-    channel = get_object_or_404(
-        RadioChannel,
-        id=channel_id
-    )
-
-    subscription = RadioSubscriber.objects.filter(
+    sub = RadioSubscriber.objects.filter(
         user=request.user,
         channel=channel
     )
 
-    if subscription.exists():
-
-        subscription.delete()
-
+    if sub.exists():
+        sub.delete()
     else:
-
         RadioSubscriber.objects.create(
             user=request.user,
             channel=channel
         )
 
     return redirect('radio_networks')
+
+
 
 
 @login_required
