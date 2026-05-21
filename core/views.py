@@ -1391,34 +1391,6 @@ def create_radio_post(request):
     )
 
 
-@login_required
-def like_radio_post(request, post_id):
-
-    post = get_object_or_404(
-        RadioPost,
-        id=post_id
-    )
-
-    liked = RadioLike.objects.filter(
-        user=request.user,
-        post=post
-    )
-
-    if liked.exists():
-
-        liked.delete()
-
-    else:
-
-        RadioLike.objects.create(
-            user=request.user,
-            post=post
-        )
-
-    return redirect(
-        'radio_networks'
-    )
-
 
 @login_required
 def comments(request, post_id):
@@ -1463,86 +1435,45 @@ def comments(request, post_id):
     )
 
 
-@login_required
-def radio_networks(request):
-    ...
-
 
 @login_required
-def create_channel(request):
-    ...
-
-
-@login_required
-def subscribe_channel(request, channel_id):
+def toggle_subscribe(request, channel_id):
     channel = get_object_or_404(RadioChannel, id=channel_id)
 
-    sub = RadioSubscriber.objects.filter(
-        user=request.user,
-        channel=channel
-    )
+    sub = RadioSubscriber.objects.filter(user=request.user, channel=channel)
 
     if sub.exists():
         sub.delete()
+        status = "unsubscribed"
     else:
-        RadioSubscriber.objects.create(
-            user=request.user,
-            channel=channel
-        )
+        RadioSubscriber.objects.create(user=request.user, channel=channel)
+        status = "subscribed"
 
-    return redirect('radio_networks')
+    return JsonResponse({
+        "status": status,
+        "count": channel.subscribers.count()
+    })
 
+    @login_required
+def toggle_like(request, post_id):
+    post = get_object_or_404(RadioPost, id=post_id)
 
+    like = RadioLike.objects.filter(user=request.user, post=post)
 
+    if like.exists():
+        like.delete()
+    else:
+        RadioLike.objects.create(user=request.user, post=post)
 
-@login_required
-def channel_profile(request, channel_id):
+    return JsonResponse({
+        "likes": post.likes.count()
+    })
+    @login_required
+def increment_listen(request, post_id):
+    post = get_object_or_404(RadioPost, id=post_id)
+    post.listeners_count += 1
+    post.save()
 
-    channel = get_object_or_404(
-        RadioChannel,
-        id=channel_id
-    )
-
-    posts = RadioPost.objects.filter(
-        channel=channel
-    ).order_by('-created_at')
-
-    is_subscribed = False
-
-    if request.user.is_authenticated:
-
-        is_subscribed = RadioSubscriber.objects.filter(
-            user=request.user,
-            channel=channel
-        ).exists()
-
-    context = {
-        'channel': channel,
-        'radio_posts': posts,
-        'is_subscribed': is_subscribed,
-    }
-
-    return render(
-        request,
-        'radio_networks.html',
-        context
-    )
-
-
-@login_required
-def delete_radio_post(request, post_id):
-
-    post = get_object_or_404(
-        RadioPost,
-        id=post_id
-    )
-
-    if post.channel.owner != request.user:
-
-        return HttpResponseForbidden(
-            "You cannot delete this post."
-        )
-
-    post.delete()
-
-    return redirect('radio_networks')
+    return JsonResponse({
+        "listeners": post.listeners_count
+    })

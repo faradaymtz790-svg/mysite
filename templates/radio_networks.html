@@ -390,21 +390,9 @@ audio{
 .bar:nth-child(10){height:95px; animation-delay:0.9s;}
 
 @keyframes wave{
-
-    0%{
-        transform:scaleY(0.5);
-        opacity:0.5;
-    }
-
-    50%{
-        transform:scaleY(1.3);
-        opacity:1;
-    }
-
-    100%{
-        transform:scaleY(0.5);
-        opacity:0.5;
-    }
+    0%{transform:scaleY(0.5);opacity:0.5;}
+    50%{transform:scaleY(1.3);opacity:1;}
+    100%{transform:scaleY(0.5);opacity:0.5;}
 }
 
 /* =========================
@@ -444,32 +432,17 @@ audio{
 
 @media(max-width:768px){
 
-    .logo-headline{
-        font-size:65px;
-    }
-
-    .subheadline{
-        font-size:24px;
-    }
-
-    .channel-name{
-        font-size:40px;
-    }
-
-    .topic-header{
-        font-size:24px;
-    }
-
-    .meta-item{
-        font-size:17px;
-    }
+    .logo-headline{font-size:65px;}
+    .subheadline{font-size:24px;}
+    .channel-name{font-size:40px;}
+    .topic-header{font-size:24px;}
+    .meta-item{font-size:17px;}
 
     .floating-post-btn{
         width:80px;
         height:80px;
         font-size:50px;
     }
-
 }
 
 </style>
@@ -479,32 +452,17 @@ audio{
 
 {% include 'navbar.html' %}
 
-<!-- HERO -->
 <section class="hero-section">
-
-    <h1 class="logo-headline">
-        Plugbar
-    </h1>
-
-    <div class="subheadline">
-        RADIO NETWORKS HUB
-    </div>
-
+    <h1 class="logo-headline">Plugbar</h1>
+    <div class="subheadline">RADIO NETWORKS HUB</div>
 </section>
 
-<!-- CREATE CHANNEL -->
 <section class="create-channel-wrapper">
-
-    <a href="{% url 'create_channel' %}"
-       class="create-channel-btn">
-
+    <a href="{% url 'create_channel' %}" class="create-channel-btn">
        + CREATE RADIO CHANNEL
-
     </a>
-
 </section>
 
-<!-- CHANNEL PROFILE -->
 {% if channel %}
 
 <section class="channel-card">
@@ -512,56 +470,37 @@ audio{
     <div class="channel-top">
 
         {% if channel.profile_image %}
-        <img src="{{ channel.profile_image.url }}"
-             class="channel-image">
+        <img src="{{ channel.profile_image.url }}" class="channel-image">
         {% endif %}
 
         <div class="channel-info">
 
             <h2 class="channel-name">
-
-                <a href="{% url 'channel_profile' channel.id %}"
-                   class="channel-name-link">
-
+                <a href="{% url 'channel_profile' channel.id %}" class="channel-name-link">
                    {{ channel.channel_name }}
-
                 </a>
-
             </h2>
 
-            <div class="channel-meta">
-                📍 {{ channel.location }}
-            </div>
-
-            <div class="channel-meta">
-                👤 {{ channel.owner.username }}
-            </div>
+            <div class="channel-meta">📍 {{ channel.location }}</div>
+            <div class="channel-meta">👤 {{ channel.owner.username }}</div>
 
             {% if channel.email %}
-            <div class="channel-meta">
-                ✉ {{ channel.email }}
-            </div>
+            <div class="channel-meta">✉ {{ channel.email }}</div>
             {% endif %}
 
         </div>
 
     </div>
 
-    <!-- SUBSCRIBE -->
     <div class="subscribe-section">
 
         {% if request.user != channel.owner %}
 
-        <a href="{% url 'subscribe_channel' channel.id %}"
+        <a href="{% url 'toggle_subscribe' channel.id %}"
            class="subscribe-btn {% if is_subscribed %}subscribed-btn{% endif %}">
 
             🔔
-
-            {% if is_subscribed %}
-                SUBSCRIBED
-            {% else %}
-                SUBSCRIBE
-            {% endif %}
+            {% if is_subscribed %}SUBSCRIBED{% else %}SUBSCRIBE{% endif %}
 
         </a>
 
@@ -573,85 +512,20 @@ audio{
 
     </div>
 
-    <!-- TOPICS -->
-    <div class="topic-box">
-
-        <div class="topic-title">
-            TOPICS
-        </div>
-
-        <div class="topic-text">
-            {{ channel.topics }}
-        </div>
-
-    </div>
-
-    <!-- SCHEDULE -->
-    <div class="topic-box">
-
-        <div class="topic-title">
-            SCHEDULE
-        </div>
-
-        <div class="topic-text">
-            {{ channel.schedule }}
-        </div>
-
-    </div>
-
-    <!-- OWNER ACTIONS -->
-    {% if request.user == channel.owner %}
-
-    <div class="action-buttons">
-
-        <a href="{% url 'create_channel' %}"
-           class="edit-btn">
-
-           EDIT CHANNEL INFO
-
-        </a>
-
-        <a href="{% url 'delete_channel' channel.id %}"
-           class="delete-btn">
-
-           DELETE CHANNEL
-
-        </a>
-
-    </div>
-
-    {% endif %}
-
 </section>
 
-<!-- FLOATING BUTTON -->
-{% if request.user == channel.owner %}
-
-<a href="{% url 'create_radio_post' %}"
-   class="floating-post-btn">
-
-   +
-
-</a>
-
 {% endif %}
 
-{% endif %}
-
-<!-- POSTS -->
 <section class="feed-section">
 
 {% for post in radio_posts %}
 
 <div class="radio-post">
 
-    <!-- IMAGE -->
     {% if post.background_image %}
-    <img src="{{ post.background_image.url }}"
-         class="post-background">
+    <img src="{{ post.background_image.url }}" class="post-background">
     {% endif %}
 
-    <!-- VIDEO -->
     {% if post.background_video %}
     <video autoplay muted loop playsinline class="post-video">
         <source src="{{ post.background_video.url }}">
@@ -662,99 +536,37 @@ audio{
 
     <div class="post-content">
 
-        <!-- CHANNEL NAME -->
         <div class="post-channel">
-
             <a href="{% url 'channel_profile' post.channel.id %}">
-
                 {{ post.channel.channel_name }}
-
             </a>
-
         </div>
 
-        <!-- TOPIC -->
         <div class="topic-header">
-
             {{ post.topic }} :
-
-            <span class="topic-name">
-
-                {{ post.title }}
-
-            </span>
-
+            <span class="topic-name">{{ post.title }}</span>
         </div>
 
-        <!-- AUDIO -->
         <div class="audio-wrapper">
-
             <audio controls>
                 <source src="{{ post.audio_file.url }}">
             </audio>
-
-            <!-- VISUALIZER -->
-            <div class="visualizer">
-
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-
-            </div>
-
         </div>
 
-        <!-- META -->
         <div class="post-meta">
 
-            <div class="meta-item">
-                ⏱ {{ post.audio_length }}
-            </div>
+            <div class="meta-item">⏱ {{ post.audio_length }}</div>
+            <div class="meta-item">📅 {{ post.created_at }}</div>
 
-            <div class="meta-item">
-                📅 {{ post.created_at }}
-            </div>
-
-            <a href="{% url 'comments' post.id %}"
-               class="meta-item meta-link">
-
+            <a href="{% url 'comments' post.id %}" class="meta-item meta-link">
                💬 {{ post.comments.count }}
-
             </a>
 
-            <a href="{% url 'like_radio_post' post.id %}"
-               class="meta-item meta-link">
-
-                <span class="{% if post.is_liked %}heart-liked{% endif %}">
-                    ❤
-                </span>
-
-                {{ post.likes.count }}
-
+            <a href="{% url 'toggle_like' post.id %}" class="meta-item meta-link">
+                ❤ {{ post.likes.count }}
             </a>
 
-            <div class="meta-item">
-                🎧 {{ post.listeners_count }}
-            </div>
-
-            <!-- DELETE POST -->
-            {% if request.user == post.channel.owner %}
-
-            <a href="{% url 'delete_radio_post' post.id %}"
-               class="delete-btn">
-
-               DELETE POST
-
-            </a>
-
-            {% endif %}
+            <div class="meta-item">🎧 {{ post.listeners_count }}</div>
 
         </div>
 
@@ -764,16 +576,8 @@ audio{
 
 {% empty %}
 
-<div style="
-padding:120px 30px;
-text-align:center;
-font-size:40px;
-font-weight:bold;
-color:green;
-">
-
-NO RADIO POSTS YET
-
+<div style="padding:120px;text-align:center;font-size:40px;color:green;">
+    NO RADIO POSTS YET
 </div>
 
 {% endfor %}

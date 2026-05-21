@@ -80,15 +80,18 @@ urlpatterns += i18n_patterns(
     path('radio-networks/', views.radio_networks, name='radio_networks'),
     path('create-channel/', views.create_channel, name='create_channel'),
     path('channel-profile/<int:channel_id>/', views.channel_profile, name='channel_profile'),
-    path('subscribe-channel/<int:channel_id>/', views.subscribe_channel, name='subscribe_channel'),
     path('delete-channel/<int:channel_id>/', views.delete_channel, name='delete_channel'),
 
-    # --- Radio Content & Interaction ---
-    path('create-radio-post/', views.create_radio_post, name='create_radio_post'),
-    path('delete-radio-post/<int:post_id>/', views.delete_radio_post, name='delete_radio_post'),
-    path('like-radio-post/<int:post_id>/', views.like_radio_post, name='like_radio_post'),
+    # --- User Interaction (Toggles & Counts) ---
+    path('subscribe/<int:channel_id>/', views.toggle_subscribe, name='toggle_subscribe'),
+    path('like/<int:post_id>/', views.toggle_like, name='toggle_like'),
+    path('listen/<int:post_id>/', views.increment_listen, name='increment_listen'),
     path('radio-comments/<int:post_id>/', views.comments, name='comments'),
-    
+
+    # --- Content Creation & Management ---
+    path('create-radio-post/', views.create_radio_post, name='create_radio_post'),
+    path('delete-post/<int:post_id>/', views.delete_post, name='delete_post'),
+
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),
