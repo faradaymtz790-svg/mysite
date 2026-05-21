@@ -71,21 +71,27 @@ body{
     background:#fff;
 }
 
-.post img,.post video{
-    position:absolute;inset:0;
-    width:100%;height:100%;
+.post img,
+.post video{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
     object-fit:cover;
     filter:brightness(0.5);
 }
 
 .overlay{
-    position:absolute;inset:0;
+    position:absolute;
+    inset:0;
     background:linear-gradient(to bottom,rgba(255,255,255,0.9),rgba(0,128,0,0.2));
 }
 
 .content{position:relative;padding:40px;}
 
-.post-channel a{color:green;font-size:28px;font-weight:bold;text-decoration:none;}
+.post-channel a{
+    color:green;font-size:28px;font-weight:bold;text-decoration:none;
+}
 
 .topic{font-size:28px;color:green;font-weight:bold;margin:20px 0;}
 
@@ -93,18 +99,13 @@ body{
 audio{width:100%;}
 
 .meta{display:flex;flex-wrap:wrap;gap:15px;}
-.meta div,.meta a{
+.meta div,
+.meta a{
     padding:12px 18px;
     background:rgba(255,255,255,0.4);
     text-decoration:none;
     font-weight:bold;
     color:#111;
-}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-.logo-headline{font-size:60px;}
-.channel-name{font-size:35px;}
 }
 </style>
 </head>
@@ -152,9 +153,11 @@ audio{width:100%;}
             <div class="channel-meta">📻 {{ channel.frequency }}</div>
             {% endif %}
         </div>
+
     </div>
 
     <div class="subscribe-section">
+
         {% if request.user != channel.owner %}
         <a href="{% url 'toggle_subscribe' channel.id %}"
            class="subscribe-btn {% if is_subscribed %}subscribed-btn{% endif %}">
@@ -163,8 +166,9 @@ audio{width:100%;}
         {% endif %}
 
         <div class="subscribers-count">
-            {{ channel.subscribers.count|default:0 }} Subscribers
+            🔔 {{ channel.subscribers.all|length }} Subscribers
         </div>
+
     </div>
 
     <div class="box">
@@ -222,9 +226,11 @@ audio{width:100%;}
     <div class="content">
 
         <div class="post-channel">
+            {% if post.channel %}
             <a href="{% url 'channel_profile' post.channel.id %}">
                 {{ post.channel.channel_name }}
             </a>
+            {% endif %}
         </div>
 
         <div class="topic">
@@ -232,9 +238,11 @@ audio{width:100%;}
         </div>
 
         <div class="audio">
+            {% if post.audio_file %}
             <audio controls>
                 <source src="{{ post.audio_file.url }}">
             </audio>
+            {% endif %}
         </div>
 
         <div class="meta">
@@ -242,11 +250,11 @@ audio{width:100%;}
             <div>📅 {{ post.created_at }}</div>
 
             <a href="{% url 'comments' post.id %}">
-                💬 {{ post.comments.count }}
+                💬 {{ post.comments.all|length }}
             </a>
 
             <a href="{% url 'toggle_like' post.id %}">
-                ❤ {{ post.likes.count }}
+                ❤ {{ post.likes.all|length }}
             </a>
 
             <div>🎧 {{ post.listeners_count|default:0 }}</div>
