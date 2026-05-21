@@ -2,7 +2,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -11,440 +10,102 @@
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
 
 body{
     width:100%;
     overflow-x:hidden;
-    background:
-    linear-gradient(
-        to bottom,
-        rgba(255,255,255,1) 0%,
-        rgba(255,255,255,0.95) 50%,
-        rgba(0,128,0,0.20) 100%
-    );
-
-    font-family:'Gill Sans', sans-serif;
+    font-family:'Gill Sans',sans-serif;
+    background:linear-gradient(to bottom,#fff 0%,#fefefe 50%,rgba(0,128,0,0.2) 100%);
 }
 
-/* =========================
-    HERO
-========================= */
+/* HERO */
+.hero-section{text-align:center;padding:40px 20px;}
+.logo-headline{font-family:'Great Vibes';font-size:90px;color:green;}
+.subheadline{background:green;color:#fff;padding:18px;font-size:34px;letter-spacing:3px;text-transform:uppercase;}
 
-.hero-section{
-    width:100%;
-    padding:40px 20px 20px 20px;
-    text-align:center;
-}
-
-.logo-headline{
-    font-family:'Great Vibes', cursive;
-    color:green;
-    font-size:95px;
-    line-height:1;
-    margin-bottom:20px;
-}
-
-.subheadline{
-    width:100%;
-    background:green;
-    color:white;
-    padding:18px;
-    font-size:36px;
-    letter-spacing:3px;
-    text-transform:uppercase;
-}
-
-/* =========================
-    CREATE CHANNEL BUTTON
-========================= */
-
-.create-channel-wrapper{
-    width:100%;
-    padding:30px;
-}
-
+/* BUTTON */
+.create-channel-wrapper{padding:30px;}
 .create-channel-btn{
-    width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-decoration:none;
-    background:green;
-    color:white;
-    font-size:34px;
-    font-weight:bold;
-    padding:28px;
-    transition:0.3s;
-    box-shadow:0 10px 25px rgba(0,128,0,0.25);
+    display:flex;justify-content:center;
+    background:green;color:#fff;
+    padding:25px;font-size:30px;
+    text-decoration:none;font-weight:bold;
 }
 
-.create-channel-btn:hover{
-    transform:scale(1.01);
-}
+/* CHANNEL */
+.channel-card{background:rgba(255,255,255,0.6);padding:30px;}
+.channel-top{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.channel-image{width:150px;height:150px;border-radius:50%;object-fit:cover;}
+.channel-name{font-size:50px;color:green;}
+.channel-meta{font-size:22px;margin-top:8px;}
 
-/* =========================
-    CHANNEL PROFILE
-========================= */
-
-.channel-card{
-    width:100%;
-    background:rgba(255,255,255,0.6);
-    backdrop-filter:blur(12px);
-    padding:35px;
-    border-top:1px solid rgba(0,128,0,0.1);
-    border-bottom:1px solid rgba(0,128,0,0.1);
-}
-
-.channel-top{
-    display:flex;
-    gap:25px;
-    align-items:center;
-    flex-wrap:wrap;
-}
-
-.channel-image{
-    width:160px;
-    height:160px;
-    object-fit:cover;
-    border-radius:50%;
-    border:5px solid rgba(0,128,0,0.2);
-}
-
-.channel-info{
-    flex:1;
-}
-
-.channel-name{
-    color:green;
-    font-size:58px;
-    font-weight:bold;
-    margin-bottom:10px;
-}
-
-.channel-name-link{
-    color:green;
-    text-decoration:none;
-}
-
-.channel-meta{
-    margin-top:12px;
-    font-size:25px;
-    color:#333;
-}
-
-/* =========================
-    SUBSCRIBE SECTION
-========================= */
-
-.subscribe-section{
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    margin-top:30px;
-}
-
+/* SUBSCRIBE */
+.subscribe-section{display:flex;gap:15px;flex-wrap:wrap;margin-top:20px;}
 .subscribe-btn{
-    text-decoration:none;
-    background:green;
-    color:white;
-    padding:18px 30px;
-    font-size:24px;
-    font-weight:bold;
-    display:flex;
-    align-items:center;
-    gap:10px;
+    background:green;color:#fff;
+    padding:15px 25px;text-decoration:none;font-weight:bold;
 }
+.subscribed-btn{background:#004d00;}
+.subscribers-count{padding:15px;background:#eaffea;color:green;font-weight:bold;}
 
-.subscribed-btn{
-    background:#004d00;
-}
+/* BOX */
+.box{margin-top:25px;padding:20px;background:rgba(0,128,0,0.06);}
+.box-title{font-size:26px;color:green;font-weight:bold;margin-bottom:10px;}
+.box-text{font-size:20px;line-height:1.6;}
 
-.subscribers-count{
-    background:rgba(0,128,0,0.08);
-    padding:18px 25px;
-    font-size:24px;
-    font-weight:bold;
-    color:green;
-}
+/* ACTIONS */
+.actions{display:flex;gap:15px;margin-top:20px;}
+.btn{padding:15px 20px;color:#fff;text-decoration:none;font-weight:bold;}
+.edit{background:green;}
+.delete{background:red;}
 
-/* =========================
-    TOPIC BOX
-========================= */
+/* FEED */
+.feed{margin-top:40px;}
 
-.topic-box{
-    margin-top:30px;
-    padding:25px;
-    background:rgba(0,128,0,0.06);
-}
-
-.topic-title{
-    color:green;
-    font-size:30px;
-    font-weight:bold;
-    margin-bottom:10px;
-}
-
-.topic-text{
-    font-size:24px;
-    line-height:1.8;
-    color:#222;
-}
-
-/* =========================
-    ACTION BUTTONS
-========================= */
-
-.action-buttons{
-    display:flex;
-    gap:20px;
-    margin-top:35px;
-    flex-wrap:wrap;
-}
-
-.edit-btn,
-.delete-btn{
-    text-decoration:none;
-    color:white;
-    font-size:22px;
-    font-weight:bold;
-    padding:18px 28px;
-}
-
-.edit-btn{
-    background:green;
-}
-
-.delete-btn{
-    background:red;
-}
-
-/* =========================
-    FLOATING POST BUTTON
-========================= */
-
-.floating-post-btn{
-    position:fixed;
-    right:30px;
-    bottom:30px;
-    width:95px;
-    height:95px;
-    border-radius:50%;
-    background:green;
-    color:white;
-    text-decoration:none;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:65px;
-    z-index:999;
-    box-shadow:0 10px 30px rgba(0,128,0,0.35);
-    transition:0.3s;
-}
-
-.floating-post-btn:hover{
-    transform:scale(1.1);
-}
-
-/* =========================
-    FEED
-========================= */
-
-.feed-section{
-    width:100%;
-    margin-top:40px;
-}
-
-.radio-post{
-    width:100%;
+.post{
     position:relative;
+    min-height:600px;
+    margin-bottom:40px;
     overflow:hidden;
-    min-height:750px;
-    margin-bottom:50px;
-    background:white;
+    background:#fff;
 }
 
-.post-background{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
+.post img,.post video{
+    position:absolute;inset:0;
+    width:100%;height:100%;
     object-fit:cover;
-    z-index:1;
     filter:brightness(0.5);
 }
 
-.post-video{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    z-index:1;
-    filter:brightness(0.5);
+.overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to bottom,rgba(255,255,255,0.9),rgba(0,128,0,0.2));
 }
 
-.post-overlay{
-    position:absolute;
-    inset:0;
-    background:
-    linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.88),
-        rgba(0,128,0,0.20)
-    );
-    z-index:2;
-}
+.content{position:relative;padding:40px;}
 
-.post-content{
-    position:relative;
-    z-index:3;
-    padding:50px 35px;
-}
+.post-channel a{color:green;font-size:28px;font-weight:bold;text-decoration:none;}
 
-/* =========================
-    POST CHANNEL NAME
-========================= */
+.topic{font-size:28px;color:green;font-weight:bold;margin:20px 0;}
 
-.post-channel{
-    margin-bottom:20px;
-}
+.audio{margin:20px 0;}
+audio{width:100%;}
 
-.post-channel a{
-    color:green;
+.meta{display:flex;flex-wrap:wrap;gap:15px;}
+.meta div,.meta a{
+    padding:12px 18px;
+    background:rgba(255,255,255,0.4);
     text-decoration:none;
-    font-size:32px;
     font-weight:bold;
-}
-
-/* =========================
-    TOPIC
-========================= */
-
-.topic-header{
-    font-size:34px;
-    color:green;
-    font-weight:bold;
-    margin-bottom:25px;
-}
-
-.topic-name{
-    text-transform:uppercase;
-    text-decoration:underline;
     color:#111;
 }
 
-/* =========================
-    AUDIO PLAYER
-========================= */
-
-.audio-wrapper{
-    width:100%;
-    padding:35px;
-    background:rgba(255,255,255,0.25);
-    backdrop-filter:blur(10px);
-}
-
-audio{
-    width:100%;
-}
-
-/* =========================
-    VISUALIZER
-========================= */
-
-.visualizer{
-    display:flex;
-    align-items:flex-end;
-    gap:8px;
-    height:120px;
-    margin-top:30px;
-}
-
-.bar{
-    width:12px;
-    border-radius:30px;
-    animation:wave 1.2s infinite ease-in-out;
-    background:
-    linear-gradient(
-        to top,
-        #00ff88,
-        #ccffee
-    );
-}
-
-.bar:nth-child(1){height:40px; animation-delay:0s;}
-.bar:nth-child(2){height:90px; animation-delay:0.1s;}
-.bar:nth-child(3){height:65px; animation-delay:0.2s;}
-.bar:nth-child(4){height:110px; animation-delay:0.3s;}
-.bar:nth-child(5){height:70px; animation-delay:0.4s;}
-.bar:nth-child(6){height:100px; animation-delay:0.5s;}
-.bar:nth-child(7){height:50px; animation-delay:0.6s;}
-.bar:nth-child(8){height:120px; animation-delay:0.7s;}
-.bar:nth-child(9){height:80px; animation-delay:0.8s;}
-.bar:nth-child(10){height:95px; animation-delay:0.9s;}
-
-@keyframes wave{
-    0%{transform:scaleY(0.5);opacity:0.5;}
-    50%{transform:scaleY(1.3);opacity:1;}
-    100%{transform:scaleY(0.5);opacity:0.5;}
-}
-
-/* =========================
-    META
-========================= */
-
-.post-meta{
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    margin-top:35px;
-}
-
-.meta-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:14px 20px;
-    font-size:22px;
-    font-weight:bold;
-    background:rgba(255,255,255,0.35);
-    backdrop-filter:blur(10px);
-    color:#111;
-}
-
-.meta-link{
-    text-decoration:none;
-}
-
-.heart-liked{
-    color:green;
-}
-
-/* =========================
-    RESPONSIVE
-========================= */
-
+/* RESPONSIVE */
 @media(max-width:768px){
-
-    .logo-headline{font-size:65px;}
-    .subheadline{font-size:24px;}
-    .channel-name{font-size:40px;}
-    .topic-header{font-size:24px;}
-    .meta-item{font-size:17px;}
-
-    .floating-post-btn{
-        width:80px;
-        height:80px;
-        font-size:50px;
-    }
+.logo-headline{font-size:60px;}
+.channel-name{font-size:35px;}
 }
-
 </style>
 </head>
 
@@ -459,7 +120,7 @@ audio{
 
 <section class="create-channel-wrapper">
     <a href="{% url 'create_channel' %}" class="create-channel-btn">
-       + CREATE RADIO CHANNEL
+        + CREATE RADIO CHANNEL
     </a>
 </section>
 
@@ -472,196 +133,93 @@ audio{
         <img src="{{ channel.profile_image.url }}" class="channel-image">
         {% endif %}
 
-        <div class="channel-info">
-
+        <div>
             <h2 class="channel-name">
-                <a href="{% url 'channel_profile' channel.id %}" class="channel-name-link">
-                   {{ channel.channel_name }}
+                <a href="{% url 'channel_profile' channel.id %}" style="text-decoration:none;color:green;">
+                    {{ channel.channel_name }}
                 </a>
             </h2>
 
-            <div class="channel-meta">
-                📍 {{ channel.location }}
-            </div>
+            {% if channel.location %}
+            <div class="channel-meta">📍 {{ channel.location }}</div>
+            {% endif %}
 
-            <div class="channel-meta">
-                👤 {{ channel.owner_name }}
-            </div>
+            {% if channel.owner_name %}
+            <div class="channel-meta">👤 {{ channel.owner_name }}</div>
+            {% endif %}
 
             {% if channel.frequency %}
-            <div class="channel-meta">
-                📻 Frequency : {{ channel.frequency }}
-            </div>
+            <div class="channel-meta">📻 {{ channel.frequency }}</div>
             {% endif %}
-
-            {% if channel.email %}
-            <div class="channel-meta">
-                ✉ {{ channel.email }}
-            </div>
-            {% endif %}
-
         </div>
-
     </div>
 
-    <!-- SUBSCRIBE -->
     <div class="subscribe-section">
-
         {% if request.user != channel.owner %}
-
         <a href="{% url 'toggle_subscribe' channel.id %}"
            class="subscribe-btn {% if is_subscribed %}subscribed-btn{% endif %}">
-
-            🔔
-
-            {% if is_subscribed %}
-                SUBSCRIBED
-            {% else %}
-                SUBSCRIBE
-            {% endif %}
-
+            🔔 {% if is_subscribed %}SUBSCRIBED{% else %}SUBSCRIBE{% endif %}
         </a>
-
         {% endif %}
 
         <div class="subscribers-count">
-            🔔 {{ channel.subscribers.count }} Subscribers
+            {{ channel.subscribers.count|default:0 }} Subscribers
         </div>
-
     </div>
 
-    <!-- TOPICS -->
-    <div class="topic-box">
-
-        <div class="topic-title">
-            TOPICS
-        </div>
-
-        <div class="topic-text">
-            {{ channel.topics }}
-        </div>
-
+    <div class="box">
+        <div class="box-title">TOPICS</div>
+        <div class="box-text">{{ channel.topics }}</div>
     </div>
 
-    <!-- SCHEDULE -->
-    <div class="topic-box">
-
-        <div class="topic-title">
-            CHANNEL SCHEDULE
-        </div>
-
-        <div class="topic-text">
-            {{ channel.schedule|linebreaks }}
-        </div>
-
+    <div class="box">
+        <div class="box-title">SCHEDULE</div>
+        <div class="box-text">{{ channel.schedule|linebreaks }}</div>
     </div>
 
-    <!-- SOCIAL LINKS -->
     {% if channel.spotify_link or channel.youtube_link %}
+    <div class="box">
+        <div class="box-title">LINKS</div>
 
-    <div class="topic-box">
+        {% if channel.spotify_link %}
+        <div>🎵 <a href="{{ channel.spotify_link }}" target="_blank">Spotify</a></div>
+        {% endif %}
 
-        <div class="topic-title">
-            CHANNEL LINKS
-        </div>
-
-        <div class="topic-text">
-
-            {% if channel.spotify_link %}
-            <div style="margin-bottom:20px;">
-
-                🎵 Spotify :
-
-                <a href="{{ channel.spotify_link }}"
-                   target="_blank"
-                   style="
-                   color:green;
-                   font-weight:bold;
-                   text-decoration:none;
-                   word-break:break-word;
-                   ">
-
-                   OPEN SPOTIFY
-
-                </a>
-
-            </div>
-            {% endif %}
-
-            {% if channel.youtube_link %}
-            <div>
-
-                ▶ YouTube :
-
-                <a href="{{ channel.youtube_link }}"
-                   target="_blank"
-                   style="
-                   color:red;
-                   font-weight:bold;
-                   text-decoration:none;
-                   word-break:break-word;
-                   ">
-
-                   OPEN YOUTUBE
-
-                </a>
-
-            </div>
-            {% endif %}
-
-        </div>
-
+        {% if channel.youtube_link %}
+        <div>▶ <a href="{{ channel.youtube_link }}" target="_blank">YouTube</a></div>
+        {% endif %}
     </div>
-
     {% endif %}
 
-    <!-- OWNER ACTIONS -->
     {% if request.user == channel.owner %}
-
-    <div class="action-buttons">
-
-        <a href="{% url 'create_channel' %}"
-           class="edit-btn">
-
-           EDIT CHANNEL INFO
-
-        </a>
-
-        <a href="{% url 'delete_channel' channel.id %}"
-           class="delete-btn">
-
-           DELETE CHANNEL
-
-        </a>
-
+    <div class="actions">
+        <a href="{% url 'create_channel' %}" class="btn edit">EDIT</a>
+        <a href="{% url 'delete_channel' channel.id %}" class="btn delete">DELETE</a>
     </div>
-
     {% endif %}
 
 </section>
-    
-
 {% endif %}
 
-<section class="feed-section">
+<section class="feed">
 
 {% for post in radio_posts %}
 
-<div class="radio-post">
+<div class="post">
 
     {% if post.background_image %}
-    <img src="{{ post.background_image.url }}" class="post-background">
+    <img src="{{ post.background_image.url }}">
     {% endif %}
 
     {% if post.background_video %}
-    <video autoplay muted loop playsinline class="post-video">
+    <video autoplay muted loop playsinline>
         <source src="{{ post.background_video.url }}">
     </video>
     {% endif %}
 
-    <div class="post-overlay"></div>
+    <div class="overlay"></div>
 
-    <div class="post-content">
+    <div class="content">
 
         <div class="post-channel">
             <a href="{% url 'channel_profile' post.channel.id %}">
@@ -669,44 +227,39 @@ audio{
             </a>
         </div>
 
-        <div class="topic-header">
-            {{ post.topic }} :
-            <span class="topic-name">{{ post.title }}</span>
+        <div class="topic">
+            {{ post.topic }} : {{ post.title }}
         </div>
 
-        <div class="audio-wrapper">
+        <div class="audio">
             <audio controls>
                 <source src="{{ post.audio_file.url }}">
             </audio>
         </div>
 
-        <div class="post-meta">
+        <div class="meta">
 
-            <div class="meta-item">⏱ {{ post.audio_length }}</div>
-            <div class="meta-item">📅 {{ post.created_at }}</div>
+            <div>📅 {{ post.created_at }}</div>
 
-            <a href="{% url 'comments' post.id %}" class="meta-item meta-link">
-               💬 {{ post.comments.count }}
+            <a href="{% url 'comments' post.id %}">
+                💬 {{ post.comments.count }}
             </a>
 
-            <a href="{% url 'toggle_like' post.id %}" class="meta-item meta-link">
+            <a href="{% url 'toggle_like' post.id %}">
                 ❤ {{ post.likes.count }}
             </a>
 
-            <div class="meta-item">🎧 {{ post.listeners_count }}</div>
+            <div>🎧 {{ post.listeners_count|default:0 }}</div>
 
         </div>
 
     </div>
-
 </div>
 
 {% empty %}
-
-<div style="padding:120px;text-align:center;font-size:40px;color:green;">
+<div style="text-align:center;padding:100px;color:green;font-size:30px;">
     NO RADIO POSTS YET
 </div>
-
 {% endfor %}
 
 </section>
