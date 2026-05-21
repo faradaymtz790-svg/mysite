@@ -77,7 +77,7 @@ urlpatterns += i18n_patterns(
 
 
   # RADIO
-    path("radio-creation/", views.radio_creation_networks, name="radio_creation_networks"),
+    path('account/', views.account_view, name='account'),
     path('radio/dashboard/', views.radio_network_profile, name='radio_dashboard'),
     path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
     path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
