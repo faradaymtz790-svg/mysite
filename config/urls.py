@@ -30,7 +30,6 @@ urlpatterns = [
         url=settings.STATIC_URL + 'favicon.ico'
     )),
 
-    path('radio/create/', views.radio_creation_networks, name='radio_creation_networks'),
     
 ]
 
@@ -78,15 +77,14 @@ urlpatterns += i18n_patterns(
     path('search/', views.search, name='search'),
 
 
-  # RADIO
-    path('account/', views.account_view, name='account'),
-    path('radio/dashboard/', views.radio_network_profile, name='radio_dashboard'),
-    path('radio/<int:pk>/', views.radio_network_profile, name='public_radio_profile'),
-    path('update-station-profile/', views.update_station_profile, name='update_station_profile'),
-    path('radio/<int:pk>/edit/', views.edit_radio_channel, name='edit_radio_channel'),
-    path('radio/<int:pk>/delete/', views.delete_radio_channel, name='delete_radio_channel'),
-    path('radio/post/create/', views.create_radio_post, name='create_radio_post'),
-    
+    path('radio-networks/', views.radio_networks, name='radio_networks'),
+    path('create-channel/', views.create_channel, name='create_channel'),
+    path('delete-channel/<int:channel_id>/', views.delete_channel, name='delete_channel'),
+
+    # --- Radio Content & Interaction ---
+    path('create-radio-post/', views.create_radio_post, name='create_radio_post'),
+    path('like-radio-post/<int:post_id>/', views.like_radio_post, name='like_radio_post'),
+    path('radio-comments/<int:post_id>/', views.comments, name='comments'),
 
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),

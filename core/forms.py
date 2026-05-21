@@ -50,3 +50,41 @@ class ProfileForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={'class': 'glass-input', 'rows': 3, 'maxlength': '500'}),
             'links': forms.URLInput(attrs={'class': 'glass-input', 'placeholder': 'https://...'}),
         }
+
+
+
+
+
+        # forms.py
+
+from django import forms
+from .models import RadioChannel, RadioPost
+
+
+class RadioChannelForm(forms.ModelForm):
+
+    class Meta:
+        model = RadioChannel
+
+        fields = [
+            'channel_name',
+            'profile_image',
+            'location',
+            'email',
+            'topics',
+            'schedule',
+        ]
+
+
+class RadioPostForm(forms.ModelForm):
+
+    class Meta:
+        model = RadioPost
+
+        fields = [
+            'topic',
+            'title',
+            'audio_file',
+            'background_image',
+            'background_video',
+        ]

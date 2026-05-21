@@ -214,43 +214,132 @@ class Report(models.Model):
 
 
 
+# models.py
 
-class RadioNetwork(models.Model):
-    """
-    Stores core metadata profile information for real-time audio channel networks.
-    """
-    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='radio_network')
-    channel_name = models.CharField(max_length=150, default="Plugbar Premium Station")
-    station_logo = models.ImageField(upload_to='station_logos/', blank=True, null=True)
-    location = models.CharField(max_length=200, default="Global Network Platform")
-    postal_address = models.CharField(max_length=255, default="No Mailing Code")
-    topics = models.TextField(default="This broadcasting channel network operator hasn't published their summary strategy agenda logs details yet.")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RadioChannel(models.Model):
+    owner = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    channel_name = models.CharField(max_length=200)
+
+    profile_image = models.ImageField(
+        upload_to='radio_channel_profiles/',
+        blank=True,
+        null=True
+    )
+
+    location = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    email = models.EmailField(
+        blank=True,
+        null=True
+    )
+
+    topics = models.TextField()
+
+    schedule = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
-        return f"{self.channel_name} ({self.owner.username})"
+        return self.channel_name
 
 
 class RadioPost(models.Model):
-    """
-    Stores text dispatches and audio podcast releases published on a station's activity wall.
-    """
-    POST_TYPES = [
-        ('TEXT', 'Live Broadcast Summary'),
-        ('AUDIO', 'Podcast Update'),
-    ]
 
-    network = models.ForeignKey(RadioNetwork, on_delete=models.CASCADE, related_name='posts')
+    channel = models.ForeignKey(
+        RadioChannel,
+        on_delete=models.CASCADE,
+        related_name='radio_posts'
+    )
+
+    topic = models.CharField(max_length=255)
+
     title = models.CharField(max_length=255)
-    content = models.TextField()
-    post_type = models.CharField(max_length=10, choices=POST_TYPES, default='TEXT')
-    likes_count = models.IntegerField(default=0)
-    comments_count = models.IntegerField(default=0)
-    published_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-published_at']
+    audio_file = models.FileField(
+        upload_to='radio_audio/'
+    )
+
+    background_image = models.ImageField(
+        upload_to='radio_background_images/',
+        blank=True,
+        null=True
+    )
+
+    background_video = models.FileField(
+        upload_to='radio_background_videos/',
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    listeners_count = models.PositiveIntegerField(
+        default=0
+    )
+
+    def total_likes(self):
+        return self.likes.count()
+
+    def total_comments(self):
+        return self.comments.count()
 
     def __str__(self):
-        return f"{self.title} - {self.network.channel_name}"
+        return self.title
+
+
+class RadioLike(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    post = models.ForeignKey(
+        RadioPost,
+        on_delete=models.CASCADE,
+        related_name='likes'
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        unique_together = ('user', 'post')
+
+
+class RadioComment(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    post = models.ForeignKey(
+        RadioPost,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+
+    comment = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.post.title}"

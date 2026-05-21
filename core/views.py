@@ -1209,100 +1209,249 @@ def niche_selection(request):
 def account_view(request):
     return render(request, 'account.html')
 
+# views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from .models import RadioNetwork, RadioPost
+from django.contrib import messages
 
-def radio_network_profile(request, pk=None):
-    """
-    Renders the radio profile page. If a pk is provided, it serves as a public view.
-    If no pk is provided, it falls back to the logged-in user's personal channel.
-    """
-    # 1. Fallback Route: If no ID is requested, try to show the user's own channel
-    if pk is None:
-        if not request.user.is_authenticated:
-            return redirect('login') # Protect the personal dashboard fallback route
-            
-        network, created = RadioNetwork.objects.get_or_create(
-            owner=request.user,
-            defaults={'channel_name': f"{request.user.username}'s Live Network"}
-        )
-    # 2. Public Route: Anyone can view any network by its ID
-    else:
-        network = get_object_or_404(RadioNetwork, pk=pk)
-    
-    # Extract historical post entities tied to this network
-    posts = network.posts.all()
-    
-    context = {
-        'network': network, # <-- CRITICAL: Passed to HTML for the {% if request.user == network.owner %} block
-        'channel_name': network.channel_name,
-        'owner_name': network.owner.get_full_name() or network.owner.username,
-        'location': network.location,
-        'postal_address': network.postal_address,
-        'topics': network.topics,
-        'station_logo': network.station_logo.url if network.station_logo else None,
-        'posts': posts,
-    }
-    return render(request, 'radio_networks.html', context)
+from .models import (
+    RadioChannel,
+    RadioPost,
+    RadioLike,
+    RadioComment
+)
+
+from .forms import (
+    RadioChannelForm,
+    RadioPostForm
+)
 
 
 @login_required
-@require_POST
-def update_station_profile(request):
-    """
-    Intercepts POST data from the in-page form editor module, verifies
-    ownership matching implicitly, and updates database records.
-    """
-    # Explicitly locks modification access to the actual owner of the network profile
-    network = get_object_or_404(RadioNetwork, owner=request.user)
-    
-    network.channel_name = request.POST.get('channel_name', network.channel_name)
-    network.location = request.POST.get('location', network.location)
-    network.postal_address = request.POST.get('postal_address', network.postal_address)
-    network.topics = request.POST.get('topics', network.topics)
-    
-    if 'station_logo' in request.FILES:
-        network.station_logo = request.FILES['station_logo']
-        
-    owner_name_input = request.POST.get('owner_name', '').strip()
-    if owner_name_input:
-        name_parts = owner_name_input.split(' ', 1)
-        request.user.first_name = name_parts[0]
-        if len(name_parts) > 1:
-            request.user.last_name = name_parts[1]
-        request.user.save()
+def radio_networks(request):
 
-    network.save()
-    return redirect('radio_dashboard')
+    channel = RadioChannel.objects.filter(
+        owner=request.user
+    ).first()
 
+    radio_posts = RadioPost.objects.all().order_by(
+        '-created_at'
+    )
 
-    # core/views.py
-# ... (rest of your existing code above) ...
-
-def radio_networks_view(request):
-    # Fetch the channel associated with the current logged-in user
-    user_channel = None
-    if request.user.is_authenticated:
-        # Assuming you have a OneToOneField or similar relationship
-        user_channel = getattr(request.user, 'radio_channel', None) 
-    
     context = {
-        'user_channel': user_channel,
-        'radio_posts': RadioPost.objects.all(),
+        'channel': channel,
+        'radio_posts': radio_posts,
     }
-    return render(request, 'radio_networks.html', context)
 
-# Ensure this is at the same level as other function definitions (no indentation)
-def radio_creation_networks(request):
-    # This view handles the creation form logic
-    return render(request, 'radio_creation.html')
+    return render(
+        request,
+        'radio_networks.html',
+        context
+    )
 
 
-from django.shortcuts import redirect # Add this import at the top
+@login_required
+def create_channel(request):
 
-def edit_radio_channel(request, pk):
-    # This redirects the user to your account page
-    return redirect('account')
+    channel = RadioChannel.objects.filter(
+        owner=request.user
+    ).first()
+
+    if request.method == 'POST':
+
+        if channel:
+            form = RadioChannelForm(
+                request.POST,
+                request.FILES,
+                instance=channel
+            )
+
+        else:
+            form = RadioChannelForm(
+                request.POST,
+                request.FILES
+            )
+
+        if form.is_valid():
+
+            new_channel = form.save(
+                commit=False
+            )
+
+            new_channel.owner = request.user
+
+            new_channel.save()
+
+            messages.success(
+                request,
+                'Channel saved successfully.'
+            )
+
+            return redirect(
+                'radio_networks'
+            )
+
+    else:
+
+        form = RadioChannelForm(
+            instance=channel
+        )
+
+    return render(
+        request,
+        'create_channel.html',
+        {
+            'form': form
+        }
+    )
+
+
+@login_required
+def delete_channel(request, channel_id):
+
+    channel = get_object_or_404(
+        RadioChannel,
+        id=channel_id,
+        owner=request.user
+    )
+
+    channel.delete()
+
+    messages.success(
+        request,
+        'Channel deleted successfully.'
+    )
+
+    return redirect(
+        'radio_networks'
+    )
+
+
+@login_required
+def create_radio_post(request):
+
+    channel = RadioChannel.objects.filter(
+        owner=request.user
+    ).first()
+
+    if not channel:
+
+        messages.error(
+            request,
+            'Create a radio channel first.'
+        )
+
+        return redirect(
+            'create_channel'
+        )
+
+    if request.method == 'POST':
+
+        form = RadioPostForm(
+            request.POST,
+            request.FILES
+        )
+
+        if form.is_valid():
+
+            post = form.save(
+                commit=False
+            )
+
+            post.channel = channel
+
+            post.save()
+
+            messages.success(
+                request,
+                'Radio post created.'
+            )
+
+            return redirect(
+                'radio_networks'
+            )
+
+    else:
+
+        form = RadioPostForm()
+
+    return render(
+        request,
+        'create_radio_post.html',
+        {
+            'form': form
+        }
+    )
+
+
+@login_required
+def like_radio_post(request, post_id):
+
+    post = get_object_or_404(
+        RadioPost,
+        id=post_id
+    )
+
+    liked = RadioLike.objects.filter(
+        user=request.user,
+        post=post
+    )
+
+    if liked.exists():
+
+        liked.delete()
+
+    else:
+
+        RadioLike.objects.create(
+            user=request.user,
+            post=post
+        )
+
+    return redirect(
+        'radio_networks'
+    )
+
+
+@login_required
+def comments(request, post_id):
+
+    post = get_object_or_404(
+        RadioPost,
+        id=post_id
+    )
+
+    comments = RadioComment.objects.filter(
+        post=post
+    ).order_by('-created_at')
+
+    if request.method == 'POST':
+
+        comment_text = request.POST.get(
+            'comment'
+        )
+
+        if comment_text:
+
+            RadioComment.objects.create(
+                user=request.user,
+                post=post,
+                comment=comment_text
+            )
+
+            return redirect(
+                'comments',
+                post_id=post.id
+            )
+
+    context = {
+        'post': post,
+        'comments': comments,
+    }
+
+    return render(
+        request,
+        'comments.html',
+        context
+    )
