@@ -1238,16 +1238,23 @@ from .models import RadioChannel, RadioPost
 
 @login_required
 def radio_networks(request):
-    channel = RadioChannel.objects.filter(owner=request.user).first()
-    radio_posts = RadioPost.objects.all()
+    try:
+        channel = RadioChannel.objects.filter(owner=request.user).first()
+        radio_posts = RadioPost.objects.select_related("channel").all().order_by("-created_at")
 
-    context = {
-        "channel": channel,
-        "radio_posts": radio_posts,
-        "is_subscribed": False,
-    }
+        is_subscribed = False
+        if channel and request.user.is_authenticated:
+            is_subscribed = channel.subscribers.filter(id=request.user.id).exists()
 
-    return render(request, "radio_networks.html", context)
+        return render(request, "radio_networks.html", {
+            "channel": channel,
+            "radio_posts": radio_posts,
+            "is_subscribed": is_subscribed,
+        })
+
+    except Exception as e:
+        print("RADIO NETWORK ERROR:", e)
+        raise
 
 
 @login_required

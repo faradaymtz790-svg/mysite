@@ -71,7 +71,6 @@ class RadioChannelForm(forms.ModelForm):
             'profile_image',
             'location',
             'owner_name',
-            'email',
             'topics',
             'frequency',
             'spotify_link',
