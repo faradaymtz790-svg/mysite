@@ -330,16 +330,13 @@ class RadioSubscriber(models.Model):
 
 
 
-     class RadioChannel(models.Model):
-
+    class RadioChannel(models.Model):
     owner = models.OneToOneField(
         User,
         on_delete=models.CASCADE
     )
 
-    channel_name = models.CharField(
-        max_length=100
-    )
+    channel_name = models.CharField(max_length=100)
 
     profile_image = models.ImageField(
         upload_to='radio_channel_profiles/',
@@ -359,12 +356,7 @@ class RadioSubscriber(models.Model):
         null=True
     )
 
-    email = models.EmailField(
-        blank=True,
-        null=True
-    )
-
-    topics = models.TextField(
+    topics = models.CharField(
         max_length=150
     )
 
@@ -386,11 +378,9 @@ class RadioSubscriber(models.Model):
 
     schedule = models.TextField()
 
-    subscribers = models.ManyToManyField(
-        User,
-        through='RadioSubscriber',
-        related_name='subscribed_radio_channels',
-        blank=True
+    email = models.EmailField(
+        blank=True,
+        null=True
     )
 
     created_at = models.DateTimeField(
@@ -398,4 +388,4 @@ class RadioSubscriber(models.Model):
     )
 
     def __str__(self):
-        return self.channel_name   
+        return self.channel_name
