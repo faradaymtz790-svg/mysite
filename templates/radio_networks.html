@@ -259,7 +259,6 @@ audio{ width:100%; }
 {% for post in radio_posts %}
 
 <div class="post">
-
     {% if post.background_image %}
     <img src="{{ post.background_image.url }}">
     {% endif %}
@@ -296,13 +295,16 @@ audio{ width:100%; }
 
         <div class="meta">
             <div>📅 {{ post.created_at }}</div>
-            <a href="{% url 'comments' post.id %}">💬 {{ post.comments.all|length }}</a>
-            <a href="{% url 'toggle_like' post.id %}">❤ {{ post.likes.all|length }}</a>
+            <a href="{% url 'comments' post.id %}">
+                💬 {{ post.comments.all|length }}
+            </a>
+            <a href="{% url 'toggle_like' post.id %}">
+                ❤ {{ post.likes.all|length }}
+            </a>
             <div>🎧 {{ post.listeners_count|default:0 }}</div>
         </div>
 
     </div>
-
 </div>
 
 {% empty %}
@@ -313,10 +315,3 @@ audio{ width:100%; }
 {% endfor %}
 
 </section>
-
-{% if channel %}
-<a href="{% url 'create_radio_post' %}" class="post-float-btn">+</a>
-{% endif %}
-
-</body>
-</html>
