@@ -10,58 +10,191 @@
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
 body{
     width:100%;
     overflow-x:hidden;
     font-family:'Gill Sans',sans-serif;
-    background:linear-gradient(to bottom,#fff 0%,#fefefe 50%,rgba(0,128,0,0.2) 100%);
+    background:linear-gradient(
+        to bottom,
+        #fff 0%,
+        #fefefe 50%,
+        rgba(0,128,0,0.2) 100%
+    );
 }
 
 /* HERO */
-.hero-section{text-align:center;padding:40px 20px;}
-.logo-headline{font-family:'Great Vibes';font-size:90px;color:green;}
-.subheadline{background:green;color:#fff;padding:18px;font-size:34px;letter-spacing:3px;text-transform:uppercase;}
+.hero-section{
+    text-align:center;
+    padding:40px 20px;
+}
 
-/* BUTTON */
-.create-channel-wrapper{padding:30px;}
+.logo-headline{
+    font-family:'Great Vibes';
+    font-size:90px;
+    color:green;
+}
+
+.subheadline{
+    background:green;
+    color:#fff;
+    padding:18px;
+    font-size:34px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+}
+
+/* CREATE CHANNEL */
+.create-channel-wrapper{
+    padding:30px;
+}
+
 .create-channel-btn{
-    display:flex;justify-content:center;
-    background:green;color:#fff;
-    padding:25px;font-size:30px;
-    text-decoration:none;font-weight:bold;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:green;
+    color:#fff;
+    padding:25px;
+    font-size:30px;
+    text-decoration:none;
+    font-weight:bold;
+    border-radius:12px;
+}
+
+/* FLOATING POST BUTTON */
+.post-float-btn{
+    position:fixed;
+    bottom:30px;
+    right:25px;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:green;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    font-size:60px;
+    font-weight:bold;
+    box-shadow:0 10px 25px rgba(0,128,0,0.4);
+    z-index:9999;
+    transition:0.3s;
+}
+
+.post-float-btn:hover{
+    transform:scale(1.08);
+    background:#009900;
 }
 
 /* CHANNEL */
-.channel-card{background:rgba(255,255,255,0.6);padding:30px;}
-.channel-top{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
-.channel-image{width:150px;height:150px;border-radius:50%;object-fit:cover;}
-.channel-name{font-size:50px;color:green;}
-.channel-meta{font-size:22px;margin-top:8px;}
+.channel-card{
+    background:rgba(255,255,255,0.6);
+    padding:30px;
+}
+
+.channel-top{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.channel-image{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.channel-name{
+    font-size:50px;
+    color:green;
+}
+
+.channel-meta{
+    font-size:22px;
+    margin-top:8px;
+}
 
 /* SUBSCRIBE */
-.subscribe-section{display:flex;gap:15px;flex-wrap:wrap;margin-top:20px;}
-.subscribe-btn{
-    background:green;color:#fff;
-    padding:15px 25px;text-decoration:none;font-weight:bold;
+.subscribe-section{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:20px;
 }
-.subscribed-btn{background:#004d00;}
-.subscribers-count{padding:15px;background:#eaffea;color:green;font-weight:bold;}
+
+.subscribe-btn{
+    background:green;
+    color:#fff;
+    padding:15px 25px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.subscribed-btn{
+    background:#004d00;
+}
+
+.subscribers-count{
+    padding:15px;
+    background:#eaffea;
+    color:green;
+    font-weight:bold;
+}
 
 /* BOX */
-.box{margin-top:25px;padding:20px;background:rgba(0,128,0,0.06);}
-.box-title{font-size:26px;color:green;font-weight:bold;margin-bottom:10px;}
-.box-text{font-size:20px;line-height:1.6;}
+.box{
+    margin-top:25px;
+    padding:20px;
+    background:rgba(0,128,0,0.06);
+}
+
+.box-title{
+    font-size:26px;
+    color:green;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.box-text{
+    font-size:20px;
+    line-height:1.6;
+}
 
 /* ACTIONS */
-.actions{display:flex;gap:15px;margin-top:20px;}
-.btn{padding:15px 20px;color:#fff;text-decoration:none;font-weight:bold;}
-.edit{background:green;}
-.delete{background:red;}
+.actions{
+    display:flex;
+    gap:15px;
+    margin-top:20px;
+}
+
+.btn{
+    padding:15px 20px;
+    color:#fff;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.edit{
+    background:green;
+}
+
+.delete{
+    background:red;
+}
 
 /* FEED */
-.feed{margin-top:40px;}
+.feed{
+    margin-top:40px;
+}
 
 .post{
     position:relative;
@@ -84,21 +217,46 @@ body{
 .overlay{
     position:absolute;
     inset:0;
-    background:linear-gradient(to bottom,rgba(255,255,255,0.9),rgba(0,128,0,0.2));
+    background:linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.9),
+        rgba(0,128,0,0.2)
+    );
 }
 
-.content{position:relative;padding:40px;}
+.content{
+    position:relative;
+    padding:40px;
+}
 
 .post-channel a{
-    color:green;font-size:28px;font-weight:bold;text-decoration:none;
+    color:green;
+    font-size:28px;
+    font-weight:bold;
+    text-decoration:none;
 }
 
-.topic{font-size:28px;color:green;font-weight:bold;margin:20px 0;}
+.topic{
+    font-size:28px;
+    color:green;
+    font-weight:bold;
+    margin:20px 0;
+}
 
-.audio{margin:20px 0;}
-audio{width:100%;}
+.audio{
+    margin:20px 0;
+}
 
-.meta{display:flex;flex-wrap:wrap;gap:15px;}
+audio{
+    width:100%;
+}
+
+.meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
 .meta div,
 .meta a{
     padding:12px 18px;
@@ -106,6 +264,45 @@ audio{width:100%;}
     text-decoration:none;
     font-weight:bold;
     color:#111;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+    .logo-headline{
+        font-size:60px;
+    }
+
+    .subheadline{
+        font-size:22px;
+    }
+
+    .channel-name{
+        font-size:35px;
+    }
+
+    .channel-image{
+        width:110px;
+        height:110px;
+    }
+
+    .topic{
+        font-size:22px;
+    }
+
+    .content{
+        padding:25px;
+    }
+
+    .post{
+        min-height:500px;
+    }
+
+    .post-float-btn{
+        width:75px;
+        height:75px;
+        font-size:50px;
+    }
 }
 </style>
 </head>
@@ -116,14 +313,21 @@ audio{width:100%;}
 
 <section class="hero-section">
     <h1 class="logo-headline">Plugbar</h1>
-    <div class="subheadline">RADIO NETWORKS HUB</div>
+    <div class="subheadline">
+        RADIO NETWORKS HUB
+    </div>
 </section>
 
+<!-- CREATE CHANNEL ONLY IF NO CHANNEL -->
+{% if not channel %}
 <section class="create-channel-wrapper">
+
     <a href="{% url 'create_channel' %}" class="create-channel-btn">
         + CREATE RADIO CHANNEL
     </a>
+
 </section>
+{% endif %}
 
 {% if channel %}
 <section class="channel-card">
@@ -135,23 +339,32 @@ audio{width:100%;}
         {% endif %}
 
         <div>
+
             <h2 class="channel-name">
-                <a href="{% url 'channel_profile' channel.id %}" style="text-decoration:none;color:green;">
+                <a href="{% url 'channel_profile' channel.id %}"
+                   style="text-decoration:none;color:green;">
                     {{ channel.channel_name }}
                 </a>
             </h2>
 
             {% if channel.location %}
-            <div class="channel-meta">📍 {{ channel.location }}</div>
+            <div class="channel-meta">
+                📍 {{ channel.location }}
+            </div>
             {% endif %}
 
             {% if channel.owner_name %}
-            <div class="channel-meta">👤 {{ channel.owner_name }}</div>
+            <div class="channel-meta">
+                👤 {{ channel.owner_name }}
+            </div>
             {% endif %}
 
             {% if channel.frequency %}
-            <div class="channel-meta">📻 {{ channel.frequency }}</div>
+            <div class="channel-meta">
+                📻 {{ channel.frequency }}
+            </div>
             {% endif %}
+
         </div>
 
     </div>
@@ -161,7 +374,13 @@ audio{width:100%;}
         {% if request.user != channel.owner %}
         <a href="{% url 'toggle_subscribe' channel.id %}"
            class="subscribe-btn {% if is_subscribed %}subscribed-btn{% endif %}">
-            🔔 {% if is_subscribed %}SUBSCRIBED{% else %}SUBSCRIBE{% endif %}
+
+            🔔 {% if is_subscribed %}
+            SUBSCRIBED
+            {% else %}
+            SUBSCRIBE
+            {% endif %}
+
         </a>
         {% endif %}
 
@@ -172,33 +391,66 @@ audio{width:100%;}
     </div>
 
     <div class="box">
-        <div class="box-title">TOPICS</div>
-        <div class="box-text">{{ channel.topics }}</div>
+        <div class="box-title">
+            TOPICS
+        </div>
+
+        <div class="box-text">
+            {{ channel.topics }}
+        </div>
     </div>
 
     <div class="box">
-        <div class="box-title">SCHEDULE</div>
-        <div class="box-text">{{ channel.schedule|linebreaks }}</div>
+
+        <div class="box-title">
+            SCHEDULE
+        </div>
+
+        <div class="box-text">
+            {{ channel.schedule|linebreaks }}
+        </div>
+
     </div>
 
     {% if channel.spotify_link or channel.youtube_link %}
     <div class="box">
-        <div class="box-title">LINKS</div>
+
+        <div class="box-title">
+            LINKS
+        </div>
 
         {% if channel.spotify_link %}
-        <div>🎵 <a href="{{ channel.spotify_link }}" target="_blank">Spotify</a></div>
+        <div>
+            🎵
+            <a href="{{ channel.spotify_link }}" target="_blank">
+                Spotify
+            </a>
+        </div>
         {% endif %}
 
         {% if channel.youtube_link %}
-        <div>▶ <a href="{{ channel.youtube_link }}" target="_blank">YouTube</a></div>
+        <div>
+            ▶
+            <a href="{{ channel.youtube_link }}" target="_blank">
+                YouTube
+            </a>
+        </div>
         {% endif %}
+
     </div>
     {% endif %}
 
     {% if request.user == channel.owner %}
     <div class="actions">
-        <a href="{% url 'create_channel' %}" class="btn edit">EDIT</a>
-        <a href="{% url 'delete_channel' channel.id %}" class="btn delete">DELETE</a>
+
+        <a href="{% url 'create_channel' %}" class="btn edit">
+            EDIT
+        </a>
+
+        <a href="{% url 'delete_channel' channel.id %}" class="btn delete">
+            DELETE
+        </a>
+
     </div>
     {% endif %}
 
@@ -226,11 +478,13 @@ audio{width:100%;}
     <div class="content">
 
         <div class="post-channel">
+
             {% if post.channel %}
             <a href="{% url 'channel_profile' post.channel.id %}">
                 {{ post.channel.channel_name }}
             </a>
             {% endif %}
+
         </div>
 
         <div class="topic">
@@ -238,16 +492,20 @@ audio{width:100%;}
         </div>
 
         <div class="audio">
+
             {% if post.audio_file %}
             <audio controls>
                 <source src="{{ post.audio_file.url }}">
             </audio>
             {% endif %}
+
         </div>
 
         <div class="meta">
 
-            <div>📅 {{ post.created_at }}</div>
+            <div>
+                📅 {{ post.created_at }}
+            </div>
 
             <a href="{% url 'comments' post.id %}">
                 💬 {{ post.comments.all|length }}
@@ -257,20 +515,37 @@ audio{width:100%;}
                 ❤ {{ post.likes.all|length }}
             </a>
 
-            <div>🎧 {{ post.listeners_count|default:0 }}</div>
+            <div>
+                🎧 {{ post.listeners_count|default:0 }}
+            </div>
 
         </div>
 
     </div>
+
 </div>
 
 {% empty %}
-<div style="text-align:center;padding:100px;color:green;font-size:30px;">
+
+<div style="
+    text-align:center;
+    padding:100px;
+    color:green;
+    font-size:30px;
+">
     NO RADIO POSTS YET
 </div>
+
 {% endfor %}
 
 </section>
+
+<!-- FLOATING CREATE POST BUTTON -->
+{% if channel %}
+<a href="{% url 'create_radio_post' %}" class="post-float-btn">
+    +
+</a>
+{% endif %}
 
 </body>
 </html>
