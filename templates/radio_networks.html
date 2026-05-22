@@ -318,7 +318,6 @@ audio{
     </div>
 </section>
 
-<!-- CREATE CHANNEL ONLY IF NO CHANNEL -->
 {% if not channel %}
 <section class="create-channel-wrapper">
 
@@ -348,21 +347,15 @@ audio{
             </h2>
 
             {% if channel.location %}
-            <div class="channel-meta">
-                📍 {{ channel.location }}
-            </div>
+            <div class="channel-meta">📍 {{ channel.location }}</div>
             {% endif %}
 
             {% if channel.owner_name %}
-            <div class="channel-meta">
-                👤 {{ channel.owner_name }}
-            </div>
+            <div class="channel-meta">👤 {{ channel.owner_name }}</div>
             {% endif %}
 
             {% if channel.frequency %}
-            <div class="channel-meta">
-                📻 {{ channel.frequency }}
-            </div>
+            <div class="channel-meta">📻 {{ channel.frequency }}</div>
             {% endif %}
 
         </div>
@@ -374,13 +367,7 @@ audio{
         {% if request.user != channel.owner %}
         <a href="{% url 'toggle_subscribe' channel.id %}"
            class="subscribe-btn {% if is_subscribed %}subscribed-btn{% endif %}">
-
-            🔔 {% if is_subscribed %}
-            SUBSCRIBED
-            {% else %}
-            SUBSCRIBE
-            {% endif %}
-
+            🔔 {% if is_subscribed %}SUBSCRIBED{% else %}SUBSCRIBE{% endif %}
         </a>
         {% endif %}
 
@@ -391,50 +378,26 @@ audio{
     </div>
 
     <div class="box">
-        <div class="box-title">
-            TOPICS
-        </div>
-
-        <div class="box-text">
-            {{ channel.topics }}
-        </div>
+        <div class="box-title">TOPICS</div>
+        <div class="box-text">{{ channel.topics }}</div>
     </div>
 
     <div class="box">
-
-        <div class="box-title">
-            SCHEDULE
-        </div>
-
-        <div class="box-text">
-            {{ channel.schedule|linebreaks }}
-        </div>
-
+        <div class="box-title">SCHEDULE</div>
+        <div class="box-text">{{ channel.schedule|linebreaks }}</div>
     </div>
 
     {% if channel.spotify_link or channel.youtube_link %}
     <div class="box">
 
-        <div class="box-title">
-            LINKS
-        </div>
+        <div class="box-title">LINKS</div>
 
         {% if channel.spotify_link %}
-        <div>
-            🎵
-            <a href="{{ channel.spotify_link }}" target="_blank">
-                Spotify
-            </a>
-        </div>
+        <div>🎵 <a href="{{ channel.spotify_link }}" target="_blank">Spotify</a></div>
         {% endif %}
 
         {% if channel.youtube_link %}
-        <div>
-            ▶
-            <a href="{{ channel.youtube_link }}" target="_blank">
-                YouTube
-            </a>
-        </div>
+        <div>▶ <a href="{{ channel.youtube_link }}" target="_blank">YouTube</a></div>
         {% endif %}
 
     </div>
@@ -442,15 +405,8 @@ audio{
 
     {% if request.user == channel.owner %}
     <div class="actions">
-
-        <a href="{% url 'create_channel' %}" class="btn edit">
-            EDIT
-        </a>
-
-        <a href="{% url 'delete_channel' channel.id %}" class="btn delete">
-            DELETE
-        </a>
-
+        <a href="{% url 'create_channel' %}" class="btn edit">EDIT</a>
+        <a href="{% url 'delete_channel' channel.id %}" class="btn delete">DELETE</a>
     </div>
     {% endif %}
 
@@ -478,13 +434,11 @@ audio{
     <div class="content">
 
         <div class="post-channel">
-
             {% if post.channel %}
             <a href="{% url 'channel_profile' post.channel.id %}">
                 {{ post.channel.channel_name }}
             </a>
             {% endif %}
-
         </div>
 
         <div class="topic">
@@ -492,33 +446,18 @@ audio{
         </div>
 
         <div class="audio">
-
             {% if post.audio_file %}
             <audio controls>
                 <source src="{{ post.audio_file.url }}">
             </audio>
             {% endif %}
-
         </div>
 
         <div class="meta">
-
-            <div>
-                📅 {{ post.created_at }}
-            </div>
-
-            <a href="{% url 'comments' post.id %}">
-                💬 {{ post.comments.all|length }}
-            </a>
-
-            <a href="{% url 'toggle_like' post.id %}">
-                ❤ {{ post.likes.all|length }}
-            </a>
-
-            <div>
-                🎧 {{ post.listeners_count|default:0 }}
-            </div>
-
+            <div>📅 {{ post.created_at }}</div>
+            <a href="{% url 'comments' post.id %}">💬 {{ post.comments.all|length }}</a>
+            <a href="{% url 'toggle_like' post.id %}">❤ {{ post.likes.all|length }}</a>
+            <div>🎧 {{ post.listeners_count|default:0 }}</div>
         </div>
 
     </div>
@@ -527,12 +466,7 @@ audio{
 
 {% empty %}
 
-<div style="
-    text-align:center;
-    padding:100px;
-    color:green;
-    font-size:30px;
-">
+<div style="text-align:center;padding:100px;color:green;font-size:30px;">
     NO RADIO POSTS YET
 </div>
 
@@ -540,11 +474,8 @@ audio{
 
 </section>
 
-<!-- FLOATING CREATE POST BUTTON -->
 {% if channel %}
-<a href="{% url 'create_radio_post' %}" class="post-float-btn">
-    +
-</a>
+<a href="{% url 'create_radio_post' %}" class="post-float-btn">+</a>
 {% endif %}
 
 </body>
