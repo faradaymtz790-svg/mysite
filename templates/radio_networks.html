@@ -536,15 +536,16 @@ audio{
     NO RADIO POSTS YET
 </div>
 
-{% endfor %}
+{% if channel %}
+
+{% else %}
+<section class="create-channel-wrapper">
+
+    <a href="{% url 'create_channel' %}" class="create-channel-btn">
+        + CREATE RADIO CHANNEL
+    </a>
 
 </section>
-
-<!-- FLOATING CREATE POST BUTTON -->
-{% if channel %}
-<a href="{% url 'create_radio_post' %}" class="post-float-btn">
-    +
-</a>
 {% endif %}
 
 </body>
