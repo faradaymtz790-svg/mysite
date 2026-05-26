@@ -1,261 +1,201 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-# --- Models ---
-from django.db import models
-from django.contrib.auth.models import User
-
-# --- Profile ---
-
-from django.db import models
-from django.conf import settings  # <--- THIS IS REQUIRED
-from django.contrib.auth.models import User
+from django.utils import timezone
 
 
-from django.db import models
-from django.conf import settings
-
-from django.db import models
-from django.conf import settings
-from cloudinary.models import CloudinaryField
-
-
+# =========================
+# PROFILE
+# =========================
 class Profile(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='profile'
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    bio = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    links = models.TextField(blank=True, null=True)
 
-    image = CloudinaryField(
-        'image',
-        folder='profile_pics',
-        blank=True,
-        null=True,
-        max_length=500
-    )
-
-    cover_photo = CloudinaryField(
-        'image',
-        folder='cover_photos',
-        blank=True,
-        null=True,
-        max_length=500
-    )
-
-    bio = models.TextField(blank=True)
-    location = models.CharField(max_length=255, blank=True)
-    links = models.URLField(max_length=500, blank=True)
+    image = models.ImageField(upload_to='profile/', blank=True, null=True)
+    cover_photo = models.ImageField(upload_to='cover/', blank=True, null=True)
 
     niches = models.JSONField(default=list, blank=True)
 
     blocked_users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
+        User,
         related_name='blocked_by',
         blank=True
     )
 
     def __str__(self):
-        return f"{self.user.username}'s Profile"
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        return self.user.username
 
 
-
-# ... Your Report model remains below ...
-
-
-# --- Post ---
-# --- Post ---
-
-
-
-
-
+# =========================
+# POST
+# =========================
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    title = models.CharField(max_length=255, default="Untitled Log")
-
-    # Use CloudinaryField instead of CharField
-    # 'auto' resource_type allows Cloudinary to detect if it's an image or audio
-    image = CloudinaryField('image', null=True, blank=True)
-    audio = CloudinaryField('auto', resource_type='auto', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='posts/')
+    audio = models.FileField(upload_to='audio_posts/', blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    listeners_count = models.PositiveIntegerField(default=0)
+
+    likes = models.ManyToManyField(User, through='PostLikes', related_name='liked_posts')
+
     replays_count = models.PositiveIntegerField(default=0)
-    
-    played_by = models.ManyToManyField(User, related_name="played_posts", blank=True)
-    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True, through='PostLikes')
+    listeners_count = models.PositiveIntegerField(default=0)
+
+    played_by = models.ManyToManyField(User, related_name='played_posts', blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.title[:20]}"
+        return self.title
 
 
-# --- PostLikes (M2M table) ---
 class PostLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # This prevents a user from liking the same post multiple times
         unique_together = ('user', 'post')
 
-# --- Follow ---
+
+# =========================
+# FOLLOW SYSTEM
+# =========================
 class Follow(models.Model):
-    follower = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
-    following = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following_set')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers_set')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('follower', 'following')
 
+
+# =========================
+# COMMENTS
+# =========================
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+
+    title = models.TextField()
+    audio_comment = models.FileField(upload_to='comment_audio/', blank=True, null=True)
+
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='replies'
+    )
+
+    likes = models.ManyToManyField(User, related_name='liked_comments', blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return f"{self.follower} follows {self.following}"
+        return f"{self.user.username}: {self.title[:30]}"
 
 
-# --- Comment ---
-
-
-
-# ... other models like Post ...
-
-from django.db import models
-from django.contrib.auth.models import User
-
+# =========================
+# NOTIFICATIONS
+# =========================
 class Notification(models.Model):
-    # The types you requested
-    NOTIFICATION_TYPES = (
+    NOTIF_TYPES = [
         ('follow', 'Follow'),
         ('post_like', 'Post Like'),
         ('comment', 'Comment'),
-        ('comment_like', 'Comment Like'),
         ('reply', 'Reply'),
-        ('share', 'Share'),
-    )
+        ('like', 'Comment Like'),
+    ]
 
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications')
-    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
-    post = models.ForeignKey('Post', on_delete=models.CASCADE, null=True, blank=True)
-    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, null=True, blank=True)
-    text = models.CharField(max_length=255)
+
+    notification_type = models.CharField(max_length=20, choices=NOTIF_TYPES)
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
+
+    text = models.TextField()
+
     is_read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.sender} -> {self.recipient} ({self.notification_type})"
 
-
-
-
-# Line 116
-class Comment(models.Model):
-    # Line 117 - MAKE SURE THIS IS INDENTED!
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=150, blank=True, null=True)
-    audio_comment = models.FileField(upload_to='comment_audios/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    # These are the fields we added for likes and replies
-    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
-
-    def __str__(self):
-        return f"{self.user.username} - {self.title}"
-    
-
-    
-
-class HelpCenter(models.Model):
-    # Field names match the data labels you're using
-    full_name = models.CharField(max_length=100)
-    email = models.EmailField(max_length=100)
-    issue = models.TextField(max_length=350)
-    
-    # Tracking data
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_resolved = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Help Request from {self.full_name} ({self.created_at.strftime('%Y-%m-%d')})"
-
-    class Meta:
-        # This makes it look professional in the Django Admin
-        verbose_name = "Help Center Entry"
-        verbose_name_plural = "Help Center Entries"
-        ordering = ['-created_at']
-
-
-        
-
-class Block(models.Model):
-    # If you also have a Block model, ensure its related_name is unique
-    blocked = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, 
-        related_name='block_entries', # Ensure this is also unique
-        blank=True
-    )
-
-
+# =========================
+# REPORTS
+# =========================
 class Report(models.Model):
-    # Ensure this uses AUTH_USER_MODEL as well for consistency
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    post = models.ForeignKey('Post', on_delete=models.CASCADE)
-    reason = models.CharField(max_length=20)
-    description = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
 
-
-
-# core/models.py
-
-class AudioCallPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="audio_call_posts")
-
-    participants = models.ManyToManyField(User, related_name="joined_audio_calls", blank=True)
-
-    heading = models.CharField(max_length=300)
+    reason = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
 
-    audio_file = models.FileField(upload_to="audio_calls/")
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    cover_image = models.ImageField(upload_to="audio_call_images/", blank=True, null=True)
-
-    cover_video = models.FileField(upload_to="audio_call_videos/", blank=True, null=True)
-
-    # ✅ NEW FIELD ADDED
-    background_video = models.FileField(
-        upload_to="background_videos/",
-        blank=True,
-        null=True
+class Block(models.Model):
+    blocker = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='blocking'
     )
 
-    background_music = models.FileField(upload_to="background_music/", blank=True, null=True)
-
-    likes = models.ManyToManyField(User, related_name="liked_audio_calls", blank=True)
-
-    listeners = models.ManyToManyField(User, related_name="listened_audio_calls", blank=True)
+    blocked = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='blocked_by_users'
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    duration_minutes = models.PositiveIntegerField(default=0)
-
-    is_group_call = models.BooleanField(default=False)
-
-    def total_likes(self):
-        return self.likes.count()
-
-    def total_listeners(self):
-        return self.listeners.count()
-
-    def total_participants(self):
-        return self.participants.count()
+    class Meta:
+        unique_together = ('blocker', 'blocked')
+        indexes = [
+            models.Index(fields=['blocker']),
+            models.Index(fields=['blocked']),
+        ]
 
     def __str__(self):
-        return self.heading
+        return f"{self.blocker.username} blocked {self.blocked.username}"
+# =========================
+# AUDIO CALL POSTS
+# =========================
+class AudioCallPost(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    heading = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    audio_file = models.FileField(upload_to='audio_calls/')
+    cover_image = models.ImageField(upload_to='audio_calls/cover/', blank=True, null=True)
+    cover_video = models.FileField(upload_to='audio_calls/video/', blank=True, null=True)
+    background_music = models.FileField(upload_to='audio_calls/music/', blank=True, null=True)
+
+    duration_minutes = models.IntegerField(default=0)
+
+    likes = models.ManyToManyField(User, related_name='liked_audio_calls', blank=True)
+    listeners = models.ManyToManyField(User, related_name='audio_call_listeners', blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+# =========================
+# CALL SYSTEM
+# =========================
+class CallSession(models.Model):
+    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_calls')
+    participants = models.ManyToManyField(User, related_name='call_participations', blank=True)
+
+    heading = models.CharField(max_length=255, blank=True, null=True)
+    duration_seconds = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CallPost(models.Model):
+    call = models.ForeignKey(CallSession, on_delete=models.CASCADE)
+    heading = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)

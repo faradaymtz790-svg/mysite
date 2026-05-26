@@ -1323,3 +1323,97 @@ def delete_audio_call(request, post_id):
     post.delete()
 
     return redirect("audio_call_feed")
+
+
+    import json
+from django.http import JsonResponse
+from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from django.utils import timezone
+
+from .models import CallSession, CallPost
+
+
+# -----------------------
+# PAGE
+# -----------------------
+def call_page(request):
+    return render(request, "call.html")
+
+
+# -----------------------
+# USER SEARCH
+# -----------------------
+def user_search(request):
+    q = request.GET.get("q", "")
+
+    users = User.objects.filter(username__icontains=q)[:10]
+
+    data = [
+        {
+            "id": u.id,
+            "username": u.username
+        }
+        for u in users
+    ]
+
+    return JsonResponse(data, safe=False)
+
+
+# -----------------------
+# SAVE CALL
+# -----------------------
+@csrf_exempt
+def save_call(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        users = data.get("users", [])
+        duration = data.get("duration", 0)
+
+        call = CallSession.objects.create(
+            host=request.user,
+            duration_seconds=duration
+        )
+
+        participants = User.objects.filter(username__in=users)
+        call.participants.set(participants)
+
+        call.save()
+
+        return JsonResponse({"status": "saved", "call_id": call.id})
+
+    return JsonResponse({"error": "invalid request"})
+
+
+# -----------------------
+# POST CALL
+# -----------------------
+@csrf_exempt
+def post_call(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        users = data.get("users", [])
+        heading = data.get("heading", "")
+
+        call = CallSession.objects.create(
+            host=request.user,
+            heading=heading
+        )
+
+        participants = User.objects.filter(username__in=users)
+        call.participants.set(participants)
+
+        post = CallPost.objects.create(
+            call=call,
+            heading=heading
+        )
+
+        return JsonResponse({
+            "status": "posted",
+            "post_id": post.id
+        })
+
+    return JsonResponse({"error": "invalid"})

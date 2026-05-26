@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Call & Post</title>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+}
+
+/* FULL SCREEN CONTAINER */
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* TOP PROGRESS BAR */
+.progress-bar {
+    height: 5px;
+    width: 100%;
+    background: #ddd;
+}
+
+.progress {
+    height: 100%;
+    width: 0%;
+    background: green;
+    transition: width 0.4s ease;
+}
+
+/* SEARCH AREA */
+.search-box {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+.search-box i {
+    color: blue;
+    font-size: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.search-input {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+    border: none;
+    outline: none;
+}
+
+/* USER LIST */
+.user-list {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.user-item:hover {
+    background: #f0f0f0;
+}
+
+/* SELECTED USERS */
+.selected-box {
+    padding: 10px;
+    background: #e9ffe9;
+    font-size: 14px;
+}
+
+/* BUTTONS */
+.btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-green {
+    background: green;
+    color: white;
+}
+
+.btn-green:hover {
+    background: #0a8f0a;
+}
+
+/* CALL PANEL */
+.call-panel {
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+/* POST PANEL */
+.post-panel {
+    padding: 10px;
+    background: white;
+}
+
+/* INPUTS */
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    font-size: 15px;
+}
+
+/* MEDIA OPTIONS */
+.media-option {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+.media-option label {
+    font-size: 14px;
+    text-transform: capitalize;
+}
+
+/* ICON BUTTONS */
+.icon-btn {
+    font-size: 20px;
+    cursor: pointer;
+    margin: 5px;
+    color: green;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input type="text" class="search-input" placeholder="search usernames..." id="searchInput">
+    </div>
+
+    <!-- USERS -->
+    <div class="user-list" id="userList">
+        <!-- dynamic users from DB -->
+    </div>
+
+    <!-- SELECTED -->
+    <div class="selected-box">
+        Selected Users: <span id="selectedUsers">None</span>
+    </div>
+
+    <!-- CALL CONTROLS -->
+    <div class="call-panel">
+        <button class="btn btn-green" onclick="startCall()">
+            <i class="fa fa-phone"></i> Tap to Call
+        </button>
+
+        <div id="callTimer" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- POST PANEL -->
+    <div class="post-panel">
+
+        <input type="text" maxlength="250" placeholder="add heading..." id="heading">
+
+        <textarea placeholder="description..."></textarea>
+
+        <!-- MEDIA OPTIONS -->
+        <div class="media-option">
+            <label><i class="fa fa-video"></i> video</label>
+            <label><i class="fa fa-image"></i> image</label>
+            <label><i class="fa fa-music"></i> music</label>
+        </div>
+
+        <button class="btn btn-green" onclick="postNow()">
+            POST NOW
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+let selected = [];
+let callStartTime = null;
+let callLimit = 3600; // 1 hour
+
+// SEARCH USERS (replace with AJAX later)
+document.getElementById("searchInput").addEventListener("input", function () {
+    let q = this.value;
+
+    // TODO: fetch users from Django
+    console.log("Searching:", q);
+});
+
+// SELECT USER
+function toggleUser(username) {
+    if (selected.includes(username)) {
+        selected = selected.filter(u => u !== username);
+    } else {
+        selected.push(username);
+    }
+    document.getElementById("selectedUsers").innerText =
+        selected.length ? selected.join(", ") : "None";
+}
+
+// CALL SYSTEM
+function startCall() {
+    if (selected.length === 0) {
+        alert("Select at least one user");
+        return;
+    }
+
+    // ringtone placeholder (browser limitation)
+    console.log("🔔 ringtone should play here");
+
+    callStartTime = Date.now();
+
+    let timer = setInterval(() => {
+        let elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+
+        document.getElementById("callTimer").innerText =
+            "Call time: " + elapsed + " sec";
+
+        if (elapsed >= callLimit) {
+            clearInterval(timer);
+            alert("Call ended (1 hour limit)");
+            saveCall();
+        }
+    }, 1000);
+}
+
+// SAVE CALL AFTER END
+function saveCall() {
+    console.log("Saving call...");
+    // send to backend
+}
+
+// POST SYSTEM
+function postNow() {
+    let heading = document.getElementById("heading").value;
+
+    if (heading.length > 250) {
+        alert("Heading too long");
+        return;
+    }
+
+    let data = {
+        users: selected,
+        heading: heading
+    };
+
+    console.log("Posting:", data);
+
+    document.getElementById("progress").style.width = "100%";
+
+    setTimeout(() => {
+        alert("Posted successfully");
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
