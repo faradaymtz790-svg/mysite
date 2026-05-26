@@ -215,71 +215,32 @@ class Report(models.Model):
 
 # core/models.py
 
-from django.db import models
-from django.contrib.auth.models import User
-
-
 class AudioCallPost(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="audio_call_posts")
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="audio_call_posts"
-    )
-
-    participants = models.ManyToManyField(
-        User,
-        related_name="joined_audio_calls",
-        blank=True
-    )
+    participants = models.ManyToManyField(User, related_name="joined_audio_calls", blank=True)
 
     heading = models.CharField(max_length=300)
+    description = models.TextField(blank=True, null=True)
 
-    description = models.TextField(
-        blank=True,
-        null=True
-    )
+    audio_file = models.FileField(upload_to="audio_calls/")
 
-    audio_file = models.FileField(
-        upload_to="audio_calls/"
-    )
+    cover_image = models.ImageField(upload_to="audio_call_images/", blank=True, null=True)
 
-    cover_image = models.ImageField(
-        upload_to="audio_call_images/",
-        blank=True,
-        null=True
-    )
+    cover_video = models.FileField(upload_to="audio_call_videos/", blank=True, null=True)
 
-    cover_video = models.FileField(
-        upload_to="audio_call_videos/",
-        blank=True,
-        null=True
-    )
-
-    background_music = models.FileField(
-        upload_to="background_music/",
-        blank=True,
-        null=True
-    )
-
-    # ✅ ADDED FIELD
+    # ✅ NEW FIELD ADDED
     background_video = models.FileField(
         upload_to="background_videos/",
         blank=True,
         null=True
     )
 
-    likes = models.ManyToManyField(
-        User,
-        related_name="liked_audio_calls",
-        blank=True
-    )
+    background_music = models.FileField(upload_to="background_music/", blank=True, null=True)
 
-    listeners = models.ManyToManyField(
-        User,
-        related_name="listened_audio_calls",
-        blank=True
-    )
+    likes = models.ManyToManyField(User, related_name="liked_audio_calls", blank=True)
+
+    listeners = models.ManyToManyField(User, related_name="listened_audio_calls", blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
