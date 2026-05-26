@@ -58,37 +58,20 @@ class ProfileForm(forms.ModelForm):
         # forms.py
 
 from django import forms
-from .models import RadioChannel, RadioPost
+from .models import AudioCallPost
 
 
-class RadioChannelForm(forms.ModelForm):
-
-    class Meta:
-        model = RadioChannel
-
-        fields = [
-            'channel_name',
-            'profile_image',
-            'location',
-            'owner_name',
-            'topics',
-            'frequency',
-            'spotify_link',
-            'youtube_link',
-            'schedule',
-
-        ]
-
-
-class RadioPostForm(forms.ModelForm):
+class AudioCallPostForm(forms.ModelForm):
 
     class Meta:
-        model = RadioPost
+        model = AudioCallPost
 
         fields = [
-            'topic',
-            'title',
+            'heading',
+            'description',
             'audio_file',
-            'background_image',
-            'background_video',
+            'cover_image',
+            'cover_video',
+            'background_music',
+            'duration_minutes',
         ]

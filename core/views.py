@@ -24,13 +24,7 @@ from .forms import CommentForm
 
 import cloudinary.uploader
 
-from .models import (
-    RadioChannel,
-    RadioPost,
-    RadioLike,
-    RadioComment,
-    RadioSubscriber
-)
+
 # This line must be at the very far left (no spaces)
 
  # Use 'core' (or whatever your app name is)
@@ -1217,245 +1211,115 @@ def account_view(request):
 
 # views.py
 
+# core/models.py
+
+# core/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+from django.http import JsonResponse
 
-from .models import (
-    RadioChannel,
-    RadioPost,
-    RadioLike,
-    RadioComment
-)
-
-from .forms import (
-    RadioChannelForm,
-    RadioPostForm
-)
-
-from django.shortcuts import render
-from .models import RadioChannel, RadioPost
-
-@login_required
-def radio_networks(request):
-    try:
-        channel = RadioChannel.objects.filter(owner=request.user).first()
-        radio_posts = RadioPost.objects.select_related("channel").all().order_by("-created_at")
-
-        is_subscribed = False
-        if channel and request.user.is_authenticated:
-            is_subscribed = channel.subscribers.filter(id=request.user.id).exists()
-
-        return render(request, "radio_networks.html", {
-            "channel": channel,
-            "radio_posts": radio_posts,
-            "is_subscribed": is_subscribed,
-        })
-
-    except Exception as e:
-        print("RADIO NETWORK ERROR:", e)
-        raise
+from .models import AudioCallPost
 
 
 @login_required
-def delete_channel(request, channel_id):
+def audio_call_feed(request):
 
-    channel = get_object_or_404(
-        RadioChannel,
-        id=channel_id,
-        owner=request.user
-    )
-
-    channel.delete()
-
-    messages.success(
-        request,
-        'Channel deleted successfully.'
-    )
-
-    return redirect(
-        'radio_networks'
-    )
-
-
-@login_required
-def create_radio_post(request):
-
-    channel = RadioChannel.objects.filter(
-        owner=request.user
-    ).first()
-
-    if not channel:
-
-        messages.error(
-            request,
-            'Create a radio channel first.'
-        )
-
-        return redirect(
-            'create_channel'
-        )
-
-    if request.method == 'POST':
-
-        form = RadioPostForm(
-            request.POST,
-            request.FILES
-        )
-
-        if form.is_valid():
-
-            post = form.save(
-                commit=False
-            )
-
-            post.channel = channel
-
-            post.save()
-
-            messages.success(
-                request,
-                'Radio post created.'
-            )
-
-            return redirect(
-                'radio_networks'
-            )
-
-    else:
-
-        form = RadioPostForm()
-
-    return render(
-        request,
-        'create_radio_post.html',
-        {
-            'form': form
-        }
-    )
-
-
-
-@login_required
-def comments(request, post_id):
-
-    post = get_object_or_404(
-        RadioPost,
-        id=post_id
-    )
-
-    comments = RadioComment.objects.filter(
-        post=post
-    ).order_by('-created_at')
-
-    if request.method == 'POST':
-
-        comment_text = request.POST.get(
-            'comment'
-        )
-
-        if comment_text:
-
-            RadioComment.objects.create(
-                user=request.user,
-                post=post,
-                comment=comment_text
-            )
-
-            return redirect(
-                'comments',
-                post_id=post.id
-            )
+    call_posts = AudioCallPost.objects.all().order_by("-created_at")
 
     context = {
-        'post': post,
-        'comments': comments,
+        "call_posts": call_posts
     }
 
     return render(
         request,
-        'comments.html',
+        "audio_call_feed.html",
         context
     )
 
 
-
 @login_required
-def toggle_subscribe(request, channel_id):
-    ...
-
-    return JsonResponse(...)
-
-
-@login_required
-def toggle_like(request, post_id):
-    post = get_object_or_404(RadioPost, id=post_id)
-
-    like = RadioLike.objects.filter(user=request.user, post=post)
-
-    if like.exists():
-        like.delete()
-    else:
-        RadioLike.objects.create(user=request.user, post=post)
-
-    return JsonResponse({
-        "likes": post.likes.count()
-    })
-
-
-@login_required
-def increment_listen(request, post_id):
-    post = get_object_or_404(RadioPost, id=post_id)
-    post.listeners_count += 1
-    post.save()
-
-    return JsonResponse({
-        "listeners": post.listeners_count
-    })
-
-
-
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-
-@login_required
-def create_channel(request):
+def start_audio_call(request):
 
     if request.method == "POST":
 
-        RadioChannel.objects.create(
-            owner=request.user,
-            profile_image=request.FILES.get("profile_image"),
-            channel_name=request.POST.get("channel_name"),
-            location=request.POST.get("location"),
-            owner_name=request.POST.get("owner_name"),
-            topics=request.POST.get("topics"),
-            frequency=request.POST.get("frequency"),
-            spotify_link=request.POST.get("spotify_link"),
-            youtube_link=request.POST.get("youtube_link"),
-            schedule=request.POST.get("schedule"),
+        heading = request.POST.get("heading")
+        description = request.POST.get("description")
+
+        audio_file = request.FILES.get("audio_file")
+        cover_image = request.FILES.get("cover_image")
+        cover_video = request.FILES.get("cover_video")
+        background_music = request.FILES.get("background_music")
+
+        duration_minutes = request.POST.get("duration_minutes")
+
+        post = AudioCallPost.objects.create(
+            user=request.user,
+            heading=heading,
+            description=description,
+            audio_file=audio_file,
+            cover_image=cover_image,
+            cover_video=cover_video,
+            background_music=background_music,
+            duration_minutes=duration_minutes
         )
 
-        messages.success(
-            request,
-            "SUCCESSFULLY CREATED. TURN TO RADIO NETWORKS TO VIEW PROFILE."
-        )
+        return redirect("audio_call_feed")
 
-        return redirect("radio_networks")
-
-    return render(request, "create_channel.html")
+    return render(
+        request,
+        "start_audio_call.html"
+    )
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import RadioChannel, RadioPost
+@login_required
+def like_audio_call(request, post_id):
 
-def channel_profile(request, id):
-    channel = get_object_or_404(RadioChannel, id=id)
+    post = get_object_or_404(
+        AudioCallPost,
+        id=post_id
+    )
 
-    posts = RadioPost.objects.filter(channel=channel).order_by("-created_at")
+    if request.user in post.likes.all():
 
-    return render(request, "channel_profile.html", {
-        "channel": channel,
-        "posts": posts,
+        post.likes.remove(request.user)
+        liked = False
+
+    else:
+
+        post.likes.add(request.user)
+        liked = True
+
+    return JsonResponse({
+        "liked": liked,
+        "likes_count": post.likes.count()
     })
+
+
+@login_required
+def track_listener(request, post_id):
+
+    post = get_object_or_404(
+        AudioCallPost,
+        id=post_id
+    )
+
+    post.listeners.add(request.user)
+
+    return JsonResponse({
+        "listeners_count": post.listeners.count()
+    })
+
+
+@login_required
+def delete_audio_call(request, post_id):
+
+    post = get_object_or_404(
+        AudioCallPost,
+        id=post_id,
+        user=request.user
+    )
+
+    post.delete()
+
+    return redirect("audio_call_feed")

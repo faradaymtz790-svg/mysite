@@ -76,19 +76,12 @@ urlpatterns += i18n_patterns(
     path('notification/<int:notification_id>/click/', views.click_notification, name='click_notification'),
     path('search/', views.search, name='search'),
 
-    path("channel/<int:id>/", views.channel_profile, name="channel_profile"),
-    path('radio-networks/', views.radio_networks, name='radio_networks'),
-    path('create-channel/', views.create_channel, name='create_channel'),
-    path('delete-channel/<int:channel_id>/', views.delete_channel, name='delete_channel'),
-    # --- User Interaction (Toggles & Counts) ---
-    path('subscribe/<int:channel_id>/', views.toggle_subscribe, name='toggle_subscribe'),
-    path('like/<int:post_id>/', views.toggle_like, name='toggle_like'),
-    path('listen/<int:post_id>/', views.increment_listen, name='increment_listen'),
-    path('radio-comments/<int:post_id>/', views.comments, name='comments'),
-
-    # --- Content Creation & Management ---
-    path('create-radio-post/', views.create_radio_post, name='create_radio_post'),
-    path('delete-post/<int:post_id>/', views.delete_post, name='delete_post'),
+     # CALL
+    path("audio-calls/", views.audio_call_feed, name="audio_call_feed"),
+    path("start-audio-call/", views.start_audio_call, name="start_audio_call"),
+    path("like-audio-call/<int:post_id>/", views.like_audio_call, name="like_audio_call"),
+    path("track-audio-listener/<int:post_id>/", views.track_listener, name="track_listener"),
+    path("delete-audio-call/<int:post_id>/", views.delete_audio_call, name="delete_audio_call"),
 
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),

@@ -213,103 +213,88 @@ class Report(models.Model):
 
 
 
+# core/models.py
 
-class RadioChannel(models.Model):
-    owner = models.OneToOneField(User, on_delete=models.CASCADE)
-    channel_name = models.CharField(max_length=100)
-    profile_image = models.ImageField(upload_to='radio_channel_profiles/', blank=True, null=True)
-    location = models.CharField(max_length=100, blank=True, null=True)
-    owner_name = models.CharField(max_length=100, blank=True, null=True)
-    topics = models.CharField(max_length=150)
-    frequency = models.CharField(max_length=100, blank=True, null=True)
-    spotify_link = models.URLField(blank=True, null=True)
-    youtube_link = models.URLField(blank=True, null=True)
-    schedule = models.TextField()
+from django.db import models
+from django.contrib.auth.models import User
+
+
+class AudioCallPost(models.Model):
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="audio_call_posts"
+    )
+
+    participants = models.ManyToManyField(
+        User,
+        related_name="joined_audio_calls",
+        blank=True
+    )
+
+    heading = models.CharField(max_length=300)
+
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    audio_file = models.FileField(
+        upload_to="audio_calls/"
+    )
+
+    cover_image = models.ImageField(
+        upload_to="audio_call_images/",
+        blank=True,
+        null=True
+    )
+
+    cover_video = models.FileField(
+        upload_to="audio_call_videos/",
+        blank=True,
+        null=True
+    )
+
+    background_music = models.FileField(
+        upload_to="background_music/",
+        blank=True,
+        null=True
+    )
+
+    # ✅ ADDED FIELD
+    background_video = models.FileField(
+        upload_to="background_videos/",
+        blank=True,
+        null=True
+    )
+
+    likes = models.ManyToManyField(
+        User,
+        related_name="liked_audio_calls",
+        blank=True
+    )
+
+    listeners = models.ManyToManyField(
+        User,
+        related_name="listened_audio_calls",
+        blank=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.channel_name
+    duration_minutes = models.PositiveIntegerField(default=0)
 
+    is_group_call = models.BooleanField(default=False)
 
-class RadioPost(models.Model):
-    channel = models.ForeignKey(RadioChannel, on_delete=models.CASCADE)  # MUST EXIST
-    title = models.CharField(max_length=200)
-    topic = models.CharField(max_length=100)
-    audio_file = models.FileField(upload_to='radio_audio/')
-    background_image = models.ImageField(upload_to='radio_images/', blank=True, null=True)
-    background_video = models.FileField(upload_to='radio_videos/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    def total_likes(self):
+        return self.likes.count()
 
-    def __str__(self):
-        return self.title
+    def total_listeners(self):
+        return self.listeners.count()
 
-
-
-class RadioLike(models.Model):
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    post = models.ForeignKey(
-        RadioPost,
-        on_delete=models.CASCADE,
-        related_name='likes'
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    class Meta:
-        unique_together = ('user', 'post')
-
-
-class RadioComment(models.Model):
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    post = models.ForeignKey(
-        RadioPost,
-        on_delete=models.CASCADE,
-        related_name='comments'
-    )
-
-    comment = models.TextField()
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    def total_participants(self):
+        return self.participants.count()
 
     def __str__(self):
-        return f"{self.user.username} - {self.post.title}"
-
-
-class RadioSubscriber(models.Model):
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    channel = models.ForeignKey(
-        RadioChannel,
-        on_delete=models.CASCADE,
-        related_name='subscribers'
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    class Meta:
-        unique_together = ('user', 'channel')
-
-    def __str__(self):
-        return f"{self.user.username} subscribed to {self.channel.channel_name}"
-
-
+        return self.heading
