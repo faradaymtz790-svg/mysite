@@ -1,4 +1,55 @@
-<!-- FLOATING CALL BUTTON -->
+<!-- =========================
+     INCOMING CALL (FLOAT CENTER)
+========================= -->
+
+{% if incoming_call %}
+
+<div id="incomingCallPopup" class="incoming-call-overlay">
+
+    <div class="incoming-call-box">
+
+        <div class="incoming-title">
+            📞 Incoming Call
+        </div>
+
+        <div class="incoming-user">
+
+            {% if incoming_call.user.profile.image %}
+            <img src="{{ incoming_call.user.profile.image.url }}"
+                 class="incoming-avatar">
+            {% endif %}
+
+            <div>
+                <div class="incoming-name">
+                    {{ incoming_call.user.username }}
+                </div>
+
+                <div class="incoming-text">
+                    is calling you...
+                </div>
+            </div>
+
+        </div>
+
+        <div class="incoming-actions">
+
+            <a href="{% url 'accept_call' incoming_call.id %}"
+               class="accept-btn">
+               ✅ Accept
+            </a>
+
+            <a href="{% url 'decline_call' incoming_call.id %}"
+               class="decline-btn">
+               ❌ Decline
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
 
 <a href="{% url 'start_audio_call' %}" class="floating-call-btn">
     📞
@@ -462,6 +513,90 @@ audio{
     transform:scale(1.1);
 }
 
+
+/* =========================
+   INCOMING CALL OVERLAY
+========================= */
+
+.incoming-call-overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.75);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999999;
+}
+
+.incoming-call-box{
+    width:320px;
+    background:#111;
+    border-radius:20px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 0 40px rgba(0,255,120,0.3);
+}
+
+.incoming-title{
+    color:#00ff88;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.incoming-user{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    color:white;
+    margin-bottom:20px;
+}
+
+.incoming-avatar{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #00ff88;
+}
+
+.incoming-name{
+    font-weight:bold;
+}
+
+.incoming-text{
+    font-size:13px;
+    color:#ccc;
+}
+
+.incoming-actions{
+    display:flex;
+    gap:10px;
+}
+
+.accept-btn, .decline-btn{
+    flex:1;
+    padding:12px;
+    border-radius:12px;
+    text-decoration:none;
+    color:white;
+    font-weight:bold;
+}
+
+.accept-btn{
+    background:#00cc66;
+}
+
+.decline-btn{
+    background:#ff3333;
+}
 /* =========================
    MOBILE
 ========================= */

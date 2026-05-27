@@ -1221,22 +1221,29 @@ from django.http import JsonResponse
 
 from .models import AudioCallPost
 
-
 @login_required
 def audio_call_feed(request):
 
     call_posts = AudioCallPost.objects.all().order_by("-created_at")
 
+    # =========================
+    # INCOMING CALL (ADDED)
+    # =========================
+    incoming_call = AudioCall.objects.filter(
+        receiver=request.user,
+        status="ringing"
+    ).first()
+
     context = {
-        "call_posts": call_posts
+        "call_posts": call_posts,
+        "incoming_call": incoming_call,  # ✅ ADDED HERE
     }
 
     return render(
         request,
-        "audio_call_feed.html",
+        "radio_networks.html",
         context
     )
-
 
 @login_required
 def start_audio_call(request):
