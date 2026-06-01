@@ -1385,8 +1385,7 @@ def decline_call(request, call_id):
     call.save()
     return redirect("audio_feed")
 
-def radio_networks(request):
-    return render(request, "radio_networks.html")
+
 
 
 
