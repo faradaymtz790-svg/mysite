@@ -89,26 +89,26 @@ LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
 # STATIC & MEDIA
+
 STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Use WhiteNoise for production static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
+# Ensure this is also set to tell Django to use Cloudinary for media
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    'SECURE': True,  # <--- Add this line here
+    'SECURE': True,
+    'RESOURCE_TYPE': 'auto',  # 🔥 IMPORTANT: fixes audio/video issues
 }
-
-# Ensure this is also set to tell Django to use Cloudinary for media
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-
 
 
 # LANGUAGES
@@ -150,10 +150,8 @@ LANGUAGE_COOKIE_PATH = '/'      # Makes it available across the whole site
 LANGUAGE_COOKIE_SAMESITE = 'Lax'
 
 
-# --- Scroll to the bottom of settings.py ---
 
-# Authentication Settings (django-allauth)
-SITE_ID = 1
+
 
 # Update these lines to remove the deprecation warnings:
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
@@ -163,26 +161,6 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none' 
 # ... etc
 
-
-# ==============================================================================
-# COOKIE & SESSION MANAGEMENT
-# ==============================================================================
-
-# Keeps the user logged in even after they close their browser window
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-
-# The duration a session remains valid (in seconds). 
-# 1209600 seconds is exactly 2 weeks.
-SESSION_COOKIE_AGE = 1209600
-
-# Save the session to the database on every single request 
-# (this refreshes the expiration timer so active users never get kicked out)
-SESSION_SAVE_EVERY_REQUEST = True
-
-
-# ==============================================================================
-# COOKIE & SESSION MANAGEMENT
-# ==============================================================================
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 1209600
