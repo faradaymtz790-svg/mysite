@@ -178,3 +178,20 @@ SESSION_COOKIE_AGE = 1209600
 # Save the session to the database on every single request 
 # (this refreshes the expiration timer so active users never get kicked out)
 SESSION_SAVE_EVERY_REQUEST = True
+
+
+# ==============================================================================
+# COOKIE & SESSION MANAGEMENT
+# ==============================================================================
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_AGE = 1209600
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Render / HTTPS settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Secure cookies in production
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
