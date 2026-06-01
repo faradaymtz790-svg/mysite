@@ -76,7 +76,7 @@ urlpatterns += i18n_patterns(
     path('notification/<int:notification_id>/click/', views.click_notification, name='click_notification'),
     path('search/', views.search, name='search'),
 
- 
+    path("radio/", views.radio_networks, name="radio_networks"),
     path("audio-feed/", views.audio_call_feed, name="audio_feed"),
     path("start-audio-call/", views.start_audio_call, name="start_audio_call"),
     path("like-audio-call/<int:post_id>/", views.like_audio_call, name="like_audio_call"),

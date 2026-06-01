@@ -1385,5 +1385,20 @@ def decline_call(request, call_id):
     call.save()
     return redirect("audio_feed")
 
+def radio_networks(request):
+    return render(request, "radio_networks.html")
 
 
+
+
+@login_required
+def profile_view(request, username):
+    incoming_call = AudioCall.objects.filter(
+        receiver=request.user,
+        status="ringing"
+    ).order_by("-created_at").first()
+
+    context = {
+        "incoming_call": incoming_call
+    }
+    return render(request, "profile.html", context)
