@@ -77,7 +77,7 @@ urlpatterns += i18n_patterns(
     path('search/', views.search, name='search'),
 
      # CALL
-    path("audio-calls/", views.audio_call_feed, name="audio_call_feed"),
+    path("audio-calls/", views.audio_call_feed, name="radio_networks"),
     path("start-audio-call/", views.start_audio_call, name="start_audio_call"),
     path("like-audio-call/<int:post_id>/", views.like_audio_call, name="like_audio_call"),
     path("track-audio-listener/<int:post_id>/", views.track_listener, name="track_listener"),
