@@ -1211,10 +1211,6 @@ def account_view(request):
 
 # views.py
 
-# core/models.py
-
-# core/views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -1224,34 +1220,39 @@ import json
 
 from .models import (
     AudioCallPost,
-    AudioCall,       # ✅ FIXED (was missing)
+    AudioCall,
     CallSession,
     CallPost
 )
 
+
+# =========================
+# AUDIO FEED
 
 @login_required
 def audio_call_feed(request):
 
     call_posts = AudioCallPost.objects.all().order_by("-created_at")
 
-    # FIXED: incoming call query
     incoming_call = AudioCall.objects.filter(
         receiver=request.user,
         status="ringing"
-    ).first()
+    ).order_by("-created_at").first()
 
-    return render(request, "radio_networks.html", {
+    return render(request, "audio_feed.html", {
         "call_posts": call_posts,
         "incoming_call": incoming_call,
     })
 
- @login_required
+
+# START AUDIO CALL POST
+# =========================
+@login_required
 def start_audio_call(request):
 
     if request.method == "POST":
 
-        post = AudioCallPost.objects.create(
+        AudioCallPost.objects.create(
             user=request.user,
             heading=request.POST.get("heading"),
             description=request.POST.get("description"),
@@ -1262,11 +1263,15 @@ def start_audio_call(request):
             duration_minutes=request.POST.get("duration_minutes"),
         )
 
-        return redirect("audio_call_feed")
+        return redirect("audio_feed")
 
     return render(request, "start_audio_call.html")
 
-  @login_required
+
+# =========================
+# LIKE AUDIO CALL
+# =========================
+@login_required
 def like_audio_call(request, post_id):
 
     post = get_object_or_404(AudioCallPost, id=post_id)
@@ -1283,7 +1288,11 @@ def like_audio_call(request, post_id):
         "likes_count": post.likes.count()
     })
 
- @login_required
+
+# =========================
+# TRACK LISTENER
+# =========================
+@login_required
 def track_listener(request, post_id):
 
     post = get_object_or_404(AudioCallPost, id=post_id)
@@ -1293,7 +1302,11 @@ def track_listener(request, post_id):
         "listeners_count": post.listeners.count()
     })
 
-  @login_required
+
+# =========================
+# DELETE POST
+# =========================
+@login_required
 def delete_audio_call(request, post_id):
 
     post = get_object_or_404(
@@ -1303,12 +1316,21 @@ def delete_audio_call(request, post_id):
     )
 
     post.delete()
-    return redirect("audio_call_feed")
+    return redirect("audio_feed")
 
+
+# =========================
+# CALL PAGE
+# =========================
 def call_page(request):
     return render(request, "call.html")
 
+
+# =========================
+# USER SEARCH
+# =========================
 def user_search(request):
+
     q = request.GET.get("q", "")
 
     users = User.objects.filter(username__icontains=q)[:10]
@@ -1318,8 +1340,13 @@ def user_search(request):
         for u in users
     ], safe=False)
 
+
+# =========================
+# SAVE CALL
+# =========================
 @csrf_exempt
 def save_call(request):
+
     if request.method == "POST":
 
         data = json.loads(request.body)
@@ -1335,9 +1362,13 @@ def save_call(request):
 
         call.participants.set(participants)
 
-        return JsonResponse({"status": "saved", "call_id": call.id})
+        return JsonResponse({
+            "status": "saved",
+            "call_id": call.id
+        })
 
     return JsonResponse({"error": "invalid request"})
 
 
-    
+
+

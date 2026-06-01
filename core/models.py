@@ -199,3 +199,22 @@ class CallPost(models.Model):
     call = models.ForeignKey(CallSession, on_delete=models.CASCADE)
     heading = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+ class AudioCall(models.Model):
+    caller = models.ForeignKey(User, related_name="sent_calls", on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name="received_calls", on_delete=models.CASCADE)
+
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("ringing", "Ringing"),
+            ("accepted", "Accepted"),
+            ("declined", "Declined"),
+            ("ended", "Ended"),
+        ],
+        default="ringing"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)   

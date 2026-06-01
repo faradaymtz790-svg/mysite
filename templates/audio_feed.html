@@ -1,10 +1,8 @@
 <!-- =========================
      INCOMING CALL (FLOAT CENTER)
 ========================= -->
-
 {% if incoming_call %}
-
-<div id="incomingCallPopup" class="incoming-call-overlay">
+<div class="incoming-call-overlay">
 
     <div class="incoming-call-box">
 
@@ -12,35 +10,14 @@
             📞 Incoming Call
         </div>
 
-        <div class="incoming-user">
-
-            {% if incoming_call.user.profile.image %}
-            <img src="{{ incoming_call.user.profile.image.url }}"
-                 class="incoming-avatar">
-            {% endif %}
-
-            <div>
-                <div class="incoming-name">
-                    {{ incoming_call.user.username }}
-                </div>
-
-                <div class="incoming-text">
-                    is calling you...
-                </div>
-            </div>
-
-        </div>
-
         <div class="incoming-actions">
 
-            <a href="{% url 'accept_call' incoming_call.id %}"
-               class="accept-btn">
-               ✅ Accept
+            <a href="{% url 'accept_call' incoming_call.id %}" class="accept-btn">
+                ✅ Accept
             </a>
 
-            <a href="{% url 'decline_call' incoming_call.id %}"
-               class="decline-btn">
-               ❌ Decline
+            <a href="{% url 'decline_call' incoming_call.id %}" class="decline-btn">
+                ❌ Decline
             </a>
 
         </div>
@@ -48,8 +25,8 @@
     </div>
 
 </div>
-
 {% endif %}
+
 
 <a href="{% url 'start_audio_call' %}" class="floating-call-btn">
     📞

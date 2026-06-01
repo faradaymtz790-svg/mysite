@@ -76,13 +76,20 @@ urlpatterns += i18n_patterns(
     path('notification/<int:notification_id>/click/', views.click_notification, name='click_notification'),
     path('search/', views.search, name='search'),
 
-     # CALL
-    path("audio-calls/", views.audio_call_feed, name="radio_networks"),
+ 
+    path("audio-feed/", views.audio_call_feed, name="audio_feed"),
     path("start-audio-call/", views.start_audio_call, name="start_audio_call"),
     path("like-audio-call/<int:post_id>/", views.like_audio_call, name="like_audio_call"),
     path("track-audio-listener/<int:post_id>/", views.track_listener, name="track_listener"),
     path("delete-audio-call/<int:post_id>/", views.delete_audio_call, name="delete_audio_call"),
 
+    path("call/", views.call_page, name="call"),
+    path("user-search/", views.user_search, name="user_search"),
+    path("save-call/", views.save_call, name="save_call"),
+    path("post-call/", views.post_call, name="post_call"),
+    path("call/accept/<int:call_id>/", views.accept_call, name="accept_call"),
+path("call/decline/<int:call_id>/", views.decline_call, name="decline_call"),
+    
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),
