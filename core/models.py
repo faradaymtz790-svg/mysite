@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 
 # =========================
@@ -8,7 +7,7 @@ from django.utils import timezone
 # =========================
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+
     bio = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     links = models.TextField(blank=True, null=True)
@@ -17,12 +16,6 @@ class Profile(models.Model):
     cover_photo = models.ImageField(upload_to='cover/', blank=True, null=True)
 
     niches = models.JSONField(default=list, blank=True)
-
-    blocked_users = models.ManyToManyField(
-        User,
-        related_name='blocked_by',
-        blank=True
-    )
 
     def __str__(self):
         return self.user.username
@@ -33,7 +26,7 @@ class Profile(models.Model):
 # =========================
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='posts/')
     audio = models.FileField(upload_to='audio_posts/', blank=True, null=True)
@@ -119,7 +112,6 @@ class Notification(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
 
     text = models.TextField()
-
     is_read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -136,6 +128,10 @@ class Report(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+# =========================
+# BLOCK SYSTEM (FIXED)
+# =========================
 class Block(models.Model):
     blocker = models.ForeignKey(
         User,
@@ -160,6 +156,8 @@ class Block(models.Model):
 
     def __str__(self):
         return f"{self.blocker.username} blocked {self.blocked.username}"
+
+
 # =========================
 # AUDIO CALL POSTS
 # =========================
@@ -201,22 +199,9 @@ class CallPost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-from django.db import models
-from django.contrib.auth.models import User
-
-
 class AudioCall(models.Model):
-    caller = models.ForeignKey(
-        User,
-        related_name="sent_calls",
-        on_delete=models.CASCADE
-    )
-
-    receiver = models.ForeignKey(
-        User,
-        related_name="received_calls",
-        on_delete=models.CASCADE
-    )
+    caller = models.ForeignKey(User, related_name="sent_calls", on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name="received_calls", on_delete=models.CASCADE)
 
     status = models.CharField(
         max_length=20,
@@ -233,5 +218,3 @@ class AudioCall(models.Model):
 
     def __str__(self):
         return f"{self.caller} → {self.receiver} ({self.status})"
-
-
