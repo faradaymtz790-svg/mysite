@@ -235,22 +235,3 @@ class AudioCall(models.Model):
         return f"{self.caller} → {self.receiver} ({self.status})"
 
 
-    @login_required
-def accept_call(request, call_id):
-    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
-
-    call.status = "accepted"
-    call.save()
-
-    return redirect("call") 
-    
-     # or call_room page later
-
-@login_required
-def decline_call(request, call_id):
-    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
-
-    call.status = "declined"
-    call.save()
-
-    return redirect("audio_feed")

@@ -1318,17 +1318,10 @@ def delete_audio_call(request, post_id):
     post.delete()
     return redirect("audio_feed")
 
-
-# =========================
-# CALL PAGE
-# =========================
 def call_page(request):
     return render(request, "call.html")
 
 
-# =========================
-# USER SEARCH
-# =========================
 def user_search(request):
 
     q = request.GET.get("q", "")
@@ -1341,9 +1334,6 @@ def user_search(request):
     ], safe=False)
 
 
-# =========================
-# SAVE CALL
-# =========================
 @csrf_exempt
 def save_call(request):
 
@@ -1378,26 +1368,21 @@ def accept_call(request, call_id):
     return redirect("audio_feed")
 
 
+
+
 @login_required
 def decline_call(request, call_id):
     call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
+
     call.status = "declined"
     call.save()
+
     return redirect("audio_feed")
 
+from django.http import JsonResponse
 
-
-
-
-
-@login_required
-def profile_view(request, username):
-    incoming_call = AudioCall.objects.filter(
-        receiver=request.user,
-        status="ringing"
-    ).order_by("-created_at").first()
-
-    context = {
-        "incoming_call": incoming_call
-    }
-    return render(request, "profile.html", context)
+def post_call(request):
+    if request.method == "POST":
+        # your call logic here
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "invalid method"})
