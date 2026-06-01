@@ -6,7 +6,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
-DEBUG = os.environ.get('DEBUG', 'False') == 'False' #was true here
+DEBUG = os.environ.get('DEBUG', 'False') == 'True' #was true here
 
 ALLOWED_HOSTS = ["*"]
 
