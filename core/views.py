@@ -1370,5 +1370,20 @@ def save_call(request):
     return JsonResponse({"error": "invalid request"})
 
 
+@login_required
+def accept_call(request, call_id):
+    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
+    call.status = "accepted"
+    call.save()
+    return redirect("audio_feed")
+
+
+@login_required
+def decline_call(request, call_id):
+    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
+    call.status = "declined"
+    call.save()
+    return redirect("audio_feed")
+
 
 

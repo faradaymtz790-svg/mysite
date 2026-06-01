@@ -201,10 +201,22 @@ class CallPost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+from django.db import models
+from django.contrib.auth.models import User
 
- class AudioCall(models.Model):
-    caller = models.ForeignKey(User, related_name="sent_calls", on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name="received_calls", on_delete=models.CASCADE)
+
+class AudioCall(models.Model):
+    caller = models.ForeignKey(
+        User,
+        related_name="sent_calls",
+        on_delete=models.CASCADE
+    )
+
+    receiver = models.ForeignKey(
+        User,
+        related_name="received_calls",
+        on_delete=models.CASCADE
+    )
 
     status = models.CharField(
         max_length=20,
@@ -217,4 +229,28 @@ class CallPost(models.Model):
         default="ringing"
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)   
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.caller} → {self.receiver} ({self.status})"
+
+
+    @login_required
+def accept_call(request, call_id):
+    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
+
+    call.status = "accepted"
+    call.save()
+
+    return redirect("call") 
+    
+     # or call_room page later
+
+@login_required
+def decline_call(request, call_id):
+    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
+
+    call.status = "declined"
+    call.save()
+
+    return redirect("audio_feed")

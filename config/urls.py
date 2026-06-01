@@ -88,7 +88,7 @@ urlpatterns += i18n_patterns(
     path("save-call/", views.save_call, name="save_call"),
     path("post-call/", views.post_call, name="post_call"),
     path("call/accept/<int:call_id>/", views.accept_call, name="accept_call"),
-path("call/decline/<int:call_id>/", views.decline_call, name="decline_call"),
+    path("call/decline/<int:call_id>/", views.decline_call, name="decline_call"),
     
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),

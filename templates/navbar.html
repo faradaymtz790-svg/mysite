@@ -206,7 +206,7 @@
         
         <a href="{% url 'feed' %}" class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}" title="Feed">🎧</a>
         
-        <a href="{% url 'audio_feed' %}" class="nav-link {% if request.resolver_match.url_name == 'radio_networks' %}active{% endif %}" title="Radio Networks">📻</a>
+        <a href="{% url 'audio_feed' %}" class="nav-link {% if request.resolver_match.url_name == 'audio_feed' %}active{% endif %}" title="Audio feed">📻</a>
         
         <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" title="Notifications">🔔</a>
     </div>
