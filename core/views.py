@@ -1218,82 +1218,63 @@ def account_view(request):
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+import json
 
-from .models import AudioCallPost
+from .models import (
+    AudioCallPost,
+    AudioCall,       # ✅ FIXED (was missing)
+    CallSession,
+    CallPost
+)
+
 
 @login_required
 def audio_call_feed(request):
 
     call_posts = AudioCallPost.objects.all().order_by("-created_at")
 
-    # =========================
-    # INCOMING CALL (ADDED)
-    # =========================
+    # FIXED: incoming call query
     incoming_call = AudioCall.objects.filter(
         receiver=request.user,
         status="ringing"
     ).first()
 
-    context = {
+    return render(request, "radio_networks.html", {
         "call_posts": call_posts,
-        "incoming_call": incoming_call,  # ✅ ADDED HERE
-    }
+        "incoming_call": incoming_call,
+    })
 
-    return render(
-        request,
-        "radio_networks.html",
-        context
-    )
-
-@login_required
+ @login_required
 def start_audio_call(request):
 
     if request.method == "POST":
 
-        heading = request.POST.get("heading")
-        description = request.POST.get("description")
-
-        audio_file = request.FILES.get("audio_file")
-        cover_image = request.FILES.get("cover_image")
-        cover_video = request.FILES.get("cover_video")
-        background_music = request.FILES.get("background_music")
-
-        duration_minutes = request.POST.get("duration_minutes")
-
         post = AudioCallPost.objects.create(
             user=request.user,
-            heading=heading,
-            description=description,
-            audio_file=audio_file,
-            cover_image=cover_image,
-            cover_video=cover_video,
-            background_music=background_music,
-            duration_minutes=duration_minutes
+            heading=request.POST.get("heading"),
+            description=request.POST.get("description"),
+            audio_file=request.FILES.get("audio_file"),
+            cover_image=request.FILES.get("cover_image"),
+            cover_video=request.FILES.get("cover_video"),
+            background_music=request.FILES.get("background_music"),
+            duration_minutes=request.POST.get("duration_minutes"),
         )
 
         return redirect("audio_call_feed")
 
-    return render(
-        request,
-        "start_audio_call.html"
-    )
+    return render(request, "start_audio_call.html")
 
-
-@login_required
+  @login_required
 def like_audio_call(request, post_id):
 
-    post = get_object_or_404(
-        AudioCallPost,
-        id=post_id
-    )
+    post = get_object_or_404(AudioCallPost, id=post_id)
 
     if request.user in post.likes.all():
-
         post.likes.remove(request.user)
         liked = False
-
     else:
-
         post.likes.add(request.user)
         liked = True
 
@@ -1302,23 +1283,17 @@ def like_audio_call(request, post_id):
         "likes_count": post.likes.count()
     })
 
-
-@login_required
+ @login_required
 def track_listener(request, post_id):
 
-    post = get_object_or_404(
-        AudioCallPost,
-        id=post_id
-    )
-
+    post = get_object_or_404(AudioCallPost, id=post_id)
     post.listeners.add(request.user)
 
     return JsonResponse({
         "listeners_count": post.listeners.count()
     })
 
-
-@login_required
+  @login_required
 def delete_audio_call(request, post_id):
 
     post = get_object_or_404(
@@ -1328,99 +1303,41 @@ def delete_audio_call(request, post_id):
     )
 
     post.delete()
-
     return redirect("audio_call_feed")
 
-
-    import json
-from django.http import JsonResponse
-from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
-from django.utils import timezone
-
-from .models import CallSession, CallPost
-
-
-# -----------------------
-# PAGE
-# -----------------------
 def call_page(request):
     return render(request, "call.html")
 
-
-# -----------------------
-# USER SEARCH
-# -----------------------
 def user_search(request):
     q = request.GET.get("q", "")
 
     users = User.objects.filter(username__icontains=q)[:10]
 
-    data = [
-        {
-            "id": u.id,
-            "username": u.username
-        }
+    return JsonResponse([
+        {"id": u.id, "username": u.username}
         for u in users
-    ]
+    ], safe=False)
 
-    return JsonResponse(data, safe=False)
-
-
-# -----------------------
-# SAVE CALL
-# -----------------------
 @csrf_exempt
 def save_call(request):
     if request.method == "POST":
-        data = json.loads(request.body)
 
-        users = data.get("users", [])
-        duration = data.get("duration", 0)
+        data = json.loads(request.body)
 
         call = CallSession.objects.create(
             host=request.user,
-            duration_seconds=duration
+            duration_seconds=data.get("duration", 0)
         )
 
-        participants = User.objects.filter(username__in=users)
-        call.participants.set(participants)
+        participants = User.objects.filter(
+            username__in=data.get("users", [])
+        )
 
-        call.save()
+        call.participants.set(participants)
 
         return JsonResponse({"status": "saved", "call_id": call.id})
 
     return JsonResponse({"error": "invalid request"})
 
 
-# -----------------------
-# POST CALL
-# -----------------------
-@csrf_exempt
-def post_call(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-
-        users = data.get("users", [])
-        heading = data.get("heading", "")
-
-        call = CallSession.objects.create(
-            host=request.user,
-            heading=heading
-        )
-
-        participants = User.objects.filter(username__in=users)
-        call.participants.set(participants)
-
-        post = CallPost.objects.create(
-            call=call,
-            heading=heading
-        )
-
-        return JsonResponse({
-            "status": "posted",
-            "post_id": post.id
-        })
-
-    return JsonResponse({"error": "invalid"})
+    
