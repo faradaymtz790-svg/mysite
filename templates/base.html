@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#00a86b">
-    <title>plugbar</title>
+    <title>Zeed</title>
     <link rel="icon" href="{% static 'favicon.ico' %}">
     <link rel="manifest" href="{% static 'manifest.json' %}">
     
@@ -167,7 +167,7 @@
     <nav class="navbar">
      
 
-        <a href="/" class="brand-logo">Plugbar</a>
+        <a href="/" class="brand-logo">Zeed</a>
 
         <div class="notif-container">
             <button class="notif-btn" id="notifBtn" onclick="toggleDropdown()">
@@ -186,7 +186,7 @@
                 {% for n in notifications %}
                     <a href="{% url 'click_notification' n.id %}" class="notif-item">
                         <p>{{ n.message|truncatechars:50 }}</p>
-                        <small>{{ n.timestamp|timesince }} {% trans "ago" %}</small>
+                       <small>{{ n.created_at|timesince }} {% trans "ago" %}</small>
                     </a>
                 {% empty %}
                     <div style="padding: 40px 20px; text-align: center; color: #8e8e8e;">

@@ -28,22 +28,32 @@ def notify_post_like(sender, instance, created, **kwargs):
             text="liked your post."
         )
 # 3. Someone Commented or Replied
+
 @receiver(post_save, sender=Comment)
 def notify_comment(sender, instance, created, **kwargs):
     if created:
-        if instance.parent: # It's a reply
+        from core.models import Notification
+        
+        # Determine if the comment is audio-based or text-based for the notification text
+        # Assuming 'audio_comment' is the field for recorded voice in your Comment model
+        is_audio = hasattr(instance, 'audio_comment') and instance.audio_comment
+        verb = "sent an audio comment" if is_audio else "commented"
+
+        if instance.parent:  # It's a reply
             Notification.objects.create(
                 recipient=instance.parent.user,
                 sender=instance.user,
                 post=instance.post,
+                comment=instance, # Link the specific comment/reply
                 notification_type='reply',
-                text="replied to your comment."
+                text=f"{verb} on your comment."
             )
-        else: # It's a top-level comment
+        else:  # It's a top-level comment
             Notification.objects.create(
                 recipient=instance.post.user,
                 sender=instance.user,
                 post=instance.post,
+                comment=instance,
                 notification_type='comment',
-                text="commented on your post."
+                text=f"{verb} on your post."
             )

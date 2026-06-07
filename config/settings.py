@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -------------------------
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -21,7 +21,7 @@ CSRF_TRUSTED_ORIGINS = [
 # APPS
 # -------------------------
 INSTALLED_APPS = [
-    # Cloudinary (MUST be first)
+    # Cloudinary (keep installed but safe)
     'cloudinary_storage',
     'cloudinary',
 
@@ -124,31 +124,37 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # -------------------------
-# MEDIA + CLOUDINARY (FIXED)
+# MEDIA (FIXED PROPERLY)
 # -------------------------
 
-# ❌ REMOVE DEFAULT_FILE_STORAGE (deprecated)
-# DO NOT USE IT ANYMORE
+if DEBUG:
+    # LOCAL DEVELOPMENT (NO CLOUDINARY)
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+else:
+    # PRODUCTION (CLOUDINARY ONLY IF KEYS EXIST)
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
-STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+CLOUDINARY_CREDENTIALS_OK = all([
+    os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    os.environ.get("CLOUDINARY_API_KEY"),
+    os.environ.get("CLOUDINARY_API_SECRET"),
+])
 
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
-    "SECURE": True,
-    "RESOURCE_TYPE": "auto",
-}
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+if CLOUDINARY_CREDENTIALS_OK:
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+        "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+        "SECURE": True,
+    }
 
 # -------------------------
 # INTERNATIONALIZATION
@@ -178,17 +184,39 @@ LANGUAGES = [
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale/')]
 
 # -------------------------
-# SESSIONS
+# SESSIONS (FIX FOR LOCAL)
 # -------------------------
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
 
-# -------------------------
-# SECURITY (RENDER)
-# -------------------------
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+# Security cookies only in production
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+else:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# config/settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.resend.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Leave this exactly as 'resend'
+EMAIL_HOST_USER = 'resend'
+
+# Paste your copied key here
+EMAIL_HOST_PASSWORD = 're_H5RVLsgF_9ekUxpXCP4BwyBLSEsmt3F4P'
+
+# Use the default Resend onboarding email for testing
+DEFAULT_FROM_EMAIL = 'Zeed App <onboarding@resend.dev>'
+# config/settings.py
+
+# Point Allauth directly to your custom template name and location
+ACCOUNT_HTML_EMAIL_TEMPLATE = 'email_verify.html'

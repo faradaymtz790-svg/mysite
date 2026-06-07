@@ -1,8 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
+import random
+import string
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from django.db import models
+from django.contrib.auth.models import User
 
-
-# =========================
 # PROFILE
 # =========================
 class Profile(models.Model):
@@ -158,63 +163,3 @@ class Block(models.Model):
         return f"{self.blocker.username} blocked {self.blocked.username}"
 
 
-# =========================
-# AUDIO CALL POSTS
-# =========================
-class AudioCallPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    heading = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-
-    audio_file = models.FileField(upload_to='audio_calls/')
-    cover_image = models.ImageField(upload_to='audio_calls/cover/', blank=True, null=True)
-    cover_video = models.FileField(upload_to='audio_calls/video/', blank=True, null=True)
-    background_music = models.FileField(upload_to='audio_calls/music/', blank=True, null=True)
-
-    duration_minutes = models.IntegerField(default=0)
-
-    likes = models.ManyToManyField(User, related_name='liked_audio_calls', blank=True)
-    listeners = models.ManyToManyField(User, related_name='audio_call_listeners', blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-# =========================
-# CALL SYSTEM
-# =========================
-class CallSession(models.Model):
-    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_calls')
-    participants = models.ManyToManyField(User, related_name='call_participations', blank=True)
-
-    heading = models.CharField(max_length=255, blank=True, null=True)
-    duration_seconds = models.IntegerField(default=0)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-class CallPost(models.Model):
-    call = models.ForeignKey(CallSession, on_delete=models.CASCADE)
-    heading = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-class AudioCall(models.Model):
-    caller = models.ForeignKey(User, related_name="sent_calls", on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name="received_calls", on_delete=models.CASCADE)
-
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ("ringing", "Ringing"),
-            ("accepted", "Accepted"),
-            ("declined", "Declined"),
-            ("ended", "Ended"),
-        ],
-        default="ringing"
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.caller} → {self.receiver} ({self.status})"

@@ -45,12 +45,17 @@
         .db-post-title { text-decoration: underline; color: green; font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase;}
         
         .audio-visual-container { height:320px; position:relative; background-size:cover; background-position:center; background-color: #222; overflow:hidden; }
-        .visualizer-bars { display:flex; align-items:flex-end; gap:3px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; }
-        .v-bar { flex:1; height:5px; border-radius:3px; transition:0.1s ease; opacity: 0.6; }
+        .visualizer-bars { display:flex; align-items:flex-end; gap:2px; height:320px; position: absolute; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 2; padding: 0 10px; box-sizing: border-box; }
+        .v-bar { flex:1; height:4px; border-radius:1px; transition: height 0.08s ease-out, opacity 0.1s ease; opacity: 0.4; min-height: 4px; }
 
         /* AUDIO TIME DISPLAY LAYOUT CONTAINER */
         .player-controls-wrapper { position: absolute; bottom: 40px; left: 20px; z-index: 10; display: flex; align-items: center; gap: 12px; }
-        .play-trigger { width:60px; height:60px; border-radius:50%; background: white; color: var(--primary-green); border:none; font-size:26px; cursor:pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        /* PREMIUM PLAY BUTTON DESIGN */
+        .play-trigger { width:64px; height:64px; border-radius:50%; background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%); color: var(--primary-green); border: none; font-size:24px; cursor:pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.8); transition: all 0.2s ease; font-weight: bold; }
+        .play-trigger:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(0, 168, 107, 0.35); color: #008f5a; }
+        .play-trigger:active { transform: scale(0.96); }
+        
         .audio-time-display { background: rgba(0, 0, 0, 0.6); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; backdrop-filter: blur(5px); font-variant-numeric: tabular-nums; }
 
         .progress-wrapper { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: rgba(0,0,0,0.3); z-index: 20; cursor: pointer; }
@@ -64,10 +69,16 @@
         /* CLEANER MODAL UI */
         #editModal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: 0.3s; }
         .modal-body { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .form-group label { display: block; font-weight: 700; font-size: 11px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1.5px solid #edf2f7; border-radius: 12px; background: #f8fafc; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; }
-        .form-group input:focus { border-color: var(--primary-green); outline: none; background: white; }
         
+        /* ICON LABELS FOR MODAL */
+        .form-group label { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 11px; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group label svg { width: 14px; height: 14px; color: #94a3b8; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1.5px solid #edf2f7; border-radius: 12px; background: #f8fafc; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary-green); outline: none; background: white; box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.1); }
+        
+        /* BLOCK NOTIFICATION ALERTS */
+        .block-alert-banner { display: flex; align-items: center; gap: 10px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 20px; border-radius: 14px; margin-top: 15px; font-weight: 600; font-size: 14px; }
+
         .fab-add-post { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background-color: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 35px; font-weight: bold; box-shadow: 0 10px 25px rgba(0, 168, 107, 0.3); z-index: 9999; }
     </style>
 </head>
@@ -84,7 +95,7 @@
         {% if request.user == profile.user %}
             <button class="btn-edit" onclick="openModal()">Edit Profile</button>
         {% elif request.user.is_authenticated %}
-            <button type="button" id="follow-btn-main" class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" data-username="{{ profile.user.username}}">
+            <button type="button" id="follow-btn-main" class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" data-username="{{ profile.user.username }}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
@@ -95,6 +106,14 @@
             <h1 style="margin: 10px 0 0 0; display: flex; align-items: center;">
                 <span id="display-username">{{ profile.user.username|capfirst }}</span>
             </h1>
+            
+            {% if is_blocked %}
+            <div class="block-alert-banner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                <span>@{{ profile.user.username }} has blocked you. Interactions are restricted.</span>
+            </div>
+            {% endif %}
+
             <span class="info-label">Bio</span>
             <div class="underlined-text info-value" id="display-bio">{{ profile.bio|default:"No bio yet"|capfirst }}</div>
             
@@ -136,11 +155,9 @@
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             {% if post.audio %}
-                <!-- Updated Audio Tag with dynamic loadedmetadata hook -->
                 <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onloadedmetadata="initDuration({{post.id}})" ontimeupdate="updateProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
                 <div class="player-controls-wrapper">
                     <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
-                    <!-- Audio Track Runtime Display Element -->
                     <div class="audio-time-display" id="time{{post.id}}">0:00 / 0:00</div>
                 </div>
             {% endif %}
@@ -157,8 +174,8 @@
                 <button class="heart-btn {% if request.user in post.likes.all %}is-liked{% endif %}" id="heart-{{ post.id }}" onclick="handleLike(this, '{{ post.id }}')">❤</button>
                 <span id="like-count-{{ post.id }}" style="font-weight: 700;">{{ post.likes.count }}</span>
             </div>
-            <div title="Unique Listeners">🎧 <span id="unique-listeners-{{post.id}}" style="font-weight: 700;">{{ post.listeners_count }}</span></div>
-            <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count }}</span></div>
+            <div title="Unique Listeners">🎧 <span id="unique-listeners-{{post.id}}" style="font-weight: 700;">{{ post.listeners_count|default:"0" }}</span></div>
+            <div title="Total Replays">👂 <span id="total-replays-{{post.id}}" style="font-weight: 700;">{{ post.replays_count|default:"0" }}</span></div>
             <a href="{% url 'post_comments' post.id %}" style="text-decoration: none; color: inherit;">💬 <span style="font-weight: 700;">{{ post.comments.count }}</span></a>
         </div>
     </div>
@@ -174,13 +191,43 @@
         <form id="profileUpdateForm" enctype="multipart/form-data">
             {% csrf_token %}
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group"><label>Profile Image</label><input type="file" name="image" accept="image/*"></div>
-                <div class="form-group"><label>Cover Photo</label><input type="file" name="cover_photo" accept="image/*"></div>
+                <div class="form-group">
+                    <label>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        Profile Image
+                    </label>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Cover Photo
+                    </label>
+                    <input type="file" name="cover_photo" accept="image/*">
+                </div>
             </div>
-            <div class="form-group"><label>Bio</label><textarea name="bio" rows="3">{{ profile.bio }}</textarea></div>
+            <div class="form-group">
+                <label>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Bio
+                </label>
+                <textarea name="bio" rows="3">{{ profile.bio }}</textarea>
+            </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group"><label>Location</label><input type="text" name="location" value="{{ profile.location }}"></div>
-                <div class="form-group"><label>Website</label><input type="url" name="links" value="{{ profile.links }}"></div>
+                <div class="form-group">
+                    <label>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        Location
+                    </label>
+                    <input type="text" name="location" value="{{ profile.location }}">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        Website
+                    </label>
+                    <input type="url" name="links" value="{{ profile.links }}">
+                </div>
             </div>
             <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 10px;">
                 <button type="button" class="btn-edit" style="background:#f1f5f9; color:#64748b; float:none; margin:0;" onclick="closeModal()">Cancel</button>
@@ -195,7 +242,6 @@
     function openModal() { document.getElementById('editModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
-    // TIME PARSER HELPER
     function formatTime(seconds) {
         if (isNaN(seconds)) return "0:00";
         const mins = Math.floor(seconds / 60);
@@ -203,7 +249,6 @@
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
-    // INITIALIZE TRACK RUNTIME BEFORE PLAYBACK
     function initDuration(id) {
         const audio = document.getElementById("audio" + id);
         const timeDisplay = document.getElementById("time" + id);
@@ -212,7 +257,6 @@
         }
     }
 
-    // PROGRESS BAR & VISUALIZER
     function updateProgress(id) {
         const audio = document.getElementById("audio" + id);
         const fill = document.getElementById("fill" + id);
@@ -227,7 +271,6 @@
                 timeDisplay.innerText = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
             }
             
-            // Smoother randomized bounce
             bars.forEach(b => {
                 const height = Math.random() * 280 + 20;
                 b.style.height = height + "px";
@@ -245,7 +288,7 @@
 
     function stopVisualizer(id) {
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-        bars.forEach(b => { b.style.height = "5px"; b.style.opacity = "0.4"; });
+        bars.forEach(b => { b.style.height = "4px"; b.style.opacity = "0.4"; });
         const btn = document.getElementById('playBtn' + id);
         if(btn) btn.innerHTML = "▶";
         const fill = document.getElementById("fill" + id);
@@ -257,7 +300,6 @@
         }
     }
 
-    // Stop all other audio tracks when a new one starts
     function stopAllOtherAudio(currentId) {
         const allAudios = document.querySelectorAll('audio');
         allAudios.forEach(audio => {
@@ -273,22 +315,50 @@
         let audio = document.getElementById("audio" + id),
             btn = document.getElementById("playBtn" + id);
 
+        if (!audio) return;
+
         if (audio.paused) {
-            // STOP other audios before playing
             stopAllOtherAudio(id);
-
-            audio.play();
-            btn.innerHTML = "⏸";
             
-            // Background analytics
-            fetch(`/record-replay/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-            .then(r => r.json()).then(d => { if(d.new_replay_count) document.getElementById(`total-replays-${id}`).innerText = d.new_replay_count; });
+            audio.play().then(() => {
+                btn.innerHTML = "⏸";
+                
+                // 🎧 UNIQUE LISTENERS (Headphones Icon Counter Updates)
+                fetch(`/record-listener/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const uniqueElement = document.getElementById(`unique-listeners-${id}`);
+                    if (uniqueElement && data.new_listener_count !== undefined) {
+                        uniqueElement.innerText = data.new_listener_count;
+                    }
+                })
+                .catch(err => console.error("Listener counter failed to update:", err));
 
-            if (!sessionStorage.getItem(`played_post_${id}`)) {
-                fetch(`/record-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-                .then(r => r.json()).then(d => { if(d.new_listener_count) document.getElementById(`unique-listeners-${id}`).innerText = d.new_listener_count; });
-                sessionStorage.setItem(`played_post_${id}`, "true");
-            }
+                // 👂 TOTAL REPLAYS (Ear Icon Counter Updates)
+                fetch(`/record-replay/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const totalElement = document.getElementById(`total-replays-${id}`);
+                    if (totalElement && data.new_replay_count !== undefined) {
+                        totalElement.innerText = data.new_replay_count;
+                    }
+                })
+                .catch(err => console.error("Replay counter failed to update:", err));
+
+            }).catch(err => console.error("Playback error:", err));
+            
         } else {
             audio.pause();
             btn.innerHTML = "▶";
@@ -297,7 +367,6 @@
         }
     }
 
-    // INSTANT ASYNC PROFILE UPDATE (NO FULL RE_LOADS OPTIMIZATION)
     document.getElementById('profileUpdateForm').onsubmit = async function(e) {
         e.preventDefault(); 
         const btn = document.getElementById('saveBtn'); 
@@ -317,7 +386,6 @@
             const d = await res.json(); 
 
             if(d.success) {
-                // Update text configurations instantly without full reload
                 if(d.bio) document.getElementById('display-bio').innerText = d.bio;
                 if(d.location) document.getElementById('display-location').innerText = d.location;
                 if(d.links) {
@@ -325,8 +393,6 @@
                     linkEl.href = d.links;
                     linkEl.innerText = d.links;
                 }
-                
-                // Swap media files directly using localized ObjectURLs (Blazing Fast UI Update)
                 if(imageInput && imageInput.files.length > 0) {
                     const avatarUrl = URL.createObjectURL(imageInput.files[0]);
                     document.getElementById('display-avatar').src = avatarUrl;
@@ -353,14 +419,14 @@
         }
     };
 
-    // VIBRANT COLOR PALETTE FOR VISUALIZER
     const visualColors = [
-        '#00a86b', '#007bff', '#ff007f', '#7b2cbf', 
-        '#ffbe0b', '#fb5607', '#ff006e', '#8338ec', '#3a86ff'
+        '#00a86b', '#007bff', '#ff007f', '#7b2cbf', '#ffbe0b', 
+        '#fb5607', '#ff006e', '#8338ec', '#3a86ff', '#4cc9f0', 
+        '#f72585', '#7209b7', '#3d5a80', '#ee6c4d', '#06d6a0'
     ];
     
     document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 50; i++) { 
+        for(let i=0; i < 90; i++) { 
             let b = document.createElement("div"); 
             b.className = "v-bar"; 
             b.style.backgroundColor = visualColors[i % visualColors.length]; 
@@ -368,23 +434,34 @@
         }
     });
 
-    // Follow Logic
     document.querySelectorAll('.follow-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
             const username = this.getAttribute('data-username'); 
             const btn = this;
-            fetch(`/follow/${username}/`, { method: 'POST', headers: { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' } })
-            .then(r => r.json()).then(data => {
+            
+            fetch(`/follow/${username}/`, { 
+                method: 'POST', 
+                headers: { 
+                    'X-CSRFToken': getCSRFToken(), 
+                    'Content-Type': 'application/json' 
+                } 
+            })
+            .then(r => r.json())
+            .then(data => {
                 if (data.status === 'followed') {
-                    btn.classList.add('following', 'btn-unfollow'); btn.classList.remove('btn-follow');
+                    btn.className = "btn-unfollow following follow-btn";
                     btn.querySelector('.btn-text').innerHTML = 'Following';
                 } else {
-                    btn.classList.remove('following', 'btn-unfollow'); btn.classList.add('btn-follow');
+                    btn.className = "btn-follow follow-btn";
                     btn.querySelector('.btn-text').innerHTML = '+ Follow';
                 }
                 const badge = document.getElementById(`follower-count-${username}`);
-                if (badge) badge.innerHTML = data.followers_count;
-            });
+                if (badge && data.followers_count !== undefined) {
+                    badge.innerHTML = data.followers_count;
+                }
+            })
+            .catch(err => console.error("Follow submission error:", err));
         });
     });
 
@@ -405,5 +482,5 @@
         }
     }
 </script>
-</body>
+</body> 
 </html>

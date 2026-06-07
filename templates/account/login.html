@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | plugbar</title>
+    <title>Login | zeed</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gill+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -14,6 +14,7 @@
             --glass-white: rgba(255, 255, 255, 0.85);
             --border-blue: #3b82f6;
             --text-dark: #1e293b;
+            --brand-green: #00a86b;
         }
 
         * {
@@ -87,30 +88,36 @@
             margin-top: 15px;
         }
 
-        .form-group {
+        .stage-wrapper {
             width: 100%;
-            margin-bottom: 30px; /* Enhanced separation for minimalist lines */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Modern Bottom Line Styling */
+        .form-group {
+            width: 100%;
+            margin-bottom: 30px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         input {
-            width: 90% !important; /* Updated to 90% */
+            width: 90% !important; 
             padding: 14px 10px !important; 
-            border-radius: 0px !important; /* Removed rounded edges */
+            border-radius: 0px !important; 
             border: none !important;
-            border-bottom: 2px solid var(--border-blue) !important; /* Pure bottom line design */
-            background: transparent !important; /* Transparent for seamless look */
+            border-bottom: 2px solid var(--border-blue) !important; 
+            background: transparent !important; 
             font-size: 16px;
             color: var(--text-dark);
             outline: none;
         }
 
         input:focus {
-            transform: translateY(-2px); /* Sleek vertical floating animation */
-            box-shadow: none !important; /* Removed heavy boxes for clean look */
+            transform: translateY(-2px); 
+            box-shadow: none !important; 
             border-bottom-color: var(--hover-blue) !important;
         }
 
@@ -123,7 +130,7 @@
 
         .toggle-password {
             position: absolute;
-            right: 8%; /* Balanced relative positioning for 90% input width */
+            right: 8%; 
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
@@ -131,8 +138,38 @@
             z-index: 10;
         }
 
+        /* 4-Box Entry Integration Layout */
+        .otp-inputs-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .otp-box {
+            width: 55px !important;
+            height: 55px !important;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            border: 2px solid #cbd5e1 !important;
+            border-radius: 12px !important;
+            background-color: rgba(248, 250, 252, 0.6) !important;
+            color: var(--text-dark);
+            padding: 0 !important;
+        }
+
+        .otp-box:focus {
+            transform: none;
+            border-bottom: 2px solid var(--brand-green) !important;
+            border: 2px solid var(--brand-green) !important;
+            background-color: #ffffff !important;
+        }
+
         button {
-            width: 90%; /* Synchronized button width with fields */
+            width: 90%; 
             padding: 20px;
             border-radius: 18px;
             border: none;
@@ -166,13 +203,26 @@
         .error {
             color: #e11d48;
             background: #fff1f2;
-            padding: 10px;
+            padding: 12px;
             border-radius: 12px;
             font-size: 14px;
             width: 90%;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
             display: none;
             border: 1px solid #fda4af;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .shake-element {
+            animation: shake 0.2s ease-in-out 0s 2;
         }
     </style>
 </head>
@@ -181,39 +231,48 @@
 
 <div class="login-container">
     <img src="/static/mylogo.png" class="logo-main" alt="Logo">
-    <h1>plugbar</h1>
-    <h2>Login Now</h2>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="error" style="display: block;">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+    <h1>Zeed</h1>
+    <h2 id="loginHeading">Login Now</h2>
     
-    <div class="error" id="errorMsg">Please fill all fields correctly</div>
+    <div class="error" id="globalError">Please fill all fields correctly</div>
 
-    <form method="POST" id="loginForm" onsubmit="return validateForm()">
+    <!-- MAIN INTERACTIVE FLOW FORM -->
+    <form method="POST" id="authForm">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.GET.next }}">
-        
         <input type="hidden" name="form_load_time" id="form_load_time">
+        <input type="hidden" name="complete_otp" id="complete-otp">
 
+        <!-- Anti-Bot Honeypot Elements -->
         <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1; overflow: hidden;">
             <input type="text" name="company_name_extra" tabindex="-1" autocomplete="off">
         </div>
 
-        <div class="form-group">
-            <input type="text" id="username" name="username" placeholder="Username or Email" required>
-        </div>
-
-        <div class="form-group">
-            <div class="password-wrapper">
-                <input type="password" id="password" name="password" placeholder="Password" required>
-                <span class="toggle-password" onclick="togglePassword()">👁</span>
+        <!-- STAGE 1: Username & Password Entry -->
+        <div id="credentialsStage" class="stage-wrapper">
+            <div class="form-group">
+                <input type="text" id="username" name="username" placeholder="Username or Email" required>
             </div>
+
+            <div class="form-group">
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePassword()">👁</span>
+                </div>
+            </div>
+            <button type="submit" id="btnAction">Login</button>
         </div>
 
-        <button type="submit">Login</button>
+        <!-- STAGE 2: 2FA Token Validation Module (Initially Hidden) -->
+        <div id="mfaStage" class="stage-wrapper hidden">
+            <div class="otp-inputs-grid">
+                <input type="text" class="otp-box" maxlength="1" pattern="[0-9]*" inputmode="numeric" autocomplete="one-time-code">
+                <input type="text" class="otp-box" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+                <input type="text" class="otp-box" maxlength="1" pattern="[0-9]*" inputmode="numeric">
+            </div>
+            <button type="submit" id="btnVerify">Verify Identity</button>
+        </div>
     </form>
 
     <div class="signup-link">
@@ -222,42 +281,143 @@
 </div>
 
 <script>
-    // Record the time the page loaded (Unix Timestamp)
+    // Initialize honeypot timer
     document.getElementById('form_load_time').value = Math.floor(Date.now() / 1000);
 
+    const authForm = document.getElementById('authForm');
+    const credentialsStage = document.getElementById('credentialsStage');
+    const mfaStage = document.getElementById('mfaStage');
+    const globalError = document.getElementById('globalError');
+    const loginHeading = document.getElementById('loginHeading');
+    const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
+    const completeOtp = document.getElementById('complete-otp');
+
+    let validationStep = "CREDENTIALS"; // State Machine Tracker: CREDENTIALS || MFA
+
     function togglePassword() {
-        const password = document.getElementById('password');
+        const passwordInput = document.getElementById('password');
         const icon = document.querySelector('.toggle-password');
-        if (password.type === 'password') {
-            password.type = 'text';
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
             icon.textContent = '🙈';
         } else {
-            password.type = 'password';
+            passwordInput.type = 'password';
             icon.textContent = '👁';
         }
     }
 
-    function validateForm() {
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const errorMsg = document.getElementById('errorMsg');
+    // 4-Box Navigation UI Logic
+    otpBoxes.forEach((box, index) => {
+        box.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.length > 1) {
+                const digits = val.replace(/\D/g, '').split('').slice(0, 4);
+                otpBoxes.forEach((b, i) => b.value = digits[i] || '');
+                otpBoxes[Math.min(digits.length, 3)].focus();
+                return;
+            }
+            if (val && !/^[0-9]$/.test(val)) {
+                box.value = '';
+                return;
+            }
+            if (val && index < 3) otpBoxes[index + 1].focus();
+        });
 
-        if (username === '' || password === '') {
-            errorMsg.textContent = 'Please fill all fields correctly';
-            errorMsg.style.display = 'block';
-            return false;
-        }
+        box.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                if (!box.value && index > 0) {
+                    otpBoxes[index - 1].value = '';
+                    otpBoxes[index - 1].focus();
+                    e.preventDefault();
+                }
+            } else if (e.key === 'ArrowLeft' && index > 0) {
+                otpBoxes[index - 1].focus();
+            } else if (e.key === 'ArrowRight' && index < 3) {
+                otpBoxes[index + 1].focus();
+            }
+        });
 
-        // Quick check: If submission is under 2 seconds, it's likely a bot
+        box.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+            const digits = pasteData.replace(/\D/g, '').split('').slice(0, 4);
+            otpBoxes.forEach((b, i) => b.value = digits[i] || '');
+            otpBoxes[Math.min(digits.length >= 4 ? 3 : digits.length, 3)].focus();
+        });
+    });
+
+    // Core Form Asynchronous Controller
+    authForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        globalError.style.display = 'none';
+
+        // Check if submission speed looks algorithmic/robotic
         const loadTime = document.getElementById('form_load_time').value;
         const now = Math.floor(Date.now() / 1000);
         if (now - loadTime < 2) {
-            // We don't alert the bot, just let the server handle it
-            return true; 
+            // Drop execution silently for bots
+            return;
         }
 
-        errorMsg.style.display = 'none';
-        return true;
+        const formData = new FormData(this);
+
+        if (validationStep === "CREDENTIALS") {
+            // First validation segment: Base Authentication
+            fetch(this.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'mfa_required') {
+                    // Backend requests 2FA token; slide out inputs seamlessly
+                    validationStep = "MFA";
+                    loginHeading.textContent = "Two-Factor Verification";
+                    credentialsStage.classList.add('hidden');
+                    mfaStage.classList.remove('hidden');
+                    otpBoxes.forEach(box => box.setAttribute('required', 'true'));
+                    setTimeout(() => otpBoxes[0].focus(), 50);
+                } else if (data.status === 'success') {
+                    window.location.href = data.redirect_url || '/';
+                } else {
+                    showFormError(data.message || "Invalid account credentials.");
+                }
+            })
+            .catch(() => showFormError("Connection loss experienced. Try again."));
+
+        } else if (validationStep === "MFA") {
+            // Second validation segment: OTP Processing
+            let combinedToken = "";
+            otpBoxes.forEach(box => combinedToken += box.value);
+            completeOtp.value = combinedToken;
+            formData.set('otp', combinedToken);
+
+            fetch(this.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url || '/';
+                } else {
+                    showFormError(data.message || "The verification token is invalid.");
+                    const grid = document.querySelector('.otp-inputs-grid');
+                    grid.classList.add('shake-element');
+                    otpBoxes.forEach(box => box.value = "");
+                    otpBoxes[0].focus();
+                    setTimeout(() => grid.classList.remove('shake-element'), 400);
+                }
+            })
+            .catch(() => showFormError("Connection loss experienced. Try again."));
+        }
+    });
+
+    function showFormError(msg) {
+        globalError.textContent = msg;
+        globalError.style.display = 'block';
     }
 </script>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy | plugbar</title>
+    <title>Privacy Policy | Zeed</title>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -47,7 +47,8 @@
         }
 
         h1 { color: var(--dark-green); font-size: 32px; margin-bottom: 5px; }
-        h3 { color: var(--brand-green); font-size: 20px; margin-top: 30px; display: flex; align-items: center; }
+        h2 { color: var(--dark-green); font-size: 22px; margin-top: 35px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+        h3 { color: var(--brand-green); font-size: 18px; margin-top: 25px; display: flex; align-items: center; }
         h3::before { content: "•"; margin-right: 10px; }
 
         .date-badge {
@@ -57,12 +58,14 @@
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
         }
 
         .highlight-box {
             background: #f1fff9;
             border-left: 5px solid var(--brand-green);
-            padding: 20px;
+            padding: 25px;
             margin: 25px 0;
             border-radius: 0 12px 12px 0;
             font-style: italic;
@@ -70,7 +73,8 @@
         }
 
         ul { padding-left: 20px; }
-        li { margin-bottom: 10px; }
+        li { margin-bottom: 12px; }
+        p { margin-bottom: 20px; text-align: justify; }
 
         @media (max-width: 600px) {
             .policy-card { padding: 30px; }
@@ -81,55 +85,85 @@
 <body>
 
 <div class="container">
-    <div class="logo-header">Plugbar</div>
+    <div class="logo-header">zeed</div>
 
     <div class="policy-card">
         <h1>Privacy Policy</h1>
-        <p class="date-badge">Last updated: April 11, 2026</p>
+        <p class="date-badge">Last updated: June 05, 2026</p>
         
-        <p>Welcome to <strong>Plugbar</strong>. We believe that your creative audio journey deserves a safe and private environment. This policy outlines how we handle your data when you interact with our platform.</p>
+        <p>Welcome to <strong>zeed</strong> (referred to herein as "the App", "Platform", "we", "us", or "our"). We are deeply committed to protecting your privacy, maintaining data security, and creating a transparent environment for digital creators. This Privacy Policy is a comprehensive legal document that details how we collect, store, process, transfer, disclose, and delete your personal and technical data when you interact with our mobile applications, web portals, and services.</p>
+        
+        <p>This Platform operates in strict compliance with the Google Play Developer Program Policies (including the User Data Policy and Data Safety mandates) alongside global data defense structures. By registering an account, completing identity verification, or using our live audio or video social features, you acknowledge and explicitly consent to the collection and handling of information as detailed in this policy document.</p>
 
-        <section>
-            <h3>1. The Data We Value</h3>
-            <p>To provide you with the best audio social experience, we process two types of data:</p>
-            <ul>
-                <li><strong>Identity Data:</strong> Your username, email, and security credentials.</li>
-                <li><strong>Creative Data:</strong> The audio stories you record, the cover images you upload, and your profile metadata.</li>
-            </ul>
-        </section>
+        <h2>1. Comprehensive Taxonomy of Collected Information</h2>
+        <p>To provide a highly interactive social ecosystem featuring real-time calling interfaces, robust media playback, and instant push notifications, we must collect and process specific clusters of personal and structural information.</p>
+        
+        <h3>A. Information You Voluntarily Furnish</h3>
+        <ul>
+            <li><strong>Account Identity and Registration Profiles:</strong> When building a profile on the Platform, you provide your legal or preferred name, customized username handler, active email address, and demographic indicators. These fields are mandatory to establish a unique user directory node.</li>
+            <li><strong>Security and Access Credentials:</strong> We store cryptographically salted and hashed variations of your security passwords. To protect account entries during multi-factor sequences, we temporarily process generated verification strings, such as One-Time Passwords (OTPs) routed to your registered electronic mail.</li>
+            <li><strong>User-Generated Media Ecosystem:</strong> As an audio-visual social network, our production storage infrastructure captures, hosts, and processes content you create. This includes live and recorded audio posts, spoken status entries, video files, text updates, profile banners, customized image covers, metadata links, and user comments.</li>
+        </ul>
 
-        <section>
-            <h3>2. Our Commitment</h3>
-            <div class="highlight-box">
-                plugbar is built for creators. We promise to never sell your private audio files or personal contact details to third-party marketing firms. Your content belongs to you.
-            </div>
-            <p>We use your data strictly to improve our recommendation algorithms, ensure the stability of our media servers, and maintain a safe, spam-free community.</p>
-        </section>
+        <h3>B. Information Gathered Automatically Through System Interaction</h3>
+        <ul>
+            <li><strong>Technical Telemetry and Network Identifiers:</strong> When utilizing the App, our server systems automatically document your Internet Protocol (IP) address configurations, unique hardware identity nodes ($e.g.$, IMEI or Android ID), device model variants, screen resolution parameters, and exact mobile operating system software versions.</li>
+            <li><strong>Application Diagnostics and Crash Analytics:</strong> To ensure system stability across diverse processing units, we collect platform exception backtraces, diagnostic log files, system execution times, freeze parameters, and application performance metrics.</li>
+            <li><strong>Anti-Bot and Behavior Timeline Monitoring:</strong> For security validation, we measure non-invasive behavior metadata, including form loading timestamps, field focusing durations, and interface interact intervals. This telemetry is used strictly to differentiate standard human navigation profiles from automated scripting suites or brute-force exploits.</li>
+        </ul>
 
-        <section>
-            <h3>3. Public vs. Private</h3>
-            <p>When you post an audio story, it is shared with the public feed so your community can engage with it. However, your email address, password, and internal account settings remain strictly private and accessible only to you.</p>
-        </section>
+        <h2>2. Dynamic Device Hardware Permissions</h2>
+        <p>To fulfill your commands within the App's functional boundaries ($e.g.$, capturing content or conducting a live call), the Platform will programmatically prompt for runtime permissions to access underlying device hardware components. These permissions are never enabled silently; they require your explicit system authorization and can be revoked via your mobile device system settings at any point:</p>
+        <ul>
+            <li><strong>Microphone Interface Access:</strong> This permission is required to capture clear audio streams, record audio social posts, and transmit your voice over WebRTC pathways during live audio calling activities. Audio is only processed when you trigger an active recording action or engage in a call.</li>
+            <li><strong>Camera and Image Gallery Storage:</strong> This permission allows the software to pull content packets from your local filesystem or directly trigger the camera sensor. This is used to capture or upload rich video updates, design layout graphics, and refresh profile banners.</li>
+            <li><strong>Push Notification Systems:</strong> This permission allows our background servers to deliver real-time engagement alerts, including notifications for call invitations, follow alerts, incoming comments, and critical security validation codes.</li>
+        </ul>
 
-        <section>
-            <h3>4. Your Control</h3>
-            <p>You remain the pilot of your Togsphere experience. At any time, you can:</p>
-            <ul>
-                <li><strong>Modify</strong> your profile information in your settings.</li>
-                <li><strong>Remove</strong> any post, which triggers an immediate deletion of that file from our servers.</li>
-                <li><strong>Request</strong> full account deactivation by contacting our support team.</li>
-            </ul>
-        </section>
+        <h2>3. Algorithmic Processing and Data Utilization Context</h2>
+        <div class="highlight-box">
+            zeed is built from the ground up for independent creators. We stand behind a binding foundational promise: your private data, uploaded media resources, voice recordings, and contact coordinates will never be traded, sold, or rented to third-party marketing brokers or advertising optimization clearinghouses. Your digital content belongs entirely to you.
+        </div>
+        <p>We process collected data sets strictly under valid legal grounds to fulfill operational, technical, and protective mandates:</p>
+        <ul>
+            <li><strong>Core Provision of Services:</strong> Setting up secure login points, generating dynamic user feeds, compiling video and sound packages, streaming media files smoothly, and establishing low-latency live audio connections between callers.</li>
+            <li><strong>System Integrity Protection:</strong> Verifying authentication queries via OTP blocks, checking honeypot fields to filter out automated traffic, detecting multi-account registration exploits, and preventing credential-stuffing attacks.</li>
+            <li><strong>Personalization Metrics:</strong> Refining our recommendations to highlight relevant audio content and video streams tailored to your user preferences.</li>
+            <li><strong>System Communications:</strong> Pushing out system alerts, password recovery options, and responses to support or ticket queries submitted to our desk.</li>
+        </ul>
 
-        <section>
-            <h3>5. Security</h3>
-            <p>We employ modern encryption standards to protect your data. While we strive to keep our platform secure, we recommend that you use a unique password and keep your login details protected.</p>
-        </section>
+        <h2>4. Data Sharing and Third-Party Subprocessors</h2>
+        <p>We restrict exposure of your profile records to specific situations, ensuring data minimization rules are enforced across all operations:</p>
+        <ul>
+            <li><strong>Public Viewable Profile Metrics:</strong> Content you publish to public feeds ($e.g.$, media posts, profile names, comments) becomes visible to the global community. Account settings, primary email handles, security strings, and security logs are kept hidden from public access.</li>
+            <li><strong>Essential System Subprocessors:</strong> We work with trusted cloud infrastructure providers ($e.g.$, secure database layers, scalable video hosting buckets, and transactional mail routers like AWS or SendGrid). These partners receive limited data packets under strict data processing agreements and are barred from using your data for any independent marketing purposes.</li>
+            <li><strong>Legal Demands and Safety Rules:</strong> We may disclose information if required by applicable law, regulatory mandates, valid legal subpoenas, or court orders, or if necessary to defend the physical safety of our users or mitigate fraud threats.</li>
+        </ul>
 
-        <section>
-            <h3>6. Questions?</h3>
-            <p>If you have any concerns regarding how your data is handled, our team is ready to assist. Please visit our <a href="{% url 'help' %}" style="color: var(--brand-green); font-weight: bold;">Help Center</a> to open a support ticket.</p>
-        </section>
+        <h2>5. Cryptographic Storage and Data Security Architecture</h2>
+        <p>We use rigorous administrative and technical safeguards to keep your personal data secure. All data moving between our mobile apps and backend endpoints is encrypted in transit using industry-standard Secure Socket Layer (SSL) and Transport Layer Security (TLS) configurations.</p>
+        <p>Data stored on our servers is protected using advanced cryptographic hashing algorithms ($e.g.$, Argon2 or PBKDF2 for access credentials), shielding sensitive values from unauthorized access in the event of an infrastructure threat. However, please note that no system can be completely secure. We encourage you to use unique passwords and avoid sharing your verification codes with others.</p>
+
+        <h2>6. Strict User Data Deletion and Retention Governance</h2>
+        <p>In full adherence to Google Play data transparency standards, you maintain absolute control over your information footprint:</p>
+        <ul>
+            <li><strong>Content Removal:</strong> Tapping the delete action on a specific media post, voice track, or upload triggers an immediate request to clear that content from our production databases. The asset file will be fully purged from all active delivery nodes and system caching layers.</li>
+            <li><strong>Complete Profile and Account Erasure:</strong> You can choose to completely erase your data footprint from our servers at any time. You can trigger an account deletion request directly within the Account Settings menu of the App, or by contacting our administration desk through a verified email. Once validated, your profile data, metadata logs, and personal details will be permanently removed from our active systems within 30 days, except where retention is required by law.</li>
+        </ul>
+
+        <h2>7. Global Privacy Framework Compliance</h2>
+        <p>Our processing methods adapt to international data rights standards to support a globally distributed user base:</p>
+        <ul>
+            <li><strong>General Data Protection Regulation (GDPR):</strong> Users within the European Economic Area retain the absolute right to request access to their data, request corrections, ask for processing restrictions, object to specific uses, or download their personal data files.</li>
+            <li><strong>California Consumer Privacy Act (CCPA):</strong> Users located in California maintain the right to receive an itemized disclosure of data categories processed over the preceding 12 months, and can request full erasure without facing discrimination.</li>
+            <li><strong>Children's Privacy Protection (COPPA):</strong> We do not intentionally gather or maintain data from individuals under 13 years of age. If we learn that a user under 13 has built an account without verified parental consent, we will take immediate steps to remove their profile data from our servers.</li>
+        </ul>
+
+        <h2>8. Updates and Modifications to this Policy</h2>
+        <p>We reserve the right to revise this document as we add new features, adjust our media infrastructure, or adapt to updated mobile market regulations. We will alert you to major adjustments by updating the "Last Updated" timestamp at the top of this view and, where appropriate, displaying a noticeable prompt within the App login interface.</p>
+
+        <h2>9. Administrative Contact Details</h2>
+        <p>If you have any questions about this policy, want to appeal a data handling decision, or need to follow up on a data deletion request, please visit our <a href="{% url 'help' %}" style="color: var(--brand-green); font-weight: bold;">Help Center</a> to submit a support ticket, or contact our compliance desk directly via email.</p>
     </div>
 </div>
 
