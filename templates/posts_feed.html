@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySite | Home</title>
+    <title>Zeed | Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -85,7 +85,7 @@
             font-family: 'Gill Sans', sans-serif;
             text-decoration: underline;
             color: green;
-            font-size:medium;
+            font-size: medium;
         }
 
         /* Audio Player & Visualizer */
@@ -109,20 +109,31 @@
             z-index: 1;
         }
 
+        /* UPDATED: COVERS 100% CONTAINER WIDTH COMPLETELY EDGE-TO-EDGE */
         .visualizer-bars {
             display: flex;
             align-items: flex-end;
-            gap: 3px;
+            gap: 1px; 
             height: 320px;
             position: absolute;
             bottom: 0;
             left: 0;
-            right: 0;
+            width: 100%;
             pointer-events: none;
             z-index: 2;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
         }
 
-        .v-bar { flex: 1; height: 5px; border-radius: 3px; transition: 0.1s; opacity: 0.7; }
+        /* ULTRA THIN VISUALIZER BARS */
+        .v-bar { 
+            flex: 1; 
+            height: 5px; 
+            border-radius: 0px; 
+            transition: height 0.08s ease-out, opacity 0.1s ease; 
+            opacity: 0.4; 
+        }
 
         .overlay-ui {
             position: absolute;
@@ -311,7 +322,8 @@
 
 <div class="feed">
     {% for post in posts %}
-    {% if post.user.id not in request.user.profile.blocked_users.all|dictsort:"id" %}
+    {# FIXED: We check against the list of IDs passed from views.py. This is break-proof. #}
+    {% if post.user.id not in my_blocked_ids or post.user == request.user %}
     <div class="post" id="post-card-{{ post.id }}">
         <div class="post-header">
             <div class="user-meta">
@@ -327,6 +339,7 @@
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <a href="{% url 'profile' post.user.username %}" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
                             <b style="cursor: pointer; font-size: 15px;">{{ post.user.username }}</b>
+                            {# UPDATED: REMOVED VERIFIED TICK SPAN CONTAINER #}
                         </a>
                         
                         <span class="follower-badge" id="follower-count-{{ post.user.id }}">
@@ -397,11 +410,11 @@
             </div>
             <div class="action-item" title="Unique Players">
                 <span class="action-icon">🎧</span>
-                <span id="unique-listeners-{{post.id}}" class="action-value">{{ post.listeners_count }}</span>
+                <span id="unique-listeners-{{post.id}}" class="action-value">{{ post.listeners_count|default:"0" }}</span>
             </div>
             <div class="action-item" title="Total Replays">
                 <span class="action-icon">👂</span>
-                <span id="total-replays-{{post.id}}" class="action-value">{{ post.replays_count }}</span>
+                <span id="total-replays-{{post.id}}" class="action-value">{{ post.replays_count|default:"0" }}</span>
             </div>
             <div class="action-item" onclick="openShareMenu({{ post.id }}, '{{ request.build_absolute_uri }}')" title="Share">
                 <span class="action-icon">📤</span>
@@ -445,7 +458,6 @@
         return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
     }
 
-    // Helper to format time into MM:SS
     function formatTime(secs) {
         if (isNaN(secs)) return "00:00";
         const m = Math.floor(secs / 60).toString().padStart(2, '0');
@@ -453,7 +465,6 @@
         return `${m}:${s}`;
     }
 
-    // New configuration to display total metadata duration when audio structure loads
     function initDuration(id) {
         const audio = document.getElementById("audio" + id);
         const timeStamp = document.getElementById("time" + id);
@@ -496,7 +507,7 @@
         const fill = document.getElementById("fill" + id);
         if (fill) fill.style.width = "0%";
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-        bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
+        bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.4"; });
         
         const audio = document.getElementById("audio" + id);
         const timeStamp = document.getElementById("time" + id);
@@ -505,7 +516,6 @@
         }
     }
 
-    // NEW: Stop all other audio tracks when a new one starts
     function stopAllOtherAudio(currentId) {
         const allAudios = document.querySelectorAll('audio');
         allAudios.forEach(audio => {
@@ -524,21 +534,23 @@
         let listenerSpan = document.getElementById(`unique-listeners-${id}`);
 
         if (audio.paused) {
-            // STOP any other playing audio before starting this one
             stopAllOtherAudio(id);
             
-            audio.play();
-            btn.innerHTML = "⏸";
-            fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-            .then(r => r.json()).then(d => {
-                if (d.total_plays !== undefined) replaySpan.innerText = d.total_plays; 
-                if (d.unique_listeners !== undefined) listenerSpan.innerText = d.unique_listeners;
-            });
+            audio.play().then(() => {
+                btn.innerHTML = "⏸";
+                fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+                .then(r => r.json()).then(d => {
+                    if (d.total_plays !== undefined) replaySpan.innerText = d.total_plays; 
+                    if (d.unique_listeners !== undefined) listenerSpan.innerText = d.unique_listeners;
+                })
+                .catch(err => console.error("Metrics increment error:", err));
+            }).catch(err => console.error("Playback delivery blocked:", err));
+
         } else {
             audio.pause();
             btn.innerHTML = "▶";
             const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-            bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.3"; });
+            bars.forEach(bar => { bar.style.height = "5px"; bar.style.opacity = "0.4"; });
         }
     }
 
@@ -561,9 +573,16 @@
         .then(() => document.getElementById(`post-card-${id}`).remove());
     }
 
-    const vizColors = ['#00a86b', 'rgba(0,168,107,0.5)', '#3498db', '#f1c40f', '#9b59b6', '#e67e22', '#795548', '#e91e63'];
+    // EXACT 15-COLOR LUXURY DESIGN GRADIENT ARRAY
+    const vizColors = [
+        '#00a86b', '#007bff', '#ff007f', '#7b2cbf', '#ffbe0b', 
+        '#fb5607', '#ff006e', '#8338ec', '#3a86ff', '#4cc9f0', 
+        '#f72585', '#7209b7', '#3d5a80', '#ee6c4d', '#06d6a0'
+    ];
+    
+    // UPDATED: Spans 100% full container density using clean, dense edge-to-edge wave items
     document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 45; i++) {
+        for(let i=0; i < 180; i++) {
             let bar = document.createElement("div");
             bar.className = "v-bar";
             bar.style.backgroundColor = vizColors[i % vizColors.length];

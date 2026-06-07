@@ -42,6 +42,7 @@ urlpatterns += i18n_patterns(
     path('', views.home_view, name='home'),
 
     path('feed/', views.posts_feed, name='feed'),
+    path('verify/', views.verify_email_view, name='verify_email'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     path('niche-selection/', views.niche_selection, name='niche_selection'),
@@ -56,19 +57,17 @@ urlpatterns += i18n_patterns(
     path('profile/<str:username>/following/', views.following_list, name='following_list'),
 
     # POSTS
+    # ✅ Restoring your exact standard text comment like route:
+    path('comment/<int:comment_id>/like/', views.like_comment, name='like-comment'),
     path('post/<int:pk>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
     path('create_post/', views.create_post, name='create_post'),
     path('delete-post/<int:id>/', views.delete_post, name='delete_post'),
     path('like-post/<int:post_id>/', views.like_post, name='like_post'),
-
     path('comment/<int:comment_id>/like/', views.like_comment, name='like_comment'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
-
-    # TRACKING
-    path('record-replay/<int:post_id>/', views.record_replay, name='record_replay'),
-    path('record-listener/<int:post_id>/', views.record_listener, name='record_listener'),
-    path('track-listener/<int:post_id>/', views.track_listener),
+    
+    path('track-listener/<int:post_id>/', views.track_listener, name='track_listener'),
 
     # NOTIFICATIONS
     path('notifications/', views.notifications, name='notifications'),
@@ -77,19 +76,9 @@ urlpatterns += i18n_patterns(
     path('search/', views.search, name='search'),
 
    
-    path("audio-feed/", views.audio_call_feed, name="audio_feed"),
-    path("start-audio-call/", views.start_audio_call, name="start_audio_call"),
-    path("like-audio-call/<int:post_id>/", views.like_audio_call, name="like_audio_call"),
-    path("track-audio-listener/<int:post_id>/", views.track_listener, name="track_listener"),
-    path("delete-audio-call/<int:post_id>/", views.delete_audio_call, name="delete_audio_call"),
 
-    path("call/", views.call_page, name="call"),
-    path("user-search/", views.user_search, name="user_search"),
-    path("save-call/", views.save_call, name="save_call"),
-    path("post-call/", views.post_call, name="post_call"),
-    path("call/accept/<int:call_id>/", views.accept_call, name="accept_call"),
-    path("call/decline/<int:call_id>/", views.decline_call, name="decline_call"),
-    
+
+
     # SETTINGS
     path('settings/', views.settings_view, name='settings'),
     path('settings/accounts/', views.delete_account, name='delete_account'),

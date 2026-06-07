@@ -56,22 +56,3 @@ class ProfileForm(forms.ModelForm):
 
 
         # forms.py
-
-from django import forms
-from .models import AudioCallPost
-
-
-class AudioCallPostForm(forms.ModelForm):
-
-    class Meta:
-        model = AudioCallPost
-
-        fields = [
-            'heading',
-            'description',
-            'audio_file',
-            'cover_image',
-            'cover_video',
-            'background_music',
-            'duration_minutes',
-        ]

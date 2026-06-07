@@ -1,6 +1,12 @@
+# Python environment and cache
 venv/
 *.pyc
 __pycache__/
+
+# Local database and environment secrets
 db.sqlite3
 .env
+
+# Generated static and media assets
 staticfiles/
+media/

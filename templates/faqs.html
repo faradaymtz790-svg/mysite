@@ -3,125 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>plugbar| Help Center</title>
+    <title>Help Center & FAQs | Zeed</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gill+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary-green: #00a86b;
-            --dark-green: #006b45;
-            --light-bg: #f4fff9;
-            --glass-bg: rgba(255, 255, 255, 0.9);
+            --primary-green: #15803d;
+            --light-green: #22c55e;
+            --glass-bg: rgba(255, 255, 255, 0.94);
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --border-green: rgba(34, 197, 94, 0.2);
+            --card-hover-bg: #f0fdf4;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(160deg, #eaffea 0%, #ffffff 100%);
-            color: #333;
-            line-height: 1.6;
+            padding: 0;
+            font-family: "Gill Sans", sans-serif;
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(248,250,252,1) 20%, 
+                rgba(34, 197, 94, 0.12) 60%, 
+                rgba(21, 128, 61, 0.3) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 0;
         }
 
-        .faq-wrapper {
-            max-width: 800px;
-            margin: 80px auto;
-            padding: 0 20px;
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .faq-header {
+        .faq-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            padding: 60px 50px;
+            border-radius: 40px;
+            width: 95vw; 
+            max-width: 900px; 
+            box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: floatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .header-section {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 45px;
         }
 
-        .faq-header h1 {
-            font-size: 36px;
-            color: var(--dark-green);
-            margin-bottom: 10px;
+        .brand-logo-text {
+            font-family: 'Great Vibes', cursive;
+            font-size: 90px;
+            font-weight: 400;
+            color: var(--text-dark);
+            margin: 0;
+            transform: rotate(-1deg);
+            line-height: 0.9;
         }
 
-        .faq-header p {
-            color: #666;
-            font-size: 18px;
+        .subtitle {
+            font-size: 24px;
+            color: var(--primary-green);
+            font-weight: 700;
+            margin-top: 10px;
+            letter-spacing: -0.5px;
         }
 
-        /* SEARCH BAR MOCKUP - Good for UI */
+        .tagline {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        /* SEARCH INTERFACE */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
         .faq-search {
             width: 100%;
-            padding: 15px 25px;
-            border-radius: 30px;
-            border: 2px solid #e0e0e0;
-            margin-bottom: 40px;
-            font-size: 16px;
+            padding: 18px 25px;
+            border-radius: 50px;
+            border: 2px solid var(--border-green);
+            background: white;
+            font-size: 17px;
+            font-family: "Gill Sans", sans-serif;
+            color: var(--text-dark);
             outline: none;
-            transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02);
         }
 
         .faq-search:focus {
-            border-color: var(--primary-green);
-            box-shadow: 0 0 10px rgba(0, 168, 107, 0.1);
+            border-color: var(--light-green);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.12);
         }
 
-        /* FAQ ITEM */
+        /* FAQ ACCORDION PATTERN */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
         .faq-item {
-            background: var(--glass-bg);
-            border: 1px solid rgba(0, 168, 107, 0.1);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            background: white;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
         }
 
         .faq-item:hover {
-            border-color: var(--primary-green);
+            border-color: var(--border-green);
             transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 12px 20px rgba(21, 128, 61, 0.05);
         }
 
         .faq-question {
-            padding: 20px 25px;
+            padding: 22px 30px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: 600;
-            font-size: 17px;
-            color: var(--dark-green);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-dark);
             user-select: none;
         }
 
+        html[dir="rtl"] .faq-question {
+            text-align: right;
+        }
+
         .faq-icon {
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 168, 107, 0.1);
+            width: 28px;
+            height: 28px;
+            background: rgba(21, 128, 61, 0.06);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            transition: 0.4s;
+            font-size: 11px;
             color: var(--primary-green);
+            flex-shrink: 0;
         }
 
         .faq-answer {
             max-height: 0;
             overflow: hidden;
-            transition: all 0.4s ease;
-            padding: 0 25px;
-            color: #555;
-            font-size: 15px;
-            border-top: 1px solid transparent;
+            padding: 0 30px;
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.7;
+            text-align: justify;
         }
 
-        /* ACTIVE STATE */
+        /* OPEN ACCORDION STATE */
         .faq-item.active {
-            border-color: var(--primary-green);
-            background: #fff;
+            border-color: var(--border-green);
+            background: white;
         }
 
         .faq-item.active .faq-answer {
-            max-height: 300px;
-            padding-bottom: 20px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0, 168, 107, 0.05);
+            max-height: 500px; /* Accommodates long paragraphs safely */
+            padding-bottom: 25px;
+            padding-top: 5px;
         }
 
         .faq-item.active .faq-icon {
@@ -130,110 +189,199 @@
             transform: rotate(180deg);
         }
 
-        .support-footer {
+        /* EMPTY SEARCH STATE */
+        .no-results {
+            display: none;
             text-align: center;
-            margin-top: 40px;
-            font-size: 14px;
-            color: #888;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 600;
+            background: white;
+            border-radius: 20px;
+            border: 1px dashed var(--border-green);
         }
 
-        .support-footer a {
-            color: var(--primary-green);
+        /* SUPPORT PLATFORM FOOTER */
+        .support-footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-green);
+        }
+
+        .support-footer p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--primary-green), #166534);
+            color: white;
             text-decoration: none;
-            font-weight: bold;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 10px 25px rgba(21, 128, 61, 0.2);
+        }
+
+        .btn-action:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(21, 128, 61, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .faq-container { padding: 40px 25px; border-radius: 30px; }
+            .brand-logo-text { font-size: 70px; }
+            .subtitle { font-size: 20px; }
+            .faq-question { padding: 18px 20px; font-size: 16px; }
+            .faq-answer { padding: 0 20px; font-size: 15px; }
+            .faq-item.active .faq-answer { padding-bottom: 20px; }
         }
     </style>
 </head>
 <body>
 
-<div class="faq-wrapper">
-    <div class="faq-header">
-        <h1>Help Center</h1>
-        <p>Everything you need to know about plugbar</p>
+<div class="faq-container">
+    
+    <!-- BRAND HEADER OVERVIEW -->
+    <div class="header-section">
+        <h1 class="brand-logo-text">Zeed</h1>
+        <div class="subtitle">Knowledge Base &amp; Help Center</div>
+        <div class="tagline">Explore architecture features, media processing documentation, and system configurations.</div>
     </div>
 
-    <input type="text" class="faq-search" placeholder="Search for a question..." id="faqSearch">
-
-    <div id="faqList">
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                How does the audio visualizer work?
-                <div class="faq-icon">▼</div>
-            </div>
-            <div class="faq-answer">
-                Our dynamic visualizer analyzes the audio frequencies in real-time as you play a track. The green bars will bounce and dance according to the beat of the music or voice recording!
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                Who can see my audio posts?
-                <div class="faq-icon">▼</div>
-            </div>
-            <div class="faq-answer">
-                By default, your posts are visible to everyone on the feed. You can gain followers who will see your latest audio stories directly on their home page.
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                What audio formats are supported?
-                <div class="faq-icon">▼</div>
-            </div>
-            <div class="faq-answer">
-                We currently support MP3, WAV, and M4A formats. For the best experience, we recommend uploading high-quality MP3 files under 20MB.
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                How do I get my posts trending?
-                <div class="faq-icon">▼</div>
-            </div>
-            <div class="faq-answer">
-                Posts with more "Likes" and "Comments" move higher up the global feed. Engaging with other creators is the best way to grow your audience!
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                I'm seeing a "No such column" error. What do I do?
-                <div class="faq-icon">▼</div>
-            </div>
-            <div class="faq-answer">
-                This usually happens during our platform updates. Try logging out and back in, or contact support if the issue persists in your profile settings.
-            </div>
-        </div>
+    <!-- LIVE SEARCH DESK -->
+    <div class="search-wrapper">
+        <input type="text" class="faq-search" placeholder="Type keywords (e.g., formats, WebRTC, calls, verification)..." id="faqSearch">
     </div>
 
+    <!-- FAQ MAIN ACCORDION WRAPPER -->
+    <div id="faqList" class="faq-list">
+        
+        <!-- MODULE 1 -->
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How does the real-time audio visualizer operate?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                Our dynamic audio engine reads files and streams using the Web Audio API. It performs real-time Fast Fourier Transform (FFT) analysis to extract current amplitude levels across distinct frequency bins. These mathematical evaluations generate the precise responsive grid layouts seen in your feed templates, tracking variations cleanly with minimal rendering overhead.
+            </div>
+        </div>
+
+        <!-- MODULE 2 -->
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                Who holds permissions to listen to my uploaded audio distributions?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                By default, distributions are pushed to the global open network feed layout. Any authenticated operator navigating the system can play your recordings, interact with the engagement panels, or follow your profile. Your structured updates are broadcast cleanly to all subscribers through an internal following database grid mapping system.
+            </div>
+        </div>
+
+        <!-- MODULE 3 -->
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What target file extensions and container sizes are supported?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                The ingestion architecture currently processes raw audio packed into MP3, WAV, or M4A containers. For optimal processing rates and server-side data preservation, we suggest deploying structured MP3 configurations limited to a maximum file size threshold of 20MB per transmission.
+            </div>
+        </div>
+
+        <!-- MODULE 4 -->
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How are voice metrics computed to compile trending feeds?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                The discovery sorting algorithm calculates tracking indexes by aggregating real-time symmetric engagement data. Posts that pull high interaction logs—specifically calculated through active post likes and sequential spoken text commentary modules—are automatically prioritized in global visibility queues across our communication interfaces.
+            </div>
+        </div>
+
+        <!-- MODULE 5 -->
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                How are peer-to-peer real-time voice calls secured on the app?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                All voice calls executed through our interface utilize custom WebRTC infrastructure layers. Connection pipelines utilize Secure Real-time Transport Protocol (SRTP) matrices, ensuring interactive metadata, communication tokens, and real-time streams are fully encrypted point-to-point and safe from network extraction methods.
+            </div>
+        </div>
+
+        <!-- MODULE 6 -->
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+                What should I do if my view displays a schema sync or profile update error?
+                <div class="faq-icon">▼</div>
+            </div>
+            <div class="faq-answer">
+                If structural alterations are implemented during automated codebase updates, your local interface state might conflict with network definitions. Purging active terminal tracking configurations, executing a clean profile logout statement, or performing an administrative cache reset inside your mobile app settings will normalize the view logic instantly.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FALLBACK ERROR SEARCH DISPLAY -->
+    <div id="noResults" class="no-results">
+        No matched architecture records or documentation entries found for your query. Try searching alternative support terms.
+    </div>
+
+    <!-- ACTION REDIRECT GRID -->
     <div class="support-footer">
-        Still have questions? <a href="{% url 'help' %}">Contact Support</a>
+        <p>Encountering a technical challenge not covered in our documentation metrics?</p>
+        <a href="{% url 'home' %}" class="btn-action">Return to System Home</a>
     </div>
+
 </div>
 
 <script>
+    // ACCORDION TOGGLE INTERACTION LOGIC
     function toggleFAQ(el) {
         const item = el.parentElement;
         const isActive = item.classList.contains('active');
         
-        // Close all other FAQs first (Accordion effect)
+        // Terminate active states across sibling elements to preserve scannability
         document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
         
-        // If it wasn't active, open it
+        // Append active status conditional flags
         if (!isActive) {
             item.classList.add('active');
         }
     }
 
-    // Basic search functionality
+    // MULTI-KEYWORD CONTENT FILTER LOGIC
     document.getElementById('faqSearch').addEventListener('keyup', function() {
-        let filter = this.value.toLowerCase();
-        let items = document.querySelectorAll('.faq-item');
+        const filter = this.value.toLowerCase().trim();
+        const items = document.querySelectorAll('.faq-item');
+        const noResults = document.getElementById('noResults');
+        let visibleCount = 0;
         
         items.forEach(item => {
-            let text = item.innerText.toLowerCase();
-            item.style.display = text.includes(filter) ? '' : 'none';
+            const textContent = item.textContent.toLowerCase();
+            if (textContent.includes(filter)) {
+                item.style.display = '';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+                item.classList.remove('active'); // Close hidden panels safely
+            }
         });
+
+        // Trigger visibility adjustments for missing records text block
+        if (visibleCount === 0 && filter.length > 0) {
+            noResults.style.display = 'block';
+        } else {
+            noResults.style.display = 'none';
+        }
     });
 </script>
 

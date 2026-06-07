@@ -2,11 +2,14 @@ import os
 from pathlib import Path
 import dj_database_url
 
-# BASE_DIR should point to the root (where manage.py is)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# -------------------------
+# SECURITY
+# -------------------------
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
-DEBUG = os.environ.get('DEBUG', 'False') == 'True' #was true here
+
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -14,42 +17,57 @@ CSRF_TRUSTED_ORIGINS = [
     "https://mysite-1-jhw2.onrender.com"
 ]
 
+# -------------------------
+# APPS
+# -------------------------
 INSTALLED_APPS = [
-    'cloudinary_storage', # Must be at the top
+    # Cloudinary (keep installed but safe)
+    'cloudinary_storage',
+    'cloudinary',
+
+    # Django core
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary', # Required for Cloudinary storage to work
     'django.contrib.staticfiles',
-    
-    # Third-party
+
+    # Third party
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'rosetta',
     'whitenoise.runserver_nostatic',
-    
-    # Your Apps
+
+    # Your app
     'core',
 ]
 
+# -------------------------
+# MIDDLEWARE
+# -------------------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',  # Required before Locale
-    'django.middleware.locale.LocaleMiddleware',            # <--- ADD THIS HERE
+
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
 
+# -------------------------
+# TEMPLATES
+# -------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -68,9 +86,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# -------------------------
 # DATABASE
-# DATABASE
-# This will automatically use the Postgres URL on Render
+# -------------------------
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -78,40 +96,69 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
-# AUTHENTICATION
+
+# -------------------------
+# AUTH
+# -------------------------
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
 SITE_ID = 1
+
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
-# STATIC & MEDIA
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
+# -------------------------
+# STATIC FILES
+# -------------------------
 STATIC_URL = '/static/'
-
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# -------------------------
+# MEDIA (FIXED PROPERLY)
+# -------------------------
 
-# Ensure this is also set to tell Django to use Cloudinary for media
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+if DEBUG:
+    # LOCAL DEVELOPMENT (NO CLOUDINARY)
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+else:
+    # PRODUCTION (CLOUDINARY ONLY IF KEYS EXIST)
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    'SECURE': True,
-    'RESOURCE_TYPE': 'auto',  # 🔥 IMPORTANT: fixes audio/video issues
-}
+CLOUDINARY_CREDENTIALS_OK = all([
+    os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    os.environ.get("CLOUDINARY_API_KEY"),
+    os.environ.get("CLOUDINARY_API_SECRET"),
+])
 
+if CLOUDINARY_CREDENTIALS_OK:
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+        "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+        "SECURE": True,
+    }
 
-# LANGUAGES
+# -------------------------
+# INTERNATIONALIZATION
+# -------------------------
 LANGUAGE_CODE = 'en'
 USE_I18N = False
 USE_L10N = True
@@ -134,42 +181,42 @@ LANGUAGES = [
     ('de', _('German')),
 ]
 
-LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'locale/'),
-]
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale/')]
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-
-# settings.py
-
-LANGUAGE_COOKIE_NAME = 'django_language'
-LANGUAGE_COOKIE_AGE = 31536000  # 1 year in seconds
-LANGUAGE_COOKIE_PATH = '/'      # Makes it available across the whole site
-LANGUAGE_COOKIE_SAMESITE = 'Lax'
-
-
-
-
-
-# Update these lines to remove the deprecation warnings:
-ACCOUNT_LOGIN_METHODS = {'username', 'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
-
-# Keep your other existing allauth settings here
-ACCOUNT_EMAIL_VERIFICATION = 'none' 
-# ... etc
-
-
+# -------------------------
+# SESSIONS (FIX FOR LOCAL)
+# -------------------------
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Render / HTTPS settings
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Security cookies only in production
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+else:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
 
-# Secure cookies in production
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# config/settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.resend.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Leave this exactly as 'resend'
+EMAIL_HOST_USER = 'resend'
+
+# Paste your copied key here
+EMAIL_HOST_PASSWORD = 're_H5RVLsgF_9ekUxpXCP4BwyBLSEsmt3F4P'
+
+# Use the default Resend onboarding email for testing
+DEFAULT_FROM_EMAIL = 'Zeed App <onboarding@resend.dev>'
+# config/settings.py
+
+# Point Allauth directly to your custom template name and location
+ACCOUNT_HTML_EMAIL_TEMPLATE = 'email_verify.html'

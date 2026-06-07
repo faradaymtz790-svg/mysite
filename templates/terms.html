@@ -3,274 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>plugbar | Terms of Service</title>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Terms of Service | Zeed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Matching your Profile/Signup Dark Palette */
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --accent-blue: #00f2fe; 
-            --text-main: #ffffff;
-            --bg-dark: #0f172a; /* Deep Slate/Navy */
+            --brand-green: #00a86b;
+            --dark-green: #1b4332;
+            --light-green: #f4fbf7;
         }
 
         body {
             margin: 0;
-            padding: 0;
             font-family: 'Inter', sans-serif;
-            /* Using the specific gradient from your Profile/Signup theme */
-            background: linear-gradient(135deg, #1e3a8a 0%, #6366f1 50%, #a855f7 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-main);
-            padding: 40px 20px;
-        }
-
-        /* Abstract blobs to give depth to the dark theme */
-        .bg-blobs {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            background-color: var(--bg-dark); /* Base layer for richness */
-        }
-        .blob {
-            position: absolute;
-            filter: blur(100px);
-            border-radius: 50%;
-            opacity: 0.4;
+            background-color: var(--light-green);
+            color: #334155;
+            line-height: 1.8;
+            padding: 40px 0;
         }
 
         .container {
-            max-width: 800px;
-            width: 100%;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-            border-radius: 24px;
-            padding: 60px 40px;
-            box-sizing: border-box;
-            animation: fadeIn 0.8s ease-out;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        header h1 {
+        .logo-header {
             font-family: 'Great Vibes', cursive;
-            font-size: 4rem;
-            margin: 0;
-            /* Gradient text matching your logo style */
-            background: linear-gradient(to right, #ffffff, var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--brand-green);
+            font-size: 50px;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
-        .subtitle {
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            opacity: 0.5;
-            margin-top: 5px;
-            color: var(--text-main);
+        .policy-card {
+            background: white;
+            padding: 60px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 168, 107, 0.08);
+            border: 1px solid #e1eee7;
         }
 
-        /* Rule Summary Box */
-        .summary-card {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--glass-border);
+        h1 { color: var(--dark-green); font-size: 32px; margin-bottom: 5px; margin-top: 0; }
+        h2 { color: var(--dark-green); font-size: 22px; margin-top: 35px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+        
+        .date-badge {
+            background: var(--light-green);
+            color: var(--brand-green);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .summary-box {
+            background: #f1fff9;
+            border: 1px solid #dcfce7;
             border-radius: 16px;
             padding: 25px;
             margin-bottom: 40px;
         }
 
-        .summary-card h2 {
-            font-size: 0.9rem;
+        .summary-box h2 {
+            font-size: 14px;
             margin-top: 0;
-            margin-bottom: 20px;
-            color: var(--accent-blue);
+            margin-bottom: 15px;
+            color: var(--brand-green);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            font-size: 0.9rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
         }
 
         .grid-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dark-green);
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-weight: 300;
+            gap: 8px;
         }
 
-        /* Content Sections */
-        section {
-            margin-bottom: 45px;
+        h3 { 
+            color: var(--brand-green); 
+            font-size: 20px; 
+            margin-top: 40px; 
+            display: flex; 
+            align-items: center; 
+            font-weight: 700;
+        }
+        
+        html[dir="ltr"] h3::before { content: "•"; margin-right: 10px; }
+        html[dir="rtl"] h3::after { content: "•"; margin-left: 10px; }
+
+        section p {
+            margin-bottom: 15px;
+            text-align: justify;
         }
 
-        h3 {
-            font-size: 1.3rem;
-            margin-bottom: 18px;
-            color: var(--accent-blue);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-weight: 600;
+        ul { padding-left: 20px; list-style: none; }
+        li { 
+            margin-bottom: 12px; 
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        html[dir="rtl"] ul { padding-right: 20px; padding-left: 0; }
+        html[dir="rtl"] li { padding-right: 15px; padding-left: 0; }
+        
+        html[dir="ltr"] li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--brand-green);
+            font-weight: bold;
+        }
+        
+        html[dir="rtl"] li::before {
+            content: "←";
+            position: absolute;
+            right: 0;
+            color: var(--brand-green);
+            font-weight: bold;
         }
 
-        h3::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: rgba(255,255,255,0.1);
-        }
-
-        p {
-            opacity: 0.8;
-            line-height: 1.8;
-            font-weight: 300;
-            font-size: 1rem;
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;
-            margin-top: 20px;
-        }
-
-        li {
-            padding: 12px 18px;
-            margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            border-left: 3px solid var(--accent-blue);
-            font-size: 0.95rem;
-            font-weight: 300;
-            transition: background 0.3s;
-        }
-
-        li:hover {
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        a {
-            color: var(--accent-blue);
-            text-decoration: none;
-            transition: 0.3s;
-            border-bottom: 1px solid transparent;
-        }
-
-        a:hover {
-            border-bottom: 1px solid var(--accent-blue);
-        }
-
-        /* Button styled like your Profile Edit/Save buttons */
-        .footer {
+        .footer-nav {
             text-align: center;
-            margin-top: 50px;
+            margin-top: 40px;
         }
 
         .btn-back {
-            background: white;
-            color: #6366f1;
-            padding: 14px 40px;
+            background: var(--brand-green);
+            color: white;
+            padding: 12px 30px;
             border-radius: 50px;
             text-decoration: none;
-            font-weight: 700;
+            font-weight: 600;
+            transition: 0.3s;
             display: inline-block;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .btn-back:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            background: var(--accent-blue);
-            color: #1e3a8a;
+            background: var(--dark-green);
+            transform: translateY(-2px);
         }
 
         @media (max-width: 600px) {
-            .container { padding: 40px 20px; border-radius: 0; }
-            header h1 { font-size: 3rem; }
+            .policy-card { padding: 35px 20px; }
+            .logo-header { font-size: 40px; }
         }
     </style>
 </head>
 <body>
 
-<div class="bg-blobs">
-    <div class="blob" style="width: 500px; height: 500px; top: -100px; right: -100px; background: #4f46e5;"></div>
-    <div class="blob" style="width: 400px; height: 400px; bottom: -50px; left: -50px; background: #a855f7;"></div>
-</div>
-
 <div class="container">
-    <header>
-        <h1>plugbar</h1>
-        <p class="subtitle">Terms of Service • April 2026</p>
-    </header>
+    <div class="logo-header">zeed</div>
 
-    <div class="summary-card">
-        <h2>The Core Rules</h2>
-        <div class="summary-grid">
-            <div class="grid-item"><span>✅</span> Ownership stays yours</div>
-            <div class="grid-item"><span>✅</span> Mutual respect</div>
-            <div class="grid-item"><span>✖</span> No copyright abuse</div>
-            <div class="grid-item"><span>✖</span> No botting/spam</div>
+    <div class="policy-card">
+        <h1>Terms of Service</h1>
+        <p class="date-badge">Last Revised: June 05, 2026</p>
+
+        <div class="summary-box">
+            <h2>The Core Rules</h2>
+            <div class="summary-grid">
+                <div class="grid-item">✅ Ownership stays yours</div>
+                <div class="grid-item">✅ Mutual respect required</div>
+                <div class="grid-item">✖ No copyright infringement</div>
+                <div class="grid-item">✖ No botting or spam</div>
+            </div>
         </div>
-    </div>
 
-    <section>
-        <h3>1. The Mission</h3>
-        <p>By entering plugbar, you join a community built for audio storytelling. These terms represent the agreement between you and our platform.</p>
-    </section>
+        <p>Welcome to <strong>zeed</strong> (referred to herein as "the App", "Platform", "we", "us", or "our"). These Terms of Service constitute a binding legal agreement between you and Zeed governing your access to and interactive usage of our mobile applications, system interfaces, real-time audio calling nodes, and media feeds.</p>
+        
+        <p>Please read these terms comprehensively. By interacting with the Platform, building an account profile, or distributing data within our environment, you signify that you have read, understood, and unconditionally accepted the contractual expectations outlined herein.</p>
 
-    <section>
-        <h3>2. Ownership</h3>
-        <p>Your audio, titles, and images remain yours. By posting, you grant plugbar a non-exclusive license to host and display your work to the community.</p>
-    </section>
+        <section>
+            <h3>1. Contractual Acceptance &amp; Onboarding Eligibility</h3>
+            <p>Access to Zeed is contingent on complete adherence to these Terms. If you do not accept these parameters, you are explicitly prohibited from downloading, accessing, or maintaining active data directories inside our environment. By validating your information through our identity processes, you declare that you are at least 13 years of age. If you are under the legal age of majority in your jurisdiction, you represent that you possess explicit parental or legal guardian consent to interact with this platform.</p>
+        </section>
 
-    <section>
-        <h3>3. Standards</h3>
-        <p>To keep the platform safe, we strictly prohibit:</p>
-        <ul>
-            <li>Unauthorized use of copyrighted audio.</li>
-            <li>Harassment or defamatory content.</li>
-            <li>Automated botting for Likes/Follows.</li>
-            <li>Malicious scripts or spam.</li>
-        </ul>
-    </section>
+        <section>
+            <h3>2. Account Maintenance, Authentication, &amp; Security Measures</h3>
+            <p>To use full-scope features ($e.g.$, deploying rich media posts, engaging with audio feeds, or participating in calls), you must construct an integrated platform account profile. You agree to maintain accurate information profiles and are fully bound to the following terms:</p>
+            <ul>
+                <li><strong>Credential Confidentiality:</strong> You are fully responsible for maintaining the privacy of your account handles, session records, passwords, and dynamic multi-factor One-Time Password (OTP) verification keys.</li>
+                <li><strong>Operational Actions Liability:</strong> You accept complete legal and operational liability for any and all behaviors, text posts, data packets, or calls executed under your assigned login identification keys.</li>
+                <li><strong>Breach Communications:</strong> You agree to immediately contact our security helpdesk upon detecting or reasonably suspecting a breach of security, data leak, or unauthorized access to your account profile.</li>
+            </ul>
+        </section>
 
-    <section>
-        <h3>4. Disclaimers</h3>
-        <p>plugbar is provided "as is." We are not responsible for device-specific playback errors or temporary downtime as we scale.</p>
-    </section>
+        <section>
+            <h3>3. Intellectual Property Rights &amp; Media Licensing Frameworks</h3>
+            <p>Our operational architecture balances developer protections with absolute creator ownership:</p>
+            <ul>
+                <li><strong>User-Generated Content Ownership:</strong> You retain complete and total ownership rights over all user-generated content assets you compile or upload ($e.g.$, audio stories, spoken voice statuses, video logs, descriptive imagery, and comments). Zeed does not claim proprietary stakes over your creative files.</li>
+                <li><strong>Platform Usage License:</strong> By publishing or broadcasting content files through our public feeds, you grant Zeed a global, non-exclusive, royalty-free, transferable license to distribute, securely cache, stream, parse, host, digitally display, and transmit your assets solely to run, optimize, and maintain our active social infrastructure. This operational license automatically terminates for a specific file when you choose to delete that asset.</li>
+                <li><strong>Proprietary Application Rights:</strong> The native application layouts, programmatic source code, underlying logic checks, security mechanisms ($e.g.$, honeypots, rate-limit logs), visual user-interface designs, logos, and trademarks remain the exclusive intellectual property of Zeed.</li>
+            </ul>
+        </section>
 
-    <section>
-        <h3>5. Support</h3>
-        <p>Questions? <a href="{% url 'help' %}">Visit the Help Center</a> or contact our team for assistance.</p>
-    </section>
+        <section>
+            <h3>4. Strict Parameters of Prohibited Platform Misuse</h3>
+            <p>To maintain a safe community environment and comply with Google Play Program Standards, you explicitly promise not to participate in the following harmful actions:</p>
+            <ul>
+                <li><strong>Copyright Infringement:</strong> You may not upload, record, or distribute media elements that feature unauthorized musical tracking, copyrighted film footage, or proprietary corporate intellectual property without legal permission.</li>
+                <li><strong>Automated Manipulation &amp; Exploit Injectors:</strong> You are barred from launching scripts, bots, spiders, scrapers, or credential-stuffing suites against our endpoints. Circumventing login checks, timing defenses, or honeypot fields is treated as a severe security violation.</li>
+                <li><strong>Decompilation and Engineering Exploits:</strong> You agree not to attempt to decompile, reverse-engineer, or capture the baseline server source code powering our audio streams, WebRTC setups, or database endpoints.</li>
+                <li><strong>Platform Abuse and Malicious Assets:</strong> You may not transmit malware or distribute abusive content that harasses others, incites real-world harm, or encourages unlawful activities.</li>
+            </ul>
+        </section>
 
-    <div class="footer">
-        <a href="{% url 'feed' %}" class="btn-back">Return to Feed</a>
+        <section>
+            <h3>5. Proactive Content Moderation, Suspension, &amp; Deletion Protocols</em></h3>
+            <p>Zeed maintains structural moderation systems to keep our community safe and compliant with mobile market platforms:</p>
+            <ul>
+                <li><strong>Review Powers:</strong> We reserve the right to review, screen, filter, flags, or permanently remove user content updates that, in our sole discretion, violate these terms or present risk factors to our community.</li>
+                <li><strong>Account Sanctions and Termination:</strong> We reserve the right to suspend or permanently terminate your access privileges, or completely erase your registration block from our servers, without advance warning or financial liability, if you violate these terms or engage in behavior that harms the platform.</li>
+                <li><strong>User-Initiated Data Deletion:</strong> In complete compliance with user choice laws, you can wipe your information footprint by triggering an account deletion request within your settings panel. This removes your active assets within 30 days.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h3>6. Absolute Disclaimer of Warranties &amp; Limitation of Liability</h3>
+            <p>THE PLATFORM IS TRANSFERRED AND EXTENDED ON AN "AS IS" AND "AS AVAILABLE" STRUCTURAL BASIS WITHOUT WARRANTY INDEMNIFICATIONS OF ANY NATURE, EXPRESSED OR IMPLIED. ZEED AND ITS ASSOCIATED SUBPROCESSORS CANNOT GUARANTEE CONTINUOUS UNINTERRUPTED PLAYBACK, COMPLETE DATA RECOVERY IN SYSTEM DISASTERS, OR ERROR-FREE WebRTC TRANSMISSIONS BETWEEN CALLS.</p>
+            <p>TO THE MAXIMUM DURATION PERMITTED BY RELEVANT LEGISLATION, ZEED, ITS CORE CODING CONTRIBUTORS, DIRECTORS, AND UPSTREAM INFRASTRUCTURE PROVIDERS WILL NOT BE HELD RESPONSIBLE FOR SPECIAL, INDIRECT, INCIDENTAL, CONSEQUENTIAL, OR PUNITIVE LEGAL DAMAGES. THIS INCLUDES DATA LOSS, MONETARY DAMAGES, OR REPUTATIONAL ISSUES STEMMING FROM YOUR USE OF THE SERVICE.</p>
+        </section>
+
+        <section>
+            <h3>7. Updates to the Legal Framework</h3>
+            <p>We retain the absolute authority to adjust these Terms of Service periodically to match infrastructure additions or updated mobile market guidelines. We will alert users to major adjustments by updating the "Last Revised" date timestamp located at the head of this view. Your continued use of the platform following the publication of changes signifies your explicit agreement to follow the updated contract.</p>
+        </section>
+
+        <section>
+            <h3>8. Help Center Contact Details</h3>
+            <p>If you have any questions or concerns regarding these terms, please visit our <a href="{% url 'help' %}" style="color: var(--brand-green); font-weight: bold;">Help Center</a> to open an administrative support ticket.</p>
+        </section>
+
+        <div class="footer-nav">
+            <a href="{% url 'feed' %}" class="btn-back">Return to Feed</a>
+        </div>
     </div>
 </div>
 

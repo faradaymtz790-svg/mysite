@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us | Mysite</title>
+    <title>About Us | Zeed</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Gill+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -11,147 +11,217 @@
         :root {
             --primary-green: #15803d;
             --light-green: #22c55e;
-            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-bg: rgba(255, 255, 255, 0.92);
             --text-dark: #0f172a;
             --text-muted: #334155;
+            --border-green: rgba(34, 197, 94, 0.3);
+            --card-hover-bg: #f0fdf4;
         }
 
         * {
             box-sizing: border-box;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             margin: 0;
             padding: 0;
             font-family: "Gill Sans", sans-serif;
-            /* Signature Milky-to-Green Gradient */
             background: linear-gradient(180deg, 
                 rgba(255,255,255,1) 0%, 
-                rgba(248,250,252,1) 30%, 
-                rgba(34, 197, 94, 0.4) 50%, 
-                rgba(21, 128, 61, 0.7) 100%);
+                rgba(248,250,252,1) 20%, 
+                rgba(34, 197, 94, 0.15) 60%, 
+                rgba(21, 128, 61, 0.35) 100%);
             background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 40px 0;
+            padding: 60px 0;
         }
 
         @keyframes floatIn {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .container {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 50px 40px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            padding: 60px 50px;
             border-radius: 40px;
-            /* Wider UI matching niche/login pages */
             width: 95vw; 
-            max-width: 900px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            animation: floatIn 0.9s ease-out;
+            max-width: 950px; 
+            box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
         }
 
         .header-section {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         .logo {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            margin-bottom: 10px;
-            border: 3px solid white;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(21, 128, 61, 0.15);
         }
 
         h1 {
             font-family: 'Great Vibes', cursive;
-            font-size: 80px;
+            font-size: 85px;
             font-weight: 400;
             color: var(--text-dark);
             margin: 0;
-            transform: rotate(-2deg);
+            transform: rotate(-1deg);
             line-height: 1;
         }
 
         .subtitle {
-            font-size: 20px;
+            font-size: 22px;
             color: var(--primary-green);
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .corporate-badge {
+            display: inline-block;
+            background: rgba(21, 128, 61, 0.08);
+            color: var(--primary-green);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 30px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .content-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            text-align: left;
+            gap: 40px;
+            text-align: justify;
         }
 
         h3 {
-            color: var(--primary-green);
-            font-size: 22px;
+            color: var(--text-dark);
+            font-size: 24px;
             border-bottom: 2px solid var(--border-green);
-            display: inline-block;
-            margin-bottom: 15px;
+            display: block;
+            margin-top: 0;
+            margin-bottom: 18px;
+            padding-bottom: 6px;
+            font-weight: 700;
         }
 
         p {
             color: var(--text-muted);
             line-height: 1.8;
             font-size: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        .features-container {
+            margin-top: 40px;
         }
 
         .features-list {
-            background: rgba(255,255,255,0.5);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(34, 197, 94, 0.2);
+            background: rgba(255,255,255,0.6);
+            padding: 25px;
+            border-radius: 24px;
+            border: 1px solid var(--border-green);
             list-style: none;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 0;
         }
 
         .features-list li {
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 600;
             color: var(--text-dark);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .features-list li:hover {
+            transform: translateY(-3px);
+            background: var(--card-hover-bg);
+            box-shadow: 0 8px 15px rgba(34, 197, 94, 0.08);
+        }
+
+        .corporate-disclosure-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 30px;
+            margin-top: 40px;
+            text-align: left;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        html[dir="rtl"] .corporate-disclosure-box {
+            text-align: right;
+        }
+
+        .disclosure-item h4 {
+            margin: 0 0 5px 0;
+            color: var(--primary-green);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .disclosure-item p {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
         }
 
         .btn-back {
             display: inline-block;
-            margin-top: 30px;
-            padding: 15px 35px;
+            margin-top: 40px;
+            padding: 16px 45px;
             background: linear-gradient(135deg, var(--primary-green), #166534);
             color: white;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 700;
-            box-shadow: 0 10px 20px rgba(21, 128, 61, 0.3);
+            font-size: 16px;
+            box-shadow: 0 10px 25px rgba(21, 128, 61, 0.25);
         }
 
         .btn-back:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 25px rgba(21, 128, 61, 0.4);
+            transform: scale(1.03);
+            box-shadow: 0 15px 30px rgba(21, 128, 61, 0.35);
         }
 
         @media (max-width: 768px) {
-            .content-grid { grid-template-columns: 1fr; }
-            h1 { font-size: 60px; }
-            .container { padding: 30px 20px; }
+            .content-grid { grid-template-columns: 1fr; gap: 25px; }
+            h1 { font-size: 65px; }
+            .container { padding: 40px 25px; }
+            .features-list { grid-template-columns: 1fr 1fr; }
+            .corporate-disclosure-box { grid-template-columns: 1fr; padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
             .features-list { grid-template-columns: 1fr; }
         }
     </style>
@@ -160,51 +230,79 @@
 
 <div class="container">
     <div class="header-section">
-        <img src="/static/mylogo.png" class="logo" alt="Logo">
-        <h1>Plugbar</h1>
+        <img src="/static/mylogo.png" class="logo" alt="Zeed App Logo">
+        <h1>Zeed</h1>
         <div class="subtitle">Connecting voices through audio storytelling</div>
+        <div class="corporate-badge">Official Play Store Distribution Profile</div>
     </div>
 
     <div class="content-grid">
         <div class="left-col">
             <h3>Who We Are</h3>
             <p>
-                We are <strong>Plugbar LLC</strong>, a company incorporated in Delaware, USA, with a remote-first team and headquarters operating from Tanzania. We are building a new kind of social platform centered around audio — where voices matter more than visuals.
+                Zeed is a forward-thinking social ecosystem designed to prioritize audio communication. Operated by a global, remote-first development collective with our core operational hub in Tanzania, we work to build digital spaces that transcend regional borders. We aim to reshape digital connection by creating spaces where human expression relies on vocal timber rather than calculated imagery.
             </p>
 
             <h3>Our Mission</h3>
             <p>
-                To create a digital sanctuary where authenticity thrives. We believe the human voice carries emotions that text and images simply cannot capture.
+                Our mission is to build an inclusive digital sanctuary that celebrates authenticity. The human voice carries raw emotional nuances, truth, and depth that plain text files and filtered photographs fail to convey. Zeed empowers thinkers, artists, and creators to build real communities using real conversations.
             </p>
         </div>
 
         <div class="right-col">
             <h3>What We Do</h3>
             <p>
-                We are the first audio-focused social platform designed for real engagement. Share stories, interact with listeners, and discover human connection.
+                Zeed provides an ecosystem designed for high-fidelity audio sharing, real-time audio calls, and cross-border social feeds. Our software scales performance metrics intelligently to keep latency to a minimum, ensuring your audio distributions and live connections remain stable across varying network environments.
             </p>
 
-            <h3>Platform Features</h3>
-            <ul class="features-list">
-                <li>🎧 Audio Sharing</li>
-                <li>❤️ Engagement</li>
-                <li>💬 Conversations</li>
-                <li>👥 Follow System</li>
-                <li>🔔 Live Alerts</li>
-                <li>🎵 Length Tracking</li>
-                <li>📈 Replay Stats</li>
-                <li>🔍 Global Search</li>
-            </ul>
+            <h3>Data Ethics and Transparency</h3>
+            <p>
+                In compliance with strict international user-protection frameworks and Google Play guidelines, Zeed stands by an absolute promise: your private audio uploads, voice call details, and registration identifiers are never compiled, packaged, or sold to third-party data analytics firms. Your profile workspace is secure, and your creative output belongs entirely to you.
+            </p>
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 20px;">
-        <h3>Why Audio?</h3>
-        <p style="max-width: 700px; margin: 0 auto 30px;">
-            In a world of filtered photos and short-lived videos, audio brings back <strong>authenticity</strong>. It allows you to connect emotionally, multitask, and engage in a deeply personal way.
+    <div class="features-container" style="text-align: center;">
+        <h3>Core Architecture Modules</h3>
+        <ul class="features-list">
+            <li>🎧 High-Fidelity Streaming</li>
+            <li>❤️ Real-Time Engagement</li>
+            <li>💬 Spoken Comments</li>
+            <li>👥 Symmetric Following</li>
+            <li>🔔 Instant Alerts</li>
+            <li>🎵 Automated Length Tracking</li>
+            <li>📈 Replay Dashboard Data</li>
+            <li>🔍 Global Keyword Discovery</li>
+            <li>🔒 Encrypted WebRTC Calls</li>
+        </ul>
+    </div>
+
+    <div class="corporate-disclosure-box">
+        <div class="disclosure-item">
+            <h4>Platform Operator</h4>
+            <p>Zeed Global Initiative</p>
+        </div>
+        <div class="disclosure-item">
+            <h4>Operations Hub</h4>
+            <p>Tanzania</p>
+        </div>
+        <div class="disclosure-item">
+            <h4>Deployment Model</h4>
+            <p>Remote-First Decentralized Team</p>
+        </div>
+        <div class="disclosure-item">
+            <h4>Regulatory Support</h4>
+            <p>support@zeed.com</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <h3>Why Voice Over Visuals?</h3>
+        <p style="max-width: 750px; margin: 0 auto 10px;">
+            In an online landscape dominated by infinite scrolling and superficial layouts, vocal interactions bring back true **empathy and clarity**. Audio allows users to pick up on emotional subtext, multi-task naturally, and create profound social connections without screen fatigue.
         </p>
 
-        <a href="/" class="btn-back">Join the Conversation</a>
+        <a href="{% url 'home' %}" class="btn-back">Join the Conversation</a>
     </div>
 </div>
 

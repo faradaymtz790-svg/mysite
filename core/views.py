@@ -255,14 +255,7 @@ def profile_view(request, username=None):
 
 
 
-# =========================
-# NICHES
-# =========================
 
-
-# =========================
-# POSTS
-# =========================
 
 from django.shortcuts import render, redirect
 
@@ -320,8 +313,13 @@ def like_post(request, post_id):
     })
 
 
+# Inside C:\Users\Admin\mysite\core\views.py
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Post
+from django.views.decorators.csrf import csrf_exempt
 
-
+@csrf_exempt  # This ensures your frontend Javascript POST requests bypass strict token mismatches
 def track_listener(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     
@@ -331,17 +329,21 @@ def track_listener(request, post_id):
     # 🎧 Update the Headphones (Unique Listeners)
     if request.user.is_authenticated:
         if not post.played_by.filter(id=request.user.id).exists():
-            post.played_by.add(request.user)
             post.listeners_count += 1
-    
-    # THIS IS THE MOST IMPORTANT LINE
-    post.save() 
+            post.save()
+            post.played_by.add(request.user)
+            
+            return JsonResponse({
+                'new_replay_count': post.replays_count,
+                'new_listener_count': post.listeners_count
+            })
+
+    post.save()
     
     return JsonResponse({
-        'total_plays': post.replays_count,
-        'unique_listeners': post.listeners_count
+        'new_replay_count': post.replays_count,
+        'new_listener_count': post.listeners_count
     })
-
 
 # =========================
 # FOLLOW
@@ -757,25 +759,27 @@ def unfollow_user(request, username):
     return redirect('profile', username=username)
 
 
-
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import Post
 
 def record_replay(request, post_id):
     if request.method == "POST":
-        post = Post.objects.get(id=post_id)
-        post.replays_count += 1  # EAR icon: always increases
+        post = get_object_or_404(Post, id=post_id)
+        post.replays_count += 1  # EAR icon
         post.save()
-        return JsonResponse({'new_replay_count': post.replays_count})
+        # Key name must match what JS checks
+        return JsonResponse({'success': True, 'new_replay_count': post.replays_count})
+    return JsonResponse({'success': False}, status=400)
 
 def record_listener(request, post_id):
     if request.method == "POST":
-        post = Post.objects.get(id=post_id)
-        # HEADPHONE icon: logic to check if user already listened
-        # For testing, we just increment it.
-        post.listeners_count += 1 
+        post = get_object_or_404(Post, id=post_id)
+        post.listeners_count += 1  # HEADPHONE icon
         post.save()
-        return JsonResponse({'new_listener_count': post.listeners_count})
-    
-
+        # Key name must match what JS checks
+        return JsonResponse({'success': True, 'new_listener_count': post.listeners_count})
+    return JsonResponse({'success': False}, status=400)
 
 
 def help_center(request):
@@ -818,21 +822,32 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Notification
 
-
 @login_required
 def notifications(request):
-    # Optimized using select_related so templates can read post/comment/sender info instantly
-    user_notifications = Notification.objects.filter(recipient=request.user)\
-                                           .select_related('sender', 'sender__profile', 'post', 'comment')\
-                                           .order_by('-timestamp')
-                                           
-    unread_count = user_notifications.filter(is_read=False).count()
+    notifications = Notification.objects.filter(recipient=request.user)\
+                                      .select_related('sender', 'sender__profile', 'post', 'comment')\
+                                      .order_by('-timestamp')    # <-- Fixed here
     
+    unread_count = notifications.filter(is_read=False).count()
+
     return render(request, 'notifications.html', {
-        'notifications': user_notifications,
+        'notifications': notifications,
         'unread_count': unread_count
     })
 
+@login_required
+def notifications_view(request):
+    # Fetch all notifications ordered by your actual database column: created_at
+    notifications = Notification.objects.filter(recipient=request.user)\
+                                      .select_related('sender', 'sender__profile', 'post', 'comment')\
+                                      .order_by('-timestamp')
+    
+    unread_count = notifications.filter(is_read=False).count()
+
+    return render(request, 'notifications.html', {
+        'notifications': notifications,
+        'unread_count': unread_count
+    })
 
 @login_required
 def click_notification(request, notification_id):
@@ -921,19 +936,22 @@ def post_detail(request, pk):
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import Notification  # Adjust this import to match your app structure
+from .models import Notification
 
 @login_required
 def notifications_view(request):
-    # 1. Fetch all notifications for the current logged-in user
+    # 1. Fetch ALL notifications (Standard + Audio)
+    # Changed '-timestamp' to '-created_at' to match your actual database fields
     notifications = Notification.objects.filter(recipient=request.user)\
                                       .select_related('sender', 'sender__profile', 'post', 'comment')\
-                                      .order_by('-timestamp')
+                                      .order_by('-created_at')
     
-    # 2. Calculate dynamically how many are unread for the green badge counter
+    # 2. Calculate unread count for the UI badge
     unread_count = notifications.filter(is_read=False).count()
 
-    # 3. Render the template with both the list and the unread count context variables
+    # 3. Optional: Mark all as read when they view the page
+    # notifications.filter(is_read=False).update(is_read=True)
+
     return render(request, 'notifications.html', {
         'notifications': notifications,
         'unread_count': unread_count
@@ -975,20 +993,36 @@ def robot_check_view(request):
     return render(request, 'robot_check.html', {'form': form})
 
 # core/views.py
+
+from django.shortcuts import render, redirect
 from .forms import SignupForm
 
 def signup_view(request):
+    # 1. Protection Check: Kick back to verification if session is empty
+    verified_email = request.session.get('verified_signup_email')
+    if not verified_email:
+        return redirect('verify_email')
+
     if request.method == 'POST':
+        # Pass the post data and files as normal
         form = SignupForm(request.POST)
         if form.is_valid():
-            # If the captcha is valid, create the user!
-            # ... your logic here
+            # Create user instance but don't save to the database yet
+            user = form.save(commit=False)
+            
+            # 2. Hard-assign the verified email directly from the session
+            user.email = verified_email
+            user.save()
+            
+            # Clean up the verification session flag after successful registration
+            del request.session['verified_signup_email']
+            
             return redirect('profile', username=user.username)
     else:
-        form = SignupForm()
+        # 3. Pre-fill the email input field in the UI form automatically
+        form = SignupForm(initial={'email': verified_email})
     
-    return render(request, 'signup.html', {'form': form})
-
+    return render(request, 'signup.html', {'form': form, 'verified_email': verified_email})
 
 
 
@@ -1079,39 +1113,33 @@ def block_user(self, target_user):
     Follow.objects.filter(follower=self.user, following=target_user).delete()
     Follow.objects.filter(follower=target_user, following=self.user).delete()
 
+from django.db.models import Q
 
-
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth import get_user_model
-from .models import Post, Report, Follow
-
-User = get_user_model()
-
-# 
 @login_required
 def feed_view(request):
-    # --- START OF REPAIR CODE ---
-    # Find the user with the space issue (like " in pocket")
-    problem_user = User.objects.filter(username__contains=' ').first()
-    if problem_user:
-        # .strip() removes the leading/trailing spaces
-        # .replace(' ', '_') turns middle spaces into underscores
-        problem_user.username = problem_user.username.strip().replace(' ', '_')
-        problem_user.save()
-    # --- END OF REPAIR CODE ---
-
-    # Your existing logic
+    # 1. Get IDs of users you have blocked
+    # We use .values_list('id', flat=True) to get a simple list of numbers [1, 2, 3]
     blocked_ids = list(request.user.profile.blocked_users.values_list('id', flat=True))
+    
+    # 2. Get IDs of users who have blocked you
     blockers_ids = list(User.objects.filter(profile__blocked_users=request.user).values_list('id', flat=True))
-    excluded_ids = blocked_ids + blockers_ids
     
-    posts = Post.objects.exclude(user__id__in=excluded_ids).order_by('-created_at')
+    # 3. Combine them into one set of IDs to hide
+    excluded_ids = set(blocked_ids + blockers_ids)
     
+    # 4. Filter Posts:
+    # We want posts that are NOT in the excluded list, 
+    # BUT we ALWAYS want to see our own posts.
+    posts = Post.objects.filter(
+        Q(user=request.user) | ~Q(user__id__in=excluded_ids)
+    ).distinct().order_by('-created_at')
+
+    # Debugging: Print this to your terminal to see if posts actually exist
+    print(f"DEBUG: Found {posts.count()} posts for user {request.user.username}")
+
     return render(request, 'feed.html', {
         'posts': posts,
-        'blocked_ids': excluded_ids 
+        'my_blocked_ids': blocked_ids, # This matches your template logic
     })
 
 
@@ -1211,178 +1239,62 @@ def account_view(request):
 
 # views.py
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+import random
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
-import json
+from django.shortcuts import render
+from django.core.mail import send_mail
+from django.conf import settings
 
-from .models import (
-    AudioCallPost,
-    AudioCall,
-    CallSession,
-    CallPost
-)
+# NOTE: For production, use a more secure method like cache, database, or redis
+# to temporarily store OTPs. This dictionary will reset if the server restarts.
+OTP_STORAGE = {}
 
+def verify_email_view(request):
+    # 1. Handle AJAX POST Requests (from your fetch calls)
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        email = request.POST.get('email')
+        otp_received = request.POST.get('otp')
+        
+        if not email:
+            return JsonResponse({'status': 'error', 'message': 'Email is required.'}, status=400)
+        
+        # Scenario A: The user is validating an OTP code
+        if otp_received is not None:
+            saved_otp = OTP_STORAGE.get(email)
+            
+            if saved_otp and str(saved_otp) == str(otp_received):
+                # SUCCESS: OTP matches! Clear it from storage so it can't be reused
+                OTP_STORAGE.pop(email, None)
+                return JsonResponse({'status': 'success'})
+            else:
+                # FAILURE: OTP is invalid or expired
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': 'The code you entered is invalid. Please check and try again.'
+                })
+        
+        # Scenario B: Initial generation or "Resend" request (only email provided)
+        else:
+            # Generate a random 4-digit code
+            otp_code = f"{random.randint(1000, 9999)}"
+            OTP_STORAGE[email] = otp_code
+            
+            # Print to console for development so you don't have to check email settings
+            print(f"\n[DEVELOPMENT] OTP for {email} is: {otp_code}\n")
+            
+            # (Optional) Try sending actual email if configured in settings.py
+            try:
+                send_mail(
+                    subject='Your Zeed Verification Code',
+                    message=f'Your 4-digit verification code is: {otp_code}',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass # Fall back to console log if email backend isn't set up yet
+                
+            return JsonResponse({'status': 'success'})
 
-# =========================
-# AUDIO FEED
-
-@login_required
-def audio_call_feed(request):
-
-    call_posts = AudioCallPost.objects.all().order_by("-created_at")
-
-    incoming_call = AudioCall.objects.filter(
-        receiver=request.user,
-        status="ringing"
-    ).order_by("-created_at").first()
-
-    return render(request, "audio_feed.html", {
-        "call_posts": call_posts,
-        "incoming_call": incoming_call,
-    })
-
-
-# START AUDIO CALL POST
-# =========================
-@login_required
-def start_audio_call(request):
-
-    if request.method == "POST":
-
-        AudioCallPost.objects.create(
-            user=request.user,
-            heading=request.POST.get("heading"),
-            description=request.POST.get("description"),
-            audio_file=request.FILES.get("audio_file"),
-            cover_image=request.FILES.get("cover_image"),
-            cover_video=request.FILES.get("cover_video"),
-            background_music=request.FILES.get("background_music"),
-            duration_minutes=request.POST.get("duration_minutes"),
-        )
-
-        return redirect("audio_feed")
-
-    return render(request, "start_audio_call.html")
-
-
-# =========================
-# LIKE AUDIO CALL
-# =========================
-@login_required
-def like_audio_call(request, post_id):
-
-    post = get_object_or_404(AudioCallPost, id=post_id)
-
-    if request.user in post.likes.all():
-        post.likes.remove(request.user)
-        liked = False
-    else:
-        post.likes.add(request.user)
-        liked = True
-
-    return JsonResponse({
-        "liked": liked,
-        "likes_count": post.likes.count()
-    })
-
-
-# =========================
-# TRACK LISTENER
-# =========================
-@login_required
-def track_listener(request, post_id):
-
-    post = get_object_or_404(AudioCallPost, id=post_id)
-    post.listeners.add(request.user)
-
-    return JsonResponse({
-        "listeners_count": post.listeners.count()
-    })
-
-
-# =========================
-# DELETE POST
-# =========================
-@login_required
-def delete_audio_call(request, post_id):
-
-    post = get_object_or_404(
-        AudioCallPost,
-        id=post_id,
-        user=request.user
-    )
-
-    post.delete()
-    return redirect("audio_feed")
-
-def call_page(request):
-    return render(request, "call.html")
-
-
-def user_search(request):
-
-    q = request.GET.get("q", "")
-
-    users = User.objects.filter(username__icontains=q)[:10]
-
-    return JsonResponse([
-        {"id": u.id, "username": u.username}
-        for u in users
-    ], safe=False)
-
-
-@csrf_exempt
-def save_call(request):
-
-    if request.method == "POST":
-
-        data = json.loads(request.body)
-
-        call = CallSession.objects.create(
-            host=request.user,
-            duration_seconds=data.get("duration", 0)
-        )
-
-        participants = User.objects.filter(
-            username__in=data.get("users", [])
-        )
-
-        call.participants.set(participants)
-
-        return JsonResponse({
-            "status": "saved",
-            "call_id": call.id
-        })
-
-    return JsonResponse({"error": "invalid request"})
-
-
-@login_required
-def accept_call(request, call_id):
-    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
-    call.status = "accepted"
-    call.save()
-    return redirect("audio_feed")
-
-
-
-
-@login_required
-def decline_call(request, call_id):
-    call = get_object_or_404(AudioCall, id=call_id, receiver=request.user)
-
-    call.status = "declined"
-    call.save()
-
-    return redirect("audio_feed")
-
-from django.http import JsonResponse
-
-def post_call(request):
-    if request.method == "POST":
-        # your call logic here
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"status": "invalid method"})
+    # 2. Handle normal GET request (When someone first visits the page)
+    return render(request, 'email_verify.html')

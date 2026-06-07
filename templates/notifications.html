@@ -11,6 +11,11 @@
         --text-main: #1a1f1d;
         --text-muted: #64748b;
         --glass-border: rgba(0, 168, 107, 0.08);
+        
+        /* Audio Feed Color System Additions */
+        --audio-primary: #1d9bf0;
+        --audio-light: rgba(29, 155, 240, 0.04);
+        --call-missed: #f4212e;
     }
 
     body { 
@@ -100,6 +105,14 @@
         background: var(--primary-green);
     }
 
+    /* Custom Unread Bar Accent for Incoming Audio Rows */
+    .notification-item.unread.audio-alert-item {
+        background-color: var(--audio-light);
+    }
+    .notification-item.unread.audio-alert-item::before {
+        background: var(--audio-primary);
+    }
+
     .notification-item:hover { 
         background-color: #fcfdfe; 
         transform: translateX(4px);
@@ -139,6 +152,16 @@
         font-size: 13px;
     }
 
+    .audio-link-badge {
+        color: var(--audio-primary);
+        text-decoration: none;
+        font-weight: 600;
+        background: rgba(29, 155, 240, 0.1);
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
     .comment-preview { 
         display: block;
         background: #f1f5f9;
@@ -148,6 +171,22 @@
         color: var(--text-muted);
         font-size: 14px;
         border-left: 3px solid #cbd5e1;
+    }
+
+    /* Embedded micro audio block layout for comments */
+    .audio-inline-player {
+        margin-top: 10px;
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        max-width: 360px;
+        border: 1px solid #e2e8f0;
+    }
+    .audio-inline-player audio {
+        width: 100%;
+        height: 26px;
     }
 
     .notif-time { 
@@ -165,6 +204,10 @@
         border-radius: 50%; 
         margin-left: 15px;
         flex-shrink: 0;
+    }
+
+    .unread-dot.audio-unread-dot {
+        background-color: var(--audio-primary);
     }
 
     .empty-state { 
@@ -185,7 +228,7 @@
 
     {% for notification in notifications %}
         <a href="{% url 'click_notification' notification.id %}" class="notif-wrapper">
-            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %} {% if notification.notification_type in 'call_missed call_accepted audio_comment audio_like' or not notification.title %}audio-alert-item{% endif %}">
                 
                 <div class="profile-pic-container">
                     {% if notification.sender.profile.image %}
@@ -201,7 +244,26 @@
                     <p>
                         <strong>{{ notification.sender.username }}</strong>
                         
-                        {% if notification.notification_type == 'post_like' or notification.notification_type == 'like' %}
+                        {% if notification.notification_type == 'call_missed' %}
+                            <span style="color: var(--call-missed); font-weight: 600;">missed an audio feed call connection</span> from your timeline channel.
+                        
+                        {% elif notification.notification_type == 'call_accepted' %}
+                            <span style="color: var(--primary-green); font-weight: 600;">connected and accepted</span> your real-time audio stream invitation.
+                        
+                        {% elif notification.notification_type == 'audio_like' %}
+                            liked your custom voice timeline track <span class="audio-link-badge">Audio Wave Post</span>
+                        
+                        {% elif notification.notification_type == 'audio_comment' %}
+                            left an audio voice comment reply on your track:
+                            {% if notification.audio_file_url %}
+                                <div class="audio-inline-player" onclick="event.stopPropagation(); event.preventDefault();">
+                                    <audio src="{{ notification.audio_file_url }}" controls preload="none"></audio>
+                                </div>
+                            {% else %}
+                                <span class="comment-preview">"🎙️ Live Audio Feed Wave Clip"</span>
+                            {% endif %}
+
+                        {% elif notification.notification_type == 'post_like' %}
                             liked your post <span class="post-link">{{ notification.post.title|truncatechars:20 }}</span>
                         
                         {% elif notification.notification_type == 'follow' %}
@@ -222,25 +284,31 @@
                         {% elif notification.notification_type == 'post_add' %}
                             shared a new post <span class="post-link">{{ notification.post.title|truncatechars:20 }}</span>
                         
-                        {% elif notification.notification_type == 'comment_like' %}
+                        {% elif notification.notification_type == 'comment_like' or notification.notification_type == 'like' %}
                             liked your comment:
                             {% if notification.comment %}
                                 <span class="comment-preview">
                                     "{% if notification.comment.title %}{{ notification.comment.title|truncatechars:60 }}{% elif notification.comment.content %}{{ notification.comment.content|truncatechars:60 }}{% else %}{{ notification.comment.text|truncatechars:60 }}{% endif %}"
                                 </span>
                             {% else %}
-                                <span>(View interaction)</span>
+                                <span>{{ notification.text }}</span>
                             {% endif %}
-                        
-                        {% else %}
+
+                        {% elif notification.message %}
+                            {{ notification.message }}
+
+                        {% elif notification.text %}
                             {{ notification.text }}
+
+                        {% else %}
+                            interacted with your profile dashboard timeline.
                         {% endif %}
                     </p>
-                    <span class="notif-time">{{ notification.timestamp|timesince }} ago</span>
+                   <span class="notif-time">{{ notification.created_at|timesince }} ago</span>
                 </div>
 
                 {% if not notification.is_read %}
-                    <div class="unread-dot"></div>
+                    <div class="unread-dot {% if notification.notification_type in 'call_missed call_accepted audio_comment audio_like' or not notification.title %}audio-unread-dot{% endif %}"></div>
                 {% endif %}
             </div>
         </a>

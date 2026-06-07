@@ -168,7 +168,7 @@
 
 <div class="navbar-container">
     <div class="nav-top-row">
-        <a href="/" class="nav-logo">Plugbar</a>
+        <a href="/" class="nav-logo">Zeed</a>
 
         <form action="{% url 'search' %}" method="GET" class="search-wrapper-form">
             <div class="search-icon-trigger">
@@ -205,8 +205,6 @@
         {% endif %}
         
         <a href="{% url 'feed' %}" class="nav-link {% if request.resolver_match.url_name == 'feed' %}active{% endif %}" title="Feed">🎧</a>
-        
-        <a href="{% url 'audio_feed' %}" class="nav-link {% if request.resolver_match.url_name == 'audio_feed' %}active{% endif %}" title="Audio Feed">📻</a>
         
         <a href="{% url 'notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" title="Notifications">🔔</a>
     </div>
