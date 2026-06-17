@@ -33,7 +33,8 @@ urlpatterns += i18n_patterns(
     # This intercepts both standard allauth URLs and your manual layout name pointers
     path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
     path('signup/', CustomSignupView.as_view(), name='signup'), 
-
+    # 🌟 CHANGE THIS LINE: make sure it says views.signup_view instead of views.signup
+    path('signup/', views.signup_view, name='signup'),
     path('accounts/', include('allauth.urls')),
 
     # HOME / FEED
