@@ -1,11 +1,9 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
-from django.conf.urls.i18n import i18n_patterns
-from core import views
-from core.views import my_profile_redirect  # Import the profile redirect view directly
+from django.conf.urls.i18n import i
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
