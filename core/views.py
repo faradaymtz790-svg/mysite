@@ -971,9 +971,8 @@ def robot_check_view(request):
     
     return render(request, 'robot_check.html', {'form': form})
 
-# core/views.py
+
 import random
-import time
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
@@ -981,7 +980,7 @@ from .forms import SignupForm
 
 def signup_view(request):
     if request.method == 'POST':
-        # 1. Capture math session variables to validate the captcha answer
+        # 1. Pull the session numbers that were generated when the page loaded
         num1 = request.session.get('captcha_num1', 0)
         num2 = request.session.get('captcha_num2', 0)
         expected_answer = num1 + num2
@@ -993,15 +992,22 @@ def signup_view(request):
 
         form = SignupForm(request.POST)
 
-        # 2. Honeypot check (security layer based on your hidden template input)
-        if request.POST.get('company_name_extra'):
-            messages.error(request, "Spam detected.")
-            return redirect('signup')
+        # 2. Relaxed Honeypot check: check for structural bot string injections 
+        # (Fixes the accidental autofill/password manager locking bug)
+        honeypot = request.POST.get('company_name_extra', '')
+        if len(honeypot) > 2:
+            messages.error(request, "Spam verification check triggered.")
+            # Do NOT use redirect() here. Return render to preserve form context data!
+            return render(request, 'signup.html', {
+                'form': form,
+                'num1': num1,
+                'num2': num2
+            })
 
-        # 3. Check math captcha results before processing form database writes
+        # 3. Check math captcha results
         if user_answer != expected_answer:
-            messages.error(request, "Incorrect math verification answer. Please try again.")
-            # Clear captcha state so it refreshes cleanly on error bounce
+            messages.error(request, "Incorrect math answer. Please try again.")
+            # Regen numbers immediately for the next attempt
             request.session['captcha_num1'] = random.randint(1, 9)
             request.session['captcha_num2'] = random.randint(1, 9)
             return render(request, 'signup.html', {
@@ -1011,33 +1017,30 @@ def signup_view(request):
             })
 
         if form.is_valid():
-            # Create user instance but don't save to the database yet
             user = form.save(commit=False)
             
-            # Extract and assign the combined phone input built by intlTelInput JS script
+            # Match the phone parameter precisely from the international input element
             phone_number = request.POST.get('phone')
-            if hasattr(user, 'phone') or hasattr(user, 'profile'):
-                # Adjust this field pointer to match where your CustomUser or Profile stores numbers
-                user.phone = phone_number 
+            if hasattr(user, 'phone'):
+                user.phone = phone_number
+            elif hasattr(user, 'profile'):
+                user.profile.phone = phone_number
                 
             user.save()
             
-            # Log the user in programmatically so their session is established
+            # Log in and establish user tracking states
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             
-            # Clean out math tokens now that verification succeeded
-            del request.session['captcha_num1']
-            del request.session['captcha_num2']
+            # Clean up verification keys safely
+            if 'captcha_num1' in request.session: del request.session['captcha_num1']
+            if 'captcha_num2' in request.session: del request.session['captcha_num2']
             
-            # 🌟 REDIRECT TO EMAIL OTP VERIFICATION STEP NEXT
             return redirect('verify_email')
         else:
-            # Handle standard Django model formatting/validation structural errors
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field.capitalize()}: {error}")
     else:
-        # Initial GET Request loads clean forms and sets fresh math parameters
         form = SignupForm()
         request.session['captcha_num1'] = random.randint(1, 9)
         request.session['captcha_num2'] = random.randint(1, 9)
@@ -1047,6 +1050,9 @@ def signup_view(request):
         'num1': request.session['captcha_num1'],
         'num2': request.session['captcha_num2']
     })
+
+
+
 
 from django.conf import settings
 from django.http import HttpResponse
