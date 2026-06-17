@@ -350,19 +350,22 @@ def track_listener(request, post_id):
 # =========================
 
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-from .models import Follow # Ensure this is your Follow model
+from .models import Follow, Notification  # Ensure these are imported correctly
 
 User = get_user_model()
+
 @login_required
 def follow_user(request, username):
+    # 1. Look up the target user safely using the username string from the URL path
     target_user = get_object_or_404(User, username=username)
 
     if request.user == target_user:
         return JsonResponse({'error': 'You cannot follow yourself'}, status=400)
 
+    # 2. Block Relationship Validation Safety Check
     is_blocked = (
         request.user.profile.blocked_users.filter(username=target_user.username).exists() or
         target_user.profile.blocked_users.filter(username=request.user.username).exists()
@@ -371,42 +374,40 @@ def follow_user(request, username):
     if is_blocked:
         return JsonResponse({'error': 'Action not allowed: Blocked relationship exists'}, status=403)
 
-    follow, created = Follow.objects.get_or_create(
-        follower=request.user,
-        following=target_user
-    )
+    # 3. Check the Follow model table for an existing connection
+    follow_entry = Follow.objects.filter(follower=request.user, following=target_user)
 
-    if not created:
-        # If they already followed them, remove it (Unfollow)
-        follow.delete()
+    if follow_entry.exists():
+        # Connection exists -> Unfollow (Delete the record)
+        follow_entry.delete()
         status = 'unfollowed'
         
-        # Optional cleanup: Delete the notification record if they unfollow right away
+        # Delete the corresponding notification record
         Notification.objects.filter(
             sender=request.user, 
             recipient=target_user, 
             notification_type='follow'
         ).delete()
     else:
+        # No connection -> Follow (Create the record)
+        Follow.objects.create(follower=request.user, following=target_user)
         status = 'followed'
         
-        # --- NEW FOLLOW NOTIFICATION TRIGGER ---
+        # Trigger follow alert notification
         Notification.objects.create(
             recipient=target_user,
             sender=request.user,
             notification_type='follow',
             text="started following you."
         )
-        # --- END NOTIFICATION TRIGGER ---
 
+    # 4. Count the updated follower totals for this specific user
     followers_count = Follow.objects.filter(following=target_user).count()
 
     return JsonResponse({
         'status': status, 
         'followers_count': followers_count
     })
-
-
 
 
  # Assuming your model is named Follow
@@ -721,28 +722,6 @@ def invite(request):
     # so the referral link works: {{ user.username }}
     return render(request, 'invite.html')
 
-
-
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-
-@login_required
-def toggle_follow(request, user_id):
-    target_user = get_object_or_404(User, id=user_id)
-    
-    if target_user in request.user.following.all():
-        request.user.following.remove(target_user)
-        status = 'unfollowed'
-    else:
-        request.user.following.add(target_user)
-        status = 'followed'
-        
-    return JsonResponse({
-        'status': status,
-        # THIS KEY MUST MATCH THE JS BELOW
-        'followers_count': target_user.followers.count(), 
-    })
 
 
 
@@ -1114,11 +1093,15 @@ def block_user(self, target_user):
     Follow.objects.filter(follower=target_user, following=self.user).delete()
 
 from django.db.models import Q
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.contrib.auth.models import User
+from .models import Post
 
 @login_required
 def feed_view(request):
     # 1. Get IDs of users you have blocked
-    # We use .values_list('id', flat=True) to get a simple list of numbers [1, 2, 3]
     blocked_ids = list(request.user.profile.blocked_users.values_list('id', flat=True))
     
     # 2. Get IDs of users who have blocked you
@@ -1128,20 +1111,18 @@ def feed_view(request):
     excluded_ids = set(blocked_ids + blockers_ids)
     
     # 4. Filter Posts:
-    # We want posts that are NOT in the excluded list, 
-    # BUT we ALWAYS want to see our own posts.
+    # Get posts that are NOT from excluded users, OR are posted by the user themselves
     posts = Post.objects.filter(
         Q(user=request.user) | ~Q(user__id__in=excluded_ids)
     ).distinct().order_by('-created_at')
 
-    # Debugging: Print this to your terminal to see if posts actually exist
+    # This print statement WILL fire in your terminal now!
     print(f"DEBUG: Found {posts.count()} posts for user {request.user.username}")
 
     return render(request, 'feed.html', {
         'posts': posts,
-        'my_blocked_ids': blocked_ids, # This matches your template logic
+        'my_blocked_ids': blocked_ids, 
     })
-
 
 # In core/views.py
 from django.shortcuts import redirect

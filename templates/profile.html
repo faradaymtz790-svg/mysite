@@ -95,7 +95,7 @@
         {% if request.user == profile.user %}
             <button class="btn-edit" onclick="openModal()">Edit Profile</button>
         {% elif request.user.is_authenticated %}
-            <button type="button" id="follow-btn-main" class="{% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %} follow-btn" data-username="{{ profile.user.username }}">
+            <button type="button" id="follow-btn-main" class="follow-btn {% if is_following %}btn-unfollow following{% else %}btn-follow{% endif %}" data-username="{{ profile.user.username }}">
                 <span class="btn-text">{% if is_following %}Following{% else %}+ Follow{% endif %}</span>
             </button>
         {% endif %}
@@ -152,7 +152,7 @@
             {% endif %}
         </div>
 
-        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')">
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.comx320{% endif %}')">
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             {% if post.audio %}
                 <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onloadedmetadata="initDuration({{post.id}})" ontimeupdate="updateProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
@@ -424,10 +424,11 @@
         }
     });
 
+    // Cleaned Follow Handler: Trimmed text targets and strict class mapping to match 'follow_user' view flawlessly
     document.querySelectorAll('.follow-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            const username = this.getAttribute('data-username'); 
+            const username = this.getAttribute('data-username').trim(); 
             const btn = this;
             
             fetch(`/follow/${username}/`, { 
@@ -437,14 +438,18 @@
                     'Content-Type': 'application/json' 
                 } 
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error("Action denied or routing signature mismatch.");
+                return r.json();
+            })
             .then(data => {
+                const btnText = btn.querySelector('.btn-text');
                 if (data.status === 'followed') {
-                    btn.className = "btn-unfollow following follow-btn";
-                    btn.querySelector('.btn-text').innerHTML = 'Following';
+                    btn.className = "follow-btn btn-unfollow following";
+                    if (btnText) btnText.innerHTML = 'Following';
                 } else {
-                    btn.className = "btn-follow follow-btn";
-                    btn.querySelector('.btn-text').innerHTML = '+ Follow';
+                    btn.className = "follow-btn btn-follow";
+                    if (btnText) btnText.innerHTML = '+ Follow';
                 }
                 const badge = document.getElementById(`follower-count-${username}`);
                 if (badge && data.followers_count !== undefined) {

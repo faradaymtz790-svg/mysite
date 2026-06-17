@@ -46,7 +46,7 @@ urlpatterns += i18n_patterns(
     path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     path('niche-selection/', views.niche_selection, name='niche_selection'),
-
+    path('', views.feed_view, name='posts_feed')
     # PROFILE
     path('profile/', my_profile_redirect, name='profile_redirect'),
     path('profile/<str:username>/', views.profile_view, name='profile'),
