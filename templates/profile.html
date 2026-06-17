@@ -323,8 +323,8 @@
             audio.play().then(() => {
                 btn.innerHTML = "⏸";
                 
-                // 🎧 UNIQUE LISTENERS (Headphones Icon Counter Updates)
-                fetch(`/record-listener/${id}/`, {
+                // Unified Tracking Endpoint Request (Updates both Headphone and Ear Counters simultaneously)
+                fetch(`/track-listener/${id}/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCSRFToken(),
@@ -333,29 +333,19 @@
                 })
                 .then(res => res.json())
                 .then(data => {
+                    // Update Unique Listeners Element (Headphones)
                     const uniqueElement = document.getElementById(`unique-listeners-${id}`);
                     if (uniqueElement && data.new_listener_count !== undefined) {
                         uniqueElement.innerText = data.new_listener_count;
                     }
-                })
-                .catch(err => console.error("Listener counter failed to update:", err));
 
-                // 👂 TOTAL REPLAYS (Ear Icon Counter Updates)
-                fetch(`/record-replay/${id}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCSRFToken(),
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
+                    // Update Total Replays Element (Ear)
                     const totalElement = document.getElementById(`total-replays-${id}`);
                     if (totalElement && data.new_replay_count !== undefined) {
                         totalElement.innerText = data.new_replay_count;
                     }
                 })
-                .catch(err => console.error("Replay counter failed to update:", err));
+                .catch(err => console.error("Metrics tracking execution failed:", err));
 
             }).catch(err => console.error("Playback error:", err));
             

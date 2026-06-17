@@ -7,16 +7,31 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -------------------------
 # SECURITY
 # -------------------------
+# -------------------------
+# SECURITY
+# -------------------------
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://mysite-1-jhw2.onrender.com"
+# Base production domains
+ALLOWED_HOSTS = [
+    'www.zeed.social', 
+    'zeed.social', 
+    'mysite-1-jhw2.onrender.com'
 ]
 
+# Automatically append local hosts only when running locally (DEBUG = True)
+if DEBUG:
+    ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
+
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.zeed.social",
+    "https://zeed.social",
+    "https://mysite-1-jhw2.onrender.com"
+]
 # -------------------------
 # APPS
 # -------------------------
@@ -106,12 +121,15 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+# Remove the old ACCOUNT_EMAIL_REQUIRED line entirely!
+
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+
+# The email* notation here already tells Allauth that email is required
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
 # -------------------------
