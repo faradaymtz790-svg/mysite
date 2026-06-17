@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
 from django.conf.urls.i18n import i18n_patterns
 from core import views
-from core.views import my_profile_redirect
+from core.views import my_profile_redirect, CustomSignupView # Make sure CustomSignupView is imported here
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
@@ -28,18 +28,23 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),
+    
+    # 🌟 OVERRIDE SIGNUP FLOWS RIGHT HERE:
+    # This intercepts both standard allauth URLs and your manual layout name pointers
+    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
+    path('signup/', CustomSignupView.as_view(), name='signup'), 
+
     path('accounts/', include('allauth.urls')),
 
     # HOME / FEED
-    path('', views.feed_view, name='posts_feed'),  # Mapped root directly to your blocking-logic feed view
+    path('', views.feed_view, name='posts_feed'),  
     path('feed/', views.posts_feed, name='feed'),
     path('verify/', views.verify_email_view, name='verify_email'),
-    path('signup/', views.signup, name='signup'),
     path('login/', views.login_view, name='login'),
     path('niche-selection/', views.niche_selection, name='niche_selection'),
     
     # PROFILE
-    path('profile/', my_profile_redirect, name='profile_redirect'), # <-- Fixed double comma!
+    path('profile/', my_profile_redirect, name='profile_redirect'), 
     path('profile/<str:username>/', views.profile_view, name='profile'),
     path('update-profile/', views.update_profile, name='update_profile'),
     path('follow/<str:username>/', views.follow_user, name='follow_user'),
