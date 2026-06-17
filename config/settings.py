@@ -223,21 +223,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # config/settings.py
 
+# config/settings.py
+
+# 1. Use Django's native SMTP backend engine
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# 2. Resend SMTP Connection parameters
 EMAIL_HOST = 'smtp.resend.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# Leave this exactly as 'resend'
+# 3. Security credentials 
 EMAIL_HOST_USER = 'resend'
-
-# Paste your copied key here
 EMAIL_HOST_PASSWORD = 're_H5RVLsgF_9ekUxpXCP4BwyBLSEsmt3F4P'
 
-# Use the default Resend onboarding email for testing
-# Change this to your new live domain email address
+# 4. Your live domain identity
 DEFAULT_FROM_EMAIL = 'Zeed App <no-reply@zeed.social>'
-# config/settings.py
 
-# Point Allauth directly to your custom template name and location
+# 5. Your custom Allauth email template
 ACCOUNT_HTML_EMAIL_TEMPLATE = 'email_verify.html'
