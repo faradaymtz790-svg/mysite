@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
 from django.conf.urls.i18n import i18n_patterns
 from core import views
-from core.views import my_profile_redirect, CustomSignupView # Make sure CustomSignupView is imported here
+from core.views import my_profile_redirect  # Import the profile redirect view directly
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
@@ -29,12 +29,10 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),
     
-    # 🌟 OVERRIDE SIGNUP FLOWS RIGHT HERE:
-    # This intercepts both standard allauth URLs and your manual layout name pointers
-    path('accounts/signup/', CustomSignupView.as_view(), name='account_signup'),
-    path('signup/', CustomSignupView.as_view(), name='signup'), 
-    # 🌟 CHANGE THIS LINE: make sure it says views.signup_view instead of views.signup
+    # SIGNUP FLOW (Using your exact custom signup_view function)
     path('signup/', views.signup_view, name='signup'),
+    
+    # Catch-all for other allauth authentication routes
     path('accounts/', include('allauth.urls')),
 
     # HOME / FEED
