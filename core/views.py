@@ -972,38 +972,29 @@ def robot_check_view(request):
     return render(request, 'robot_check.html', {'form': form})
 
 # core/views.py
-
 from django.shortcuts import render, redirect
+from django.contrib.auth import login
 from .forms import SignupForm
 
 def signup_view(request):
-    # 1. Protection Check: Kick back to verification if session is empty
-    verified_email = request.session.get('verified_signup_email')
-    if not verified_email:
-        return redirect('verify_email')
+    # 🌟 REMOVED THE VERIFICATION SESSION CHECK FROM HERE 🌟
 
     if request.method == 'POST':
-        # Pass the post data and files as normal
         form = SignupForm(request.POST)
         if form.is_valid():
-            # Create user instance but don't save to the database yet
-            user = form.save(commit=False)
+            # Save the user directly to the database
+            user = form.save()
             
-            # 2. Hard-assign the verified email directly from the session
-            user.email = verified_email
-            user.save()
+            # Log the user in automatically
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             
-            # Clean up the verification session flag after successful registration
-            del request.session['verified_signup_email']
-            
-            return redirect('profile', username=user.username)
+            # Send them straight to niche selection!
+            return redirect('niche_selection')
     else:
-        # 3. Pre-fill the email input field in the UI form automatically
-        form = SignupForm(initial={'email': verified_email})
+        # Just display a clean, empty signup form
+        form = SignupForm()
     
-    return render(request, 'signup.html', {'form': form, 'verified_email': verified_email})
-
-
+    return render(request, 'signup.html', {'form': form})
 
 
 from django.conf import settings
