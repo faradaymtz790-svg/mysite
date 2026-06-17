@@ -972,30 +972,81 @@ def robot_check_view(request):
     return render(request, 'robot_check.html', {'form': form})
 
 # core/views.py
+import random
+import time
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import login
 from .forms import SignupForm
 
 def signup_view(request):
-    # 🌟 REMOVED THE VERIFICATION SESSION CHECK FROM HERE 🌟
-
     if request.method == 'POST':
+        # 1. Capture math session variables to validate the captcha answer
+        num1 = request.session.get('captcha_num1', 0)
+        num2 = request.session.get('captcha_num2', 0)
+        expected_answer = num1 + num2
+        
+        try:
+            user_answer = int(request.POST.get('captcha_answer', ''))
+        except ValueError:
+            user_answer = None
+
         form = SignupForm(request.POST)
+
+        # 2. Honeypot check (security layer based on your hidden template input)
+        if request.POST.get('company_name_extra'):
+            messages.error(request, "Spam detected.")
+            return redirect('signup')
+
+        # 3. Check math captcha results before processing form database writes
+        if user_answer != expected_answer:
+            messages.error(request, "Incorrect math verification answer. Please try again.")
+            # Clear captcha state so it refreshes cleanly on error bounce
+            request.session['captcha_num1'] = random.randint(1, 9)
+            request.session['captcha_num2'] = random.randint(1, 9)
+            return render(request, 'signup.html', {
+                'form': form,
+                'num1': request.session['captcha_num1'],
+                'num2': request.session['captcha_num2']
+            })
+
         if form.is_valid():
-            # Save the user directly to the database
-            user = form.save()
+            # Create user instance but don't save to the database yet
+            user = form.save(commit=False)
             
-            # Log the user in automatically
+            # Extract and assign the combined phone input built by intlTelInput JS script
+            phone_number = request.POST.get('phone')
+            if hasattr(user, 'phone') or hasattr(user, 'profile'):
+                # Adjust this field pointer to match where your CustomUser or Profile stores numbers
+                user.phone = phone_number 
+                
+            user.save()
+            
+            # Log the user in programmatically so their session is established
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             
-            # Send them straight to niche selection!
-            return redirect('niche_selection')
+            # Clean out math tokens now that verification succeeded
+            del request.session['captcha_num1']
+            del request.session['captcha_num2']
+            
+            # 🌟 REDIRECT TO EMAIL OTP VERIFICATION STEP NEXT
+            return redirect('verify_email')
+        else:
+            # Handle standard Django model formatting/validation structural errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
     else:
-        # Just display a clean, empty signup form
+        # Initial GET Request loads clean forms and sets fresh math parameters
         form = SignupForm()
-    
-    return render(request, 'signup.html', {'form': form})
+        request.session['captcha_num1'] = random.randint(1, 9)
+        request.session['captcha_num2'] = random.randint(1, 9)
 
+    return render(request, 'signup.html', {
+        'form': form,
+        'num1': request.session['captcha_num1'],
+        'num2': request.session['captcha_num2']
+    })
 
 from django.conf import settings
 from django.http import HttpResponse
