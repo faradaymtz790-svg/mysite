@@ -1181,7 +1181,7 @@ def feed_view(request):
 
     print(f"DEBUG: Found {posts.count()} posts for user {request.user.username}")
 
-    return render(request, 'feed.html', {
+    return render(request, 'posts_feed.html', {
         'posts': posts,
         'my_blocked_ids': blocked_ids, 
     })
