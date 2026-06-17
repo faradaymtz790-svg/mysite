@@ -127,8 +127,11 @@ SITE_ID = 1
 # Remove the old ACCOUNT_EMAIL_REQUIRED line entirely!
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-LOGOUT_REDIRECT_URL = 'login'
+# config/settings.py
 
+LOGOUT_REDIRECT_URL = 'login'
+# config/settings.py
+LOGIN_REDIRECT_URL = 'feed'
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 
 # The email* notation here already tells Allauth that email is required
@@ -143,12 +146,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# -------------------------
-# MEDIA (FIXED PROPERLY)
-# -------------------------
-# -------------------------
-# MEDIA (FIXED PROPERLY)
-# -------------------------
+
+
 MEDIA_URL = "/media/"
 
 if DEBUG:
@@ -164,14 +163,8 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-
-CLOUDINARY_CREDENTIALS_OK = all([
-    os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    os.environ.get("CLOUDINARY_API_KEY"),
-    os.environ.get("CLOUDINARY_API_SECRET"),
-])
-
-if CLOUDINARY_CREDENTIALS_OK:
+    
+    # Force production to explicitly read variables
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
         "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
@@ -179,6 +172,10 @@ if CLOUDINARY_CREDENTIALS_OK:
         "SECURE": True,
     }
 
+    # Debug helper print statement (visible in Render log stream during startup)
+    missing_keys = [k for k, v in CLOUDINARY_STORAGE.items() if not v]
+    if missing_keys:
+        print(f"🚨 CLOUDINARY ERROR: Missing production environment keys for: {missing_keys}")
 # -------------------------
 # INTERNATIONALIZATION
 # -------------------------
