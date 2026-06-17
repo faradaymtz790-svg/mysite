@@ -126,7 +126,7 @@ SITE_ID = 1
 
 # Remove the old ACCOUNT_EMAIL_REQUIRED line entirely!
 
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 # config/settings.py
 
 LOGOUT_REDIRECT_URL = 'login'

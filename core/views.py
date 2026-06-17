@@ -103,7 +103,6 @@ from django.contrib.auth import login
 def signup(request):
     if request.method == 'POST':
 
-        # --- 1. SECURITY CHECKS (Honeypot, Time, CAPTCHA) ---
 
         # Honeypot (bot trap)
         if request.POST.get('company_name_extra'):
@@ -194,13 +193,26 @@ def signup(request):
         'num2': num2
     })
 
+# Inside your core/views.py signup function:
+try:
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password
+    )
 
+    request.session.pop('captcha_result', None)
 
+    # 🌟 Specify the backend cleanly to match your custom adapter logic
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    login(request, user)
 
+    # Force the response to the correct endpoint name
+    return redirect('niche_selection')
 
-# =========================
-# PROFILE
-# =========================
+except Exception as e:
+    messages.error(request, f"Signup failed: {e}")
+    return redirect('signup')
 
 
 from django.shortcuts import render, get_object_or_404, redirect

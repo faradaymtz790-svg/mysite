@@ -9,4 +9,3 @@ db.sqlite3
 
 # Generated static and media assets
 staticfiles/
-media/

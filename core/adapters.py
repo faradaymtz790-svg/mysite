@@ -5,20 +5,20 @@ class ZeedAccountAdapter(DefaultAccountAdapter):
     
     def get_login_redirect_url(self, request):
         """
-        Where users go right after logging in normally OR via social login.
+        Routes users dynamically based on their onboarding status.
         """
-        # If they just signed up, redirect them to niche selection first
-        if request.session.get('new_signup_redirect'):
-            del request.session['new_signup_redirect']
+        user = request.user
+        
+        # Check if the user has a profile or if they haven't finished onboarding
+        # (Adjust 'has_selected_niche' to match whatever boolean or profile check you use)
+        if hasattr(user, 'profile') and not user.profile.has_selected_niche:
             return reverse('niche_selection')
             
-        # Returning users go straight to their profile
-        return reverse('profile', kwargs={'username': request.user.username})
+        # Returning users with finished profiles go to the feed or profile page
+        return reverse('feed')
 
     def get_signup_redirect_url(self, request):
         """
-        Where users go right after registering a brand-new account.
+        Where allauth maps new signups. Force them to niche selection.
         """
-        # Set the session flag just in case
-        request.session['new_signup_redirect'] = True
         return reverse('niche_selection')
