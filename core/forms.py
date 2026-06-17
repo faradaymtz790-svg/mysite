@@ -13,29 +13,44 @@ class CommentForm(forms.ModelForm):
         }
 
 
-
-
-
 from django import forms
-# CHANGE THIS:
-# from captcha.fields import ReCaptchaField
-
-# TO THIS:
-from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 # --- Keep your existing functions/classes here ---
 # class MyOldForm(forms.Form):
 #     ...
 
-# --- Add the new SignupForm below ---
+# --- Updated SignupForm ---
 class SignupForm(forms.Form):
-    # Add your existing signup fields here, for example:
-    username = forms.CharField(max_length=150)
-    password = forms.CharField(widget=forms.PasswordInput)
-    
-    # This is the new security field
-    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+    username = forms.CharField(
+        max_length=150, 
+        widget=forms.TextInput(attrs={'placeholder': 'Pick a unique username'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'placeholder': 'name@example.com'})
+    )
+    phone = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={'id': 'phone'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'id': 'password', 'placeholder': 'Create a password'})
+    )
+    confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={'id': 'confirm', 'placeholder': 'Repeat your password'})
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm = cleaned_data.get("confirm")
+
+        # Basic backend alignment check for passwords matching
+        if password and confirm and password != confirm:
+            raise forms.ValidationError("Passwords do not match.")
+            
+        return cleaned_data
+
+
 
 
 
