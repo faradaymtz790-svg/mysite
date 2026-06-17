@@ -1004,7 +1004,11 @@ def signup_view(request):
             })
 
         if form.is_valid():
+            # 3. Create the user object in Python memory, pausing DB write
             user = form.save(commit=False)
+            
+            # 4. 🌟 SECURE THE PASSWORD: Encrypt it so Django can read it properly
+            user.set_password(form.cleaned_data['password'])
             
             # Match the phone parameter precisely from the international input element
             phone_number = request.POST.get('phone')
@@ -1013,6 +1017,7 @@ def signup_view(request):
             elif hasattr(user, 'profile'):
                 user.profile.phone = phone_number
                 
+            # 5. Commit the fully populated and hashed user record to your database
             user.save()
             
             # Log in and establish user tracking states
@@ -1037,7 +1042,6 @@ def signup_view(request):
         'num1': request.session['captcha_num1'],
         'num2': request.session['captcha_num2']
     })
-
 
 
 
