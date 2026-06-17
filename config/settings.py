@@ -18,7 +18,7 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 ALLOWED_HOSTS = [
     'www.zeed.social', 
     'zeed.social', 
-    'mysite-1-jhw2.onrender.com'
+    'mysite-0v87.onrender.com'
 ]
 
 # Automatically append local hosts only when running locally (DEBUG = True)
