@@ -31,6 +31,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.zeed.social",
     "https://zeed.social",
     "https://mysite-1-jhw2.onrender.com"
+    "https://mysite-0v87.onrender.com"
 ]
 # -------------------------
 # APPS
@@ -146,13 +147,16 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # -------------------------
 # MEDIA (FIXED PROPERLY)
 # -------------------------
+# -------------------------
+# MEDIA (FIXED PROPERLY)
+# -------------------------
+MEDIA_URL = "/media/"
 
 if DEBUG:
     # LOCAL DEVELOPMENT (NO CLOUDINARY)
-    MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 else:
-    # PRODUCTION (CLOUDINARY ONLY IF KEYS EXIST)
+    # PRODUCTION (CLOUDINARY ONLY)
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -180,7 +184,7 @@ if CLOUDINARY_CREDENTIALS_OK:
 # INTERNATIONALIZATION
 # -------------------------
 LANGUAGE_CODE = 'en'
-USE_I18N = False
+USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
