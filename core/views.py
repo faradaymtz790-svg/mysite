@@ -971,7 +971,6 @@ def robot_check_view(request):
     
     return render(request, 'robot_check.html', {'form': form})
 
-
 import random
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -980,7 +979,7 @@ from .forms import SignupForm
 
 def signup_view(request):
     if request.method == 'POST':
-        # 1. Pull the session numbers that were generated when the page loaded
+        # 1. Pull the session numbers generated when the page loaded
         num1 = request.session.get('captcha_num1', 0)
         num2 = request.session.get('captcha_num2', 0)
         expected_answer = num1 + num2
@@ -992,22 +991,10 @@ def signup_view(request):
 
         form = SignupForm(request.POST)
 
-        # 2. Relaxed Honeypot check: check for structural bot string injections 
-        # (Fixes the accidental autofill/password manager locking bug)
-        honeypot = request.POST.get('company_name_extra', '')
-        if len(honeypot) > 2:
-            messages.error(request, "Spam verification check triggered.")
-            # Do NOT use redirect() here. Return render to preserve form context data!
-            return render(request, 'signup.html', {
-                'form': form,
-                'num1': num1,
-                'num2': num2
-            })
-
-        # 3. Check math captcha results
+        # 2. Check math captcha results
         if user_answer != expected_answer:
             messages.error(request, "Incorrect math answer. Please try again.")
-            # Regen numbers immediately for the next attempt
+            # Refresh random numbers for the next attempt
             request.session['captcha_num1'] = random.randint(1, 9)
             request.session['captcha_num2'] = random.randint(1, 9)
             return render(request, 'signup.html', {
