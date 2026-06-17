@@ -1000,14 +1000,24 @@ def signup_view(request):
                 'num1': request.session['captcha_num1'],
                 'num2': request.session['captcha_num2']
             })
-
-        if form.is_valid():
+  if form.is_valid():
             from django.contrib.auth.models import User
+            from django.db import IntegrityError  # 🌟 Import IntegrityError
+
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
 
-            # Create and hash manually
+            # 1. Check if the email already exists before trying to save
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "A user with that email address already exists.")
+                return render(request, 'signup.html', {
+                    'form': form,
+                    'num1': num1,
+                    'num2': num2
+                })
+
+            # Create the manual user instance
             user = User(username=username, email=email)
             user.set_password(password)
             
@@ -1017,28 +1027,23 @@ def signup_view(request):
             elif hasattr(user, 'profile'):
                 user.profile.phone = phone_number
                 
-            user.save()
+            # 2. 🌟 Wrap the database commit in a try/except block to catch duplicate usernames
+            try:
+                user.save()
+            except IntegrityError:
+                messages.error(request, "That username is already taken. Please pick another one.")
+                return render(request, 'signup.html', {
+                    'form': form,
+                    'num1': num1,
+                    'num2': num2
+                })
             
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             
             if 'captcha_num1' in request.session: del request.session['captcha_num1']
             if 'captcha_num2' in request.session: del request.session['captcha_num2']
             
-            return redirect('verify_email')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field.capitalize()}: {error}")
-    else:
-        form = SignupForm()
-        request.session['captcha_num1'] = random.randint(1, 9)
-        request.session['captcha_num2'] = random.randint(1, 9)
-
-    return render(request, 'signup.html', {
-        'form': form,
-        'num1': request.session['captcha_num1'],
-        'num2': request.session['captcha_num2']
-    })
+            return redirect('verify_email')     
 
 
 from django.conf import settings
