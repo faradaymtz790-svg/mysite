@@ -1145,38 +1145,46 @@ def block_user(self, target_user):
     Follow.objects.filter(follower=self.user, following=target_user).delete()
     Follow.objects.filter(follower=target_user, following=self.user).delete()
 
+from django.db import models
+from django.core.exceptions import ObjectDoesNotExist  # 🌟 MAKE SURE THIS IS IMPORTED
 from django.db.models import Q
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Profile 
 
 @login_required
 def feed_view(request):
-    # 1. Get IDs of users you have blocked
-    blocked_ids = list(request.user.profile.blocked_users.values_list('id', flat=True))
+    # 1. 🌟 AUTO-HEAL: If the user profile doesn't exist in the DB, create it right now!
+    try:
+        profile = request.user.profile
+    except ObjectDoesNotExist:
+        # This catches the 'User has no profile' error and creates it on the fly
+        profile = Profile.objects.create(user=request.user)
+
+    # 2. Get IDs of users you have blocked
+    if hasattr(profile, 'blocked_users'):
+        blocked_ids = list(profile.blocked_users.values_list('id', flat=True))
+    else:
+        blocked_ids = []
     
-    # 2. Get IDs of users who have blocked you
+    # 3. Get IDs of users who have blocked you
     blockers_ids = list(User.objects.filter(profile__blocked_users=request.user).values_list('id', flat=True))
     
-    # 3. Combine them into one set of IDs to hide
+    # 4. Combine them into one set of IDs to hide
     excluded_ids = set(blocked_ids + blockers_ids)
     
-    # 4. Filter Posts:
-    # Get posts that are NOT from excluded users, OR are posted by the user themselves
+    # 5. Filter Posts
     posts = Post.objects.filter(
         Q(user=request.user) | ~Q(user__id__in=excluded_ids)
     ).distinct().order_by('-created_at')
 
-    # This print statement WILL fire in your terminal now!
     print(f"DEBUG: Found {posts.count()} posts for user {request.user.username}")
 
     return render(request, 'feed.html', {
         'posts': posts,
         'my_blocked_ids': blocked_ids, 
     })
-
 # In core/views.py
 from django.shortcuts import redirect
 
