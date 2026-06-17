@@ -971,7 +971,6 @@ def robot_check_view(request):
     
     return render(request, 'robot_check.html', {'form': form})
 
-
 import random
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -1000,15 +999,16 @@ def signup_view(request):
                 'num1': request.session['captcha_num1'],
                 'num2': request.session['captcha_num2']
             })
-  if form.is_valid():
+
+        # 🌟 FIXED INDENTATION BELOW: Now properly nested inside signup_view
+        if form.is_valid():
             from django.contrib.auth.models import User
-            from django.db import IntegrityError  # 🌟 Import IntegrityError
+            from django.db import IntegrityError  
 
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
 
-            # 1. Check if the email already exists before trying to save
             if User.objects.filter(email=email).exists():
                 messages.error(request, "A user with that email address already exists.")
                 return render(request, 'signup.html', {
@@ -1017,7 +1017,6 @@ def signup_view(request):
                     'num2': num2
                 })
 
-            # Create the manual user instance
             user = User(username=username, email=email)
             user.set_password(password)
             
@@ -1027,7 +1026,6 @@ def signup_view(request):
             elif hasattr(user, 'profile'):
                 user.profile.phone = phone_number
                 
-            # 2. 🌟 Wrap the database commit in a try/except block to catch duplicate usernames
             try:
                 user.save()
             except IntegrityError:
@@ -1043,8 +1041,23 @@ def signup_view(request):
             if 'captcha_num1' in request.session: del request.session['captcha_num1']
             if 'captcha_num2' in request.session: del request.session['captcha_num2']
             
-            return redirect('verify_email')     
+            return redirect('verify_email')
+        else:
+            # If form structure itself validation fails, report errors to UI
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
+    else:
+        form = SignupForm()
+        request.session['captcha_num1'] = random.randint(1, 9)
+        request.session['captcha_num2'] = random.randint(1, 9)
 
+    # 🌟 CRITICAL FALLBACK: Ensures page renders if POST requests fail validation checks
+    return render(request, 'signup.html', {
+        'form': form,
+        'num1': request.session.get('captcha_num1', 0),
+        'num2': request.session.get('captcha_num2', 0)
+    })
 
 from django.conf import settings
 from django.http import HttpResponse
