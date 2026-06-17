@@ -8,8 +8,9 @@ from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import User
 
-# PROFILE
-# =========================
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -22,8 +23,37 @@ class Profile(models.Model):
 
     niches = models.JSONField(default=list, blank=True)
 
+    # 🌟 Added: Track which users this profile has blocked
+    blocked_users = models.ManyToManyField(
+        User, 
+        symmetrical=False, 
+        blank=True, 
+        related_name='blocked_by'
+    )
+
     def __str__(self):
         return self.user.username
+
+
+# ==========================================
+# 🌟 AUTOMATED SIGNALS: Permanent Profile Creation Fix
+# ==========================================
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Automatically create a Profile instance whenever a new User is saved."""
+    if created:
+        Profile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """Safely update and save the profile whenever the User instance updates."""
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
+
+
+
+
 
 
 # =========================
