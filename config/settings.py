@@ -127,7 +127,6 @@ SITE_ID = 1
 # Remove the old ACCOUNT_EMAIL_REQUIRED line entirely!
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-LOGIN_REDIRECT_URL = 'feed'
 LOGOUT_REDIRECT_URL = 'login'
 
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
