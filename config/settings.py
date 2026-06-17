@@ -235,7 +235,8 @@ EMAIL_HOST_USER = 'resend'
 EMAIL_HOST_PASSWORD = 're_H5RVLsgF_9ekUxpXCP4BwyBLSEsmt3F4P'
 
 # Use the default Resend onboarding email for testing
-DEFAULT_FROM_EMAIL = 'Zeed App <onboarding@resend.dev>'
+# Change this to your new live domain email address
+DEFAULT_FROM_EMAIL = 'Zeed App <no-reply@zeed.social>'
 # config/settings.py
 
 # Point Allauth directly to your custom template name and location
