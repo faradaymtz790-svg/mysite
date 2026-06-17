@@ -148,13 +148,12 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 
-MEDIA_URL = "/media/"
-
 if DEBUG:
-    # LOCAL DEVELOPMENT (NO CLOUDINARY)
+    # LOCAL DEVELOPMENT
+    MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 else:
-    # PRODUCTION (CLOUDINARY ONLY)
+    # PRODUCTION (RENDER + CLOUDINARY)
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -163,8 +162,7 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-    
-    # Force production to explicitly read variables
+
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
         "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
@@ -172,10 +170,9 @@ else:
         "SECURE": True,
     }
 
-    # Debug helper print statement (visible in Render log stream during startup)
-    missing_keys = [k for k, v in CLOUDINARY_STORAGE.items() if not v]
-    if missing_keys:
-        print(f"🚨 CLOUDINARY ERROR: Missing production environment keys for: {missing_keys}")
+    # 🌟 OVERRIDE MEDIA_URL IN PRODUCTION SO DJANGO PULLS FROM THE CLOUD
+    # Replace 'dwccyjh8z' with your cloud name if it differs from your settings dump
+    MEDIA_URL = f"https://res.cloudinary.com/dwccyjh8z/image/upload/"
 # -------------------------
 # INTERNATIONALIZATION
 # -------------------------
