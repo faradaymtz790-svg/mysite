@@ -971,6 +971,7 @@ def robot_check_view(request):
     
     return render(request, 'robot_check.html', {'form': form})
 
+
 import random
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -979,7 +980,6 @@ from .forms import SignupForm
 
 def signup_view(request):
     if request.method == 'POST':
-        # 1. Pull the session numbers generated when the page loaded
         num1 = request.session.get('captcha_num1', 0)
         num2 = request.session.get('captcha_num2', 0)
         expected_answer = num1 + num2
@@ -991,10 +991,8 @@ def signup_view(request):
 
         form = SignupForm(request.POST)
 
-        # 2. Check math captcha results
         if user_answer != expected_answer:
             messages.error(request, "Incorrect math answer. Please try again.")
-            # Refresh random numbers for the next attempt
             request.session['captcha_num1'] = random.randint(1, 9)
             request.session['captcha_num2'] = random.randint(1, 9)
             return render(request, 'signup.html', {
@@ -1004,26 +1002,25 @@ def signup_view(request):
             })
 
         if form.is_valid():
-            # 3. Create the user object in Python memory, pausing DB write
-            user = form.save(commit=False)
+            from django.contrib.auth.models import User
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+
+            # Create and hash manually
+            user = User(username=username, email=email)
+            user.set_password(password)
             
-            # 4. 🌟 SECURE THE PASSWORD: Encrypt it so Django can read it properly
-            user.set_password(form.cleaned_data['password'])
-            
-            # Match the phone parameter precisely from the international input element
             phone_number = request.POST.get('phone')
             if hasattr(user, 'phone'):
                 user.phone = phone_number
             elif hasattr(user, 'profile'):
                 user.profile.phone = phone_number
                 
-            # 5. Commit the fully populated and hashed user record to your database
             user.save()
             
-            # Log in and establish user tracking states
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             
-            # Clean up verification keys safely
             if 'captcha_num1' in request.session: del request.session['captcha_num1']
             if 'captcha_num2' in request.session: del request.session['captcha_num2']
             
@@ -1042,7 +1039,6 @@ def signup_view(request):
         'num1': request.session['captcha_num1'],
         'num2': request.session['captcha_num2']
     })
-
 
 
 from django.conf import settings
