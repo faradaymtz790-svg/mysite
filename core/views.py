@@ -508,7 +508,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .models import Comment, Notification  # Ensure Notification is imported
+from .models import Comment, Notification 
 
 @login_required
 @require_POST
@@ -530,12 +530,11 @@ def like_comment(request, comment_id):
                     recipient=comment.user,
                     sender=request.user,
                     notification_type='like', 
-                    post=comment.post,   # Connects back to the primary thread post ID
-                    comment=comment,     # Attaches the specific comment instance
+                    post=comment.post,   
+                    comment=comment,     
                     text="liked your comment."
                 )
             except Exception as e:
-                # Catching hidden database constraint issues
                 print(f"Error creating notification: {e}")
             
     return JsonResponse({
