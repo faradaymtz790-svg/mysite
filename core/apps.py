@@ -1,7 +1,4 @@
 
-
-
-# core/apps.py
 from django.apps import AppConfig
 
 class CoreConfig(AppConfig):
@@ -9,4 +6,5 @@ class CoreConfig(AppConfig):
     name = 'core'
 
     def ready(self):
-        import core.signals
+        import core.signals  # <--- Essential line to register your code changes!
+

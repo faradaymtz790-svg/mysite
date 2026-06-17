@@ -119,6 +119,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+ACCOUNT_ADAPTER = 'core.adapters.ZeedAccountAdapter'
+
 SITE_ID = 1
 
 # Remove the old ACCOUNT_EMAIL_REQUIRED line entirely!
