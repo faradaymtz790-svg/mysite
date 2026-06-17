@@ -504,6 +504,12 @@ def post_comments(request, post_id):
     })
 
 
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .models import Comment, Notification  # Ensure Notification is imported
+
 @login_required
 @require_POST
 def like_comment(request, comment_id):
@@ -524,20 +530,19 @@ def like_comment(request, comment_id):
                     recipient=comment.user,
                     sender=request.user,
                     notification_type='like', 
-                    post=comment.post,  # Connects back to the primary thread post ID
+                    post=comment.post,   # Connects back to the primary thread post ID
                     comment=comment,     # Attaches the specific comment instance
                     text="liked your comment."
                 )
             except Exception as e:
-                # Catching hidden database constraint issues (e.g., if model doesn't allow comment field)
+                # Catching hidden database constraint issues
                 print(f"Error creating notification: {e}")
             
     return JsonResponse({
+        'status': 'success',
         'liked': liked,
         'count': comment.likes.count()
     })
-
-
 
 @login_required
 @require_POST
@@ -558,9 +563,6 @@ def delete_comment(request, comment_id):
 
 
 
-# NOTIFICATIONS
-# =========================
-# @login_required  <-- Add a '#' to the start of this line
 
 
 # =========================

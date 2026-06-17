@@ -385,9 +385,9 @@
 
             <div class="comment-footer">
                 <button class="like-btn {% if request.user in comment.likes.all %}is-liked{% endif %}" 
-                        onclick="toggleCommentLike(this, '{% url 'like-comment' comment.id %}')">
-                    ❤ <span class="count">{{ comment.likes.count }}</span>
-                </button>
+        onclick="toggleCommentLike(this, '{% url 'like_comment' comment.id %}')">
+                            ❤ <span class="count">{{ comment.likes.count }}</span>
+          </button>
                 <span class="reply-trigger" onclick="showReplyForm({{ comment.id }})">Reply</span>
                 
                 {% if comment.user == request.user %}

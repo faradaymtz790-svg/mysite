@@ -57,7 +57,7 @@ urlpatterns += i18n_patterns(
     path('create_post/', views.create_post, name='create_post'),
     path('delete-post/<int:id>/', views.delete_post, name='delete_post'),
     path('like-post/<int:post_id>/', views.like_post, name='like_post'),
-    path('comment/<int:comment_id>/like/', views.like_comment, name='like_comment'),
+    path('comment/<int:comment_id>/like/', views.like_comment, name='like-comment'),
     path('delete-comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
     path('track-listener/<int:post_id>/', views.track_listener, name='track_listener'),
 
