@@ -109,7 +109,6 @@
             z-index: 1;
         }
 
-        /* UPDATED: COVERS 100% CONTAINER WIDTH COMPLETELY EDGE-TO-EDGE */
         .visualizer-bars {
             display: flex;
             align-items: flex-end;
@@ -126,7 +125,6 @@
             box-sizing: border-box;
         }
 
-        /* ULTRA THIN VISUALIZER BARS */
         .v-bar { 
             flex: 1; 
             height: 5px; 
@@ -147,7 +145,6 @@
             box-sizing: border-box;
         }
 
-        /* Duration Stamp Styles */
         .time-stamp {
             color: white;
             font-size: 14px;
@@ -322,12 +319,12 @@
 
 <div class="feed">
     {% for post in posts %}
-    {% if post.user.id not in my_blocked_ids or post.user == request.user %}
+    {% if not my_blocked_ids or post.user.id not in my_blocked_ids or post.user == request.user %}
     <div class="post" id="post-card-{{ post.id }}">
         <div class="post-header">
             <div class="user-meta">
                 <a href="{% url 'profile' post.user.username %}" style="text-decoration: none;">
-                    <img class="avatar" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/44{% endif %}">
+                    <img class="avatar" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/44{% endif %}" alt="Avatar">
                 </a>
                 
                 <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -344,12 +341,12 @@
                             {{ post.user.followers.count }} followers
                         </span>
                         
-                        {% if post.user != user %}
-                        <button class="follow-btn {% if post.user in user.following.all %}following{% endif %}" 
+                        {% if post.user != request.user %}
+                        <button class="follow-btn {% if post.user in request.user.following.all %}following{% endif %}" 
                                 data-user-id="{{ post.user.id }}" 
                                 id="follow-btn-{{ post.user.id }}">
                             <span class="btn-text">
-                                {% if post.user in user.following.all %}Following{% else %}+ Follow{% endif %}
+                                {% if post.user in request.user.following.all %}Following{% else %}+ Follow{% endif %}
                             </span>
                         </button>
                         {% endif %}
@@ -364,23 +361,23 @@
                     <a href="{% url 'report_post' post.id %}" style="text-decoration:none; color:inherit;">
                         <button>🚩 Report Post</button>
                     </a>
-                    {% if post.user != user %}
+                    {% if post.user != request.user %}
                         <button onclick="toggleBlockUser({{ post.user.id }}, this)" id="block-btn-{{ post.user.id }}">
-                            {% if post.user in user.blocked_users.all %}
+                            {% if post.user in request.user.blocked_users.all %}
                                 ✅ Unblock User
                             {% else %}
                                 🚫 Block User
                             {% endif %}
                         </button>
                     {% endif %}
-                    {% if post.user == user %}
+                    {% if post.user == request.user %}
                         <button onclick="deletePost({{ post.id }})" style="color:red;">🗑️ Delete Post</button>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }} {% else %}https://via.placeholder.com/600x320{% endif %}')"> 
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')"> 
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             <div class="overlay-ui">
                 {% if post.audio %}
@@ -431,7 +428,7 @@
     {% empty %}
     <div style="text-align:center; padding:100px; color:gray;">
         <h2>Feed is empty</h2>
-        <p>Upload a post to get started!</p>
+        <p>No audio posts available right now!</p>
     </div>
     {% endfor %}
 </div>
@@ -452,7 +449,6 @@
 <a href="/create_post/" class="floating-btn">+</a>
 
 <script>
-    // Retrieves standard cookie fallback token directly
     function getCSRFToken(){
         return document.cookie.split('; ').find(r=>r.startsWith('csrftoken'))?.split('=')[1];
     }
@@ -539,7 +535,6 @@
                 btn.innerHTML = "⏸";
                 fetch(`/track-listener/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
                 .then(r => r.json()).then(d => {
-                    // FIXED: Changed keys to 'new_replay_count' and 'new_listener_count' to exactly map your views.py
                     if (d.new_replay_count !== undefined) replaySpan.innerText = d.new_replay_count; 
                     if (d.new_listener_count !== undefined) listenerSpan.innerText = d.new_listener_count;
                 })

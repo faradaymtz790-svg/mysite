@@ -49,7 +49,7 @@ urlpatterns += i18n_patterns(
     path('unfollow/<str:username>/', views.unfollow_user, name='unfollow'),
     path('profile/<str:username>/followers/', views.followers_list, name='followers_list'),
     path('profile/<str:username>/following/', views.following_list, name='following_list'),
-
+    path('block-user/<int:user_id>/', views.toggle_block_user, name='block_user'),
     # POSTS
     path('post/<int:pk>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),

@@ -1129,47 +1129,53 @@ def block_user(self, target_user):
     Follow.objects.filter(follower=self.user, following=target_user).delete()
     Follow.objects.filter(follower=target_user, following=self.user).delete()
 
+
 from django.db import models
-from django.core.exceptions import ObjectDoesNotExist  # 🌟 MAKE SURE THIS IS IMPORTED
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from .models import Post, Profile 
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from .models import Post, Profile, Follow  # Ensure Follow is imported here if used
+
+User = get_user_model()
 
 @login_required
 def feed_view(request):
-    # 1. 🌟 AUTO-HEAL: If the user profile doesn't exist in the DB, create it right now!
+    # 1. Profile Auto-Heal Safeguard
     try:
         profile = request.user.profile
     except ObjectDoesNotExist:
-        # This catches the 'User has no profile' error and creates it on the fly
         profile = Profile.objects.create(user=request.user)
 
-    # 2. Get IDs of users you have blocked
+    # 2. Extract authentic USER IDs (using user__id) that you have blocked
     if hasattr(profile, 'blocked_users'):
-        blocked_ids = list(profile.blocked_users.values_list('id', flat=True))
+        blocked_user_ids = list(profile.blocked_users.values_list('user__id', flat=True))
     else:
-        blocked_ids = []
+        blocked_user_ids = []
     
-    # 3. Get IDs of users who have blocked you
-    blockers_ids = list(User.objects.filter(profile__blocked_users=request.user).values_list('id', flat=True))
+    # 3. Extract authentic USER IDs of profiles who have blocked you
+    blockers_user_ids = list(User.objects.filter(profile__blocked_users=request.user).values_list('id', flat=True))
     
-    # 4. Combine them into one set of IDs to hide
-    excluded_ids = set(blocked_ids + blockers_ids)
+    # 4. Consolidate into a single exclusion set
+    excluded_user_ids = set(blocked_user_ids + blockers_user_ids)
     
-    # 5. Filter Posts
+    # 5. Filter Feed Query (Show your posts OR posts from anyone not in the excluded set)
     posts = Post.objects.filter(
-        Q(user=request.user) | ~Q(user__id__in=excluded_ids)
+        Q(user=request.user) | ~Q(user__id__in=excluded_user_ids)
     ).distinct().order_by('-created_at')
 
-    print(f"DEBUG: Found {posts.count()} posts for user {request.user.username}")
+    print(f"DEBUG: Rendering {posts.count()} global safe posts for {request.user.username}")
 
-    return render(request, 'posts_feed.html', {
+    # 6. Render to your updated interface template file
+    return render(request, 'home.html', {
         'posts': posts,
-        'my_blocked_ids': blocked_ids, 
+        'my_blocked_ids': blocked_user_ids, # Sent back as clear User IDs to match post.user.id
     })
-# In core/views.py
+
+
+
 from django.shortcuts import redirect
 
 def my_profile_redirect(request):

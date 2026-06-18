@@ -14,20 +14,22 @@
         --shadow-md: 0 12px 35px rgba(0, 0, 0, 0.06);
     }
 
-    /* Outer Wrapper sizing up to span beautifully across modern screens */
+    /* --- Outer Wrapper Expanded For Big Screens --- */
     .search-feed-wrapper {
-        max-width: 1100px;
+        max-width: 1600px; /* Increased from 1100px for full modern ultra-wide screen usage */
+        width: 100%;
         margin: 40px auto;
-        padding: 0 24px;
+        padding: 0 4%; /* Responsive fluid side padding instead of fixed pixels */
+        box-sizing: border-box;
         font-family: 'Inter', sans-serif;
     }
 
     .search-title {
-        font-size: 24px;
-        font-weight: 700;
+        font-size: clamp(24px, 4vw, 36px); /* Fluid typography scales beautifully with screen widths */
+        font-weight: 800;
         color: var(--text-main);
-        margin-bottom: 32px;
-        letter-spacing: -0.5px;
+        margin-bottom: 40px;
+        letter-spacing: -1px;
     }
 
     .section-heading {
@@ -35,11 +37,11 @@
         text-transform: uppercase;
         letter-spacing: 1.5px;
         color: var(--text-muted);
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         font-weight: 700;
     }
 
-    /* --- User Grid Slider Layout --- */
+    /* --- Expanded User Slider Cards --- */
     .user-results-container {
         display: flex;
         gap: 24px;
@@ -49,9 +51,8 @@
         scrollbar-color: var(--primary-green) transparent;
     }
 
-    /* Webkit scrollbar customization for clean aesthetics */
     .user-results-container::-webkit-scrollbar {
-        height: 5px;
+        height: 6px;
     }
     .user-results-container::-webkit-scrollbar-track {
         background: transparent;
@@ -67,10 +68,10 @@
     .user-profile-card {
         text-decoration: none;
         text-align: center;
-        min-width: 120px;
+        min-width: 160px; /* Made cards wider for a more premium visual presence */
         background: white;
-        padding: 20px 16px;
-        border-radius: 20px;
+        padding: 28px 20px;
+        border-radius: 24px;
         box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color);
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
@@ -85,22 +86,22 @@
     .avatar-wrapper {
         position: relative;
         display: inline-block;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
 
     .user-avatar-lg {
-        width: 76px;
-        height: 76px;
+        width: 88px; /* Bigger avatar frames for high-density screen display */
+        height: 88px;
         border-radius: 50%;
         object-fit: cover;
         border: 3px solid var(--primary-green);
-        padding: 3px;
+        padding: 4px;
         background: white;
     }
 
     .username-txt {
         color: var(--text-main);
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 600;
         display: block;
         overflow: hidden;
@@ -109,38 +110,40 @@
     }
 
     .follower-count-txt {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--text-muted);
-        margin-top: 4px;
+        margin-top: 6px;
         display: block;
     }
 
-    /* --- Dynamic Post Results Grid --- */
+    /* --- Responsive Dynamic Large Post Grid Layout --- */
     .posts-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 30px;
-        margin-top: 20px;
+        /* Dynamically structures grid items depending on screen size, filling rows aggressively */
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+        gap: 32px;
+        margin-top: 24px;
     }
 
     .post-card-premium {
         background: white;
-        border-radius: 24px;
+        border-radius: 28px;
         overflow: hidden;
         border: 1px solid var(--border-color);
         box-shadow: var(--shadow-sm);
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
         display: flex;
         flex-direction: column;
+        width: 100%;
     }
 
     .post-card-premium:hover {
-        transform: translateY(-4px);
+        transform: translateY(-6px);
         box-shadow: var(--shadow-md);
     }
 
     .post-header {
-        padding: 16px 20px;
+        padding: 20px 24px;
         display: flex;
         align-items: center;
         background: white;
@@ -150,39 +153,48 @@
     .user-meta-link {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         text-decoration: none;
         color: inherit;
+        width: 100%;
     }
 
     .avatar-sm {
-        width: 40px;
-        height: 40px;
+        width: 48px; /* Slightly scaled up for proportional tracking symmetry */
+        height: 48px;
         border-radius: 50%;
         object-fit: cover;
         background: #f0f0f0;
     }
 
+    .meta-details {
+        overflow: hidden;
+        flex-grow: 1;
+    }
+
     .meta-details b {
-        font-size: 14px;
+        font-size: 15px;
         color: var(--text-main);
-        font-weight: 600;
+        font-weight: 700;
         display: block;
     }
 
     .match-tag {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--primary-green);
-        font-weight: 500;
+        font-weight: 600;
         margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    /* --- Audio Canvas Visual Container --- */
+    /* --- Immersive Wide Audio Cover Art Box --- */
     .audio-visual-container {
         position: relative;
         background-size: cover;
         background-position: center;
-        height: 240px;
+        height: 280px; /* Tall visual presentation */
         width: 100%;
         margin-top: auto;
     }
@@ -203,20 +215,20 @@
     }
 
     .play-trigger {
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
         background: white;
         color: var(--primary-green);
         border: none;
         border-radius: 50%;
-        font-size: 18px;
+        font-size: 22px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
-        padding-left: 4px; /* Fix structural centering for standard play icons */
+        padding-left: 6px;
     }
 
     .play-trigger:hover {
@@ -225,61 +237,75 @@
         color: var(--primary-green-hover);
     }
 
-    /* --- Clean State Viewports --- */
+    /* --- Structural Utilities --- */
     .divider-line {
         border: 0;
         height: 1px;
         background: radial-gradient(circle, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 100%);
-        margin: 40px 0;
+        margin: 48px 0;
     }
 
     .empty-state-box {
         text-align: center;
-        padding: 100px 24px;
+        padding: 120px 24px;
         background: white;
-        border-radius: 30px;
+        border-radius: 32px;
         box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color);
-        max-width: 500px;
-        margin: 40px auto;
+        max-width: 550px;
+        margin: 60px auto;
     }
 
     .empty-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
+        font-size: 56px;
+        margin-bottom: 20px;
         display: block;
     }
 
     .empty-state-box h3 {
-        margin: 0 0 8px 0;
+        margin: 0 0 12px 0;
         color: var(--text-main);
-        font-size: 20px;
+        font-size: 22px;
+        font-weight: 700;
     }
 
     .empty-state-box p {
         margin: 0;
         color: var(--text-muted);
-        font-size: 14px;
-        line-height: 1.5;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    /* --- Mobile Breakpoint Cleanup Tuning --- */
+    @media (max-width: 480px) {
+        .posts-grid {
+            grid-template-columns: 1fr; /* Force elegant single full columns on tiny phones */
+            gap: 20px;
+        }
+        .audio-visual-container {
+            height: 220px; /* Slightly lowered height context specifically on micro screens */
+        }
+        .search-feed-wrapper {
+            margin: 20px auto;
+            padding: 0 16px;
+        }
     }
 </style>
 
 <div class="search-feed-wrapper">
-    <!-- Context Query Label Header -->
     {% if query %}
         <h2 class="search-title">
             Search results for <span style="color: var(--primary-green); font-weight: 800;">"{{ query }}"</span>
         </h2>
     {% endif %}
 
-    <!-- User Profile Blocks Section -->
     {% if user_results %}
         <h3 class="section-heading">Matching Accounts</h3>
         <div class="user-results-container">
             {% for profile_user in user_results %}
                 <a href="{% url 'profile' profile_user.username %}" class="user-profile-card">
                     <div class="avatar-wrapper">
-                        <img src="{% if profile_user.profile.image %}{{ profile_user.profile.image.url }}{% else %}https://via.placeholder.com/80{% endif %}" class="user-avatar-lg" alt="{{ profile_user.username }}">
+                        <img src="{% if profile_user.profile.image %}{{ profile_user.profile.image.url }}{% else %}https://via.placeholder.com/100{% endif %}" class="user-avatar-lg" alt="{{ profile_user.username }}">
                     </div>
                     <div>
                         <b class="username-txt">@{{ profile_user.username }}</b>
@@ -294,25 +320,24 @@
         {% endif %}
     {% endif %}
 
-    <!-- Audio Track / Content Grid Cards Section -->
     {% if post_results %}
         <h3 class="section-heading">Matching Audio Posts</h3>
         <div class="posts-grid">
             {% for post in post_results %}
                 <div class="post-card-premium" id="post-card-{{ post.id }}">
                     <div class="post-header">
-                        <div class="user-meta">
+                        <div class="user-meta" style="width: 100%;">
                             <a href="{% url 'profile' post.user.username %}" class="user-meta-link">
-                                <img class="avatar-sm" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/40{% endif %}" alt="Avatar">
+                                <img class="avatar-sm" src="{% if post.user.profile.image %}{{ post.user.profile.image.url }}{% else %}https://via.placeholder.com/48{% endif %}" alt="Avatar">
                                 <div class="meta-details">
                                     <b>{{ post.user.username }}</b>
-                                    <div class="match-tag">{{ post.title }}</div>
+                                    <div class="match-tag" title="{{ post.title }}">{{ post.title }}</div>
                                 </div>
                             </a>
                         </div>
                     </div>
                     
-                    <div class="audio-visual-container" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/400x240{% endif %}');">
+                    <div class="audio-visual-container" style="background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x350{% endif %}');">
                         <div class="overlay-ui">
                             <button class="play-trigger" onclick="togglePlay({{ post.id }})">▶</button>
                         </div>
@@ -321,7 +346,6 @@
             {% endfor %}
         </div>
     {% else %}
-        <!-- Universal Fallback Screen Empty Container Block -->
         {% if not user_results %}
             <div class="empty-state-box">
                 <span class="empty-icon">🔍</span>
