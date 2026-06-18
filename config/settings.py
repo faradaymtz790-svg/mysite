@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import dj_database_url
+from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,14 +12,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-# Base production domains
 ALLOWED_HOSTS = [
     'www.zeed.social', 
     'zeed.social', 
     'mysite-0v87.onrender.com'
 ]
 
-# Automatically append local hosts only when running locally (DEBUG = True)
 if DEBUG:
     ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
 
@@ -34,11 +33,9 @@ CSRF_TRUSTED_ORIGINS = [
 # APPS
 # -------------------------
 INSTALLED_APPS = [
-    # Cloudinary (keep installed but safe)
     'cloudinary_storage',
     'cloudinary',
 
-    # Django core
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,14 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third party
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'rosetta',
     'whitenoise.runserver_nostatic',
 
-    # Your app
     'core',
 ]
 
@@ -63,16 +58,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     'allauth.account.middleware.AccountMiddleware',
 ]
 
@@ -111,25 +103,20 @@ DATABASES = {
 }
 
 # -------------------------
-# AUTH
+# AUTH & ALLAUTH
 # -------------------------
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
 ACCOUNT_ADAPTER = 'core.adapters.ZeedAccountAdapter'
-
 SITE_ID = 1
-
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_REDIRECT_URL = 'feed'
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
-
-# The email* notation here already tells Allauth that email is required
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
-# -------------------------
 # -------------------------
 # STATIC FILES & MEDIA STORAGES
 # -------------------------
@@ -137,13 +124,18 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Keep MEDIA_URL simple and uniform! Cloudinary overrides this implicitly in production.
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
 if DEBUG:
-    # LOCAL DEVELOPMENT
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # LOCAL DEVELOPMENT (Modernized unified storage dictionary)
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 else:
     # PRODUCTION (RENDER + CLOUDINARY)
     STORAGES = {
@@ -162,7 +154,6 @@ else:
         "SECURE": True,
     }
 
-    # Pull media dynamically from Cloudinary CDN network
     MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_STORAGE['CLOUD_NAME']}/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
@@ -173,8 +164,6 @@ LANGUAGE_CODE = 'en'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-from django.utils.translation import gettext_lazy as _
 
 LANGUAGES = [
     ('en', _('English')),
@@ -194,21 +183,22 @@ LANGUAGES = [
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale/')]
 
 # -------------------------
-# SESSIONS
+# SESSIONS & SECURITY COOKIES
 # -------------------------
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Security cookies only in production
 if not DEBUG:
+    # Trust Render's load balancer secure headers
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = False  
 else:
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # -------------------------
 # EMAIL CONFIGURATION
@@ -218,29 +208,6 @@ EMAIL_HOST = 'smtp.resend.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'resend'
-
-# Secure configuration extracted out of raw code space
 EMAIL_HOST_PASSWORD = os.environ.get('RESEND_API_KEY')
-
 DEFAULT_FROM_EMAIL = 'Zeed App <no-reply@zeed.social>'
 ACCOUNT_HTML_EMAIL_TEMPLATE = 'email_verify.html'
-
-
-# -------------------------
-# SESSIONS & SECURITY COOKIES
-# -------------------------
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = 1209600
-SESSION_SAVE_EVERY_REQUEST = True
-
-if not DEBUG:
-    # 🔑 Tell Django to trust Render's secure proxy setup
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
-    # 🔒 Enforce absolute strictness over production channels
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_HTTPONLY = False  # Allows smooth token handshakes
-else:
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
