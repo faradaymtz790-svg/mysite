@@ -7,9 +7,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -------------------------
 # SECURITY
 # -------------------------
-# -------------------------
-# SECURITY
-# -------------------------
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 
 DEBUG = os.environ.get("DEBUG", "True") == "True"
@@ -25,14 +22,13 @@ ALLOWED_HOSTS = [
 if DEBUG:
     ALLOWED_HOSTS += ['127.0.0.1', 'localhost']
 
-
-
 CSRF_TRUSTED_ORIGINS = [
     "https://www.zeed.social",
     "https://zeed.social",
-    "https://mysite-1-jhw2.onrender.com"
+    "https://mysite-1-jhw2.onrender.com",  # Fixed missing comma here
     "https://mysite-0v87.onrender.com"
 ]
+
 # -------------------------
 # APPS
 # -------------------------
@@ -124,13 +120,8 @@ ACCOUNT_ADAPTER = 'core.adapters.ZeedAccountAdapter'
 
 SITE_ID = 1
 
-# Remove the old ACCOUNT_EMAIL_REQUIRED line entirely!
-
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-# config/settings.py
-
 LOGOUT_REDIRECT_URL = 'login'
-# config/settings.py
 LOGIN_REDIRECT_URL = 'feed'
 ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 
@@ -138,18 +129,16 @@ ACCOUNT_LOGIN_METHODS = {'username', 'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
 # -------------------------
-# STATIC FILES
+# STATIC FILES & MEDIA STORAGES
 # -------------------------
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-
-
 if DEBUG:
     # LOCAL DEVELOPMENT
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
     MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 else:
@@ -164,15 +153,16 @@ else:
     }
 
     CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME", "dwccyjh8z"),
         "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
         "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
         "SECURE": True,
     }
 
-    # 🌟 OVERRIDE MEDIA_URL IN PRODUCTION SO DJANGO PULLS FROM THE CLOUD
-    # Replace 'dwccyjh8z' with your cloud name if it differs from your settings dump
-    MEDIA_URL = f"https://res.cloudinary.com/dwccyjh8z/image/upload/"
+    # Pull media dynamically from Cloudinary CDN network
+    MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_STORAGE['CLOUD_NAME']}/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # -------------------------
 # INTERNATIONALIZATION
 # -------------------------
@@ -201,7 +191,7 @@ LANGUAGES = [
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale/')]
 
 # -------------------------
-# SESSIONS (FIX FOR LOCAL)
+# SESSIONS
 # -------------------------
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 1209600
@@ -217,25 +207,17 @@ else:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# config/settings.py
-
-# config/settings.py
-
-# 1. Use Django's native SMTP backend engine
+# -------------------------
+# EMAIL CONFIGURATION
+# -------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# 2. Resend SMTP Connection parameters
 EMAIL_HOST = 'smtp.resend.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
-# 3. Security credentials 
 EMAIL_HOST_USER = 'resend'
-EMAIL_HOST_PASSWORD = 're_H5RVLsgF_9ekUxpXCP4BwyBLSEsmt3F4P'
 
-# 4. Your live domain identity
+# Secure configuration extracted out of raw code space
+EMAIL_HOST_PASSWORD = os.environ.get('RESEND_API_KEY')
+
 DEFAULT_FROM_EMAIL = 'Zeed App <no-reply@zeed.social>'
-
-# 5. Your custom Allauth email template
 ACCOUNT_HTML_EMAIL_TEMPLATE = 'email_verify.html'
