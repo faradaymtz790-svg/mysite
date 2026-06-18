@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
@@ -28,14 +28,12 @@ urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
     path('rosetta/', include('rosetta.urls')),
     
-    # SIGNUP FLOW (Using your exact custom signup_view function)
+    # SIGNUP FLOW
     path('signup/', views.signup_view, name='signup'),
-    
-    # Catch-all for other allauth authentication routes
     path('accounts/', include('allauth.urls')),
 
-    # HOME / FEED
-    path('', views.feed_view, name='posts_feed'),  
+    # HOME / FEED (Now with explicit global 'home' layout tracking)
+    path('', views.feed_view, name='home'),  
     path('feed/', views.posts_feed, name='feed'),
     path('verify/', views.verify_email_view, name='verify_email'),
     path('login/', views.login_view, name='login'),
@@ -49,7 +47,7 @@ urlpatterns += i18n_patterns(
     path('unfollow/<str:username>/', views.unfollow_user, name='unfollow'),
     path('profile/<str:username>/followers/', views.followers_list, name='followers_list'),
     path('profile/<str:username>/following/', views.following_list, name='following_list'),
-    path('block-user/<int:user_id>/', views.toggle_block_user, name='block_user'),
+    
     # POSTS
     path('post/<int:pk>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/comments/', views.post_comments, name='post_comments'),
@@ -81,7 +79,7 @@ urlpatterns += i18n_patterns(
 
     # SAFETY
     path('report/<int:post_id>/', views.report_post_view, name='report_post'),
-    path('block-user/<int:user_id>/', views.toggle_block_user, name='toggle_block_user'),
+    path('block-user/<int:user_id>/', views.toggle_block_user, name='block_user'),
     path('robot-check/', views.robot_check_view, name='robot_check'),
 
     prefix_default_language=True
