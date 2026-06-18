@@ -3,7 +3,8 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
-from django.conf.urls.i18n import i
+from django.conf.urls.i18n import i18n_patterns
+from core import views
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
@@ -41,7 +42,7 @@ urlpatterns += i18n_patterns(
     path('niche-selection/', views.niche_selection, name='niche_selection'),
     
     # PROFILE
-    path('profile/', my_profile_redirect, name='profile_redirect'), 
+    path('profile/', views.my_profile_redirect, name='profile_redirect'),
     path('profile/<str:username>/', views.profile_view, name='profile'),
     path('update-profile/', views.update_profile, name='update_profile'),
     path('follow/<str:username>/', views.follow_user, name='follow_user'),

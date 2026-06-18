@@ -90,19 +90,16 @@ from django.contrib import messages
 
 # @ratelimit(key='ip', rate='3/15m', block=True) # Optional: prevents brute force
 
-
 import time
 import random
+import json
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 
-
-
 def signup(request):
     if request.method == 'POST':
-
 
         # Honeypot (bot trap)
         if request.POST.get('company_name_extra'):
@@ -113,12 +110,10 @@ def signup(request):
 
         try:
             submit_time = int(time.time())
-
             if load_time:
                 if submit_time - int(load_time) < 4:
                     messages.error(request, "Form submitted too quickly. Are you a bot?")
                     return redirect('signup')
-
         except (ValueError, TypeError):
             return redirect('signup')
 
@@ -138,7 +133,6 @@ def signup(request):
             if int(user_answer) != int(correct_answer):
                 messages.error(request, "Incorrect math answer. Please try again.")
                 return redirect('signup')
-
         except (ValueError, TypeError):
             messages.error(request, "Invalid captcha input.")
             return redirect('signup')
@@ -173,7 +167,8 @@ def signup(request):
             # Clean session safely
             request.session.pop('captcha_result', None)
 
-            # LOGIN USER (SAFE)
+            # 🌟 Specify the backend cleanly right here inside the function!
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
 
             return redirect('niche_selection')
@@ -192,27 +187,6 @@ def signup(request):
         'num1': num1,
         'num2': num2
     })
-
-# Inside your core/views.py signup function:
-try:
-    user = User.objects.create_user(
-        username=username,
-        email=email,
-        password=password
-    )
-
-    request.session.pop('captcha_result', None)
-
-    # 🌟 Specify the backend cleanly to match your custom adapter logic
-    user.backend = 'django.contrib.auth.backends.ModelBackend'
-    login(request, user)
-
-    # Force the response to the correct endpoint name
-    return redirect('niche_selection')
-
-except Exception as e:
-    messages.error(request, f"Signup failed: {e}")
-    return redirect('signup')
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -575,9 +549,6 @@ def delete_comment(request, comment_id):
 
 
 
-
-# =========================
-# SEARCH
 # =========================
 
 from django.shortcuts import render
@@ -1291,6 +1262,7 @@ def niche_selection(request):
 
 def account_view(request):
     return render(request, 'account.html')
+# (Make sure there is no extra "return redirect..." hanging out below this line!)
 
 # views.py
 
