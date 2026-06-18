@@ -1151,7 +1151,7 @@ def feed_view(request):
 
     # 2. Extract authentic USER IDs (using user__id) that you have blocked
     if hasattr(profile, 'blocked_users'):
-        blocked_user_ids = list(profile.blocked_users.values_list('user__id', flat=True))
+        blocked_user_ids = list(profile.blocked_users.values_list('id', flat=True))
     else:
         blocked_user_ids = []
     
