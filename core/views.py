@@ -1025,7 +1025,7 @@ def signup_view(request):
             if 'captcha_num1' in request.session: del request.session['captcha_num1']
             if 'captcha_num2' in request.session: del request.session['captcha_num2']
             
-            return redirect('verify_email')
+            return redirect('niche_selection')
         else:
             # If form structure itself validation fails, report errors to UI
             for field, errors in form.errors.items():
