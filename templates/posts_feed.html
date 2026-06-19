@@ -218,7 +218,7 @@
 
         .action-item { display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
         .action-item:hover { transform: translateY(-2px); }
-        .action-value { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .action-item:white { font-size: 14px; font-weight: 700; color: var(--text-main); }
         .comment-link { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 6px; }
 
         .share-modal {
@@ -377,15 +377,21 @@
             </div>
         </div>
 
-        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')"> 
+        <!-- FIXED: Image fallback checked across properties -->
+        <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% elif post.image_post %}{{ post.image_post.url }}{% else %}https://via.placeholder.com/600x320{% endif %}')"> 
             <div class="visualizer-bars" id="viz{{post.id}}"></div>
             <div class="overlay-ui">
+                <!-- FIXED: Added an alternate property fallback check to intercept the correct field key -->
                 {% if post.audio %}
                     <audio id="audio{{post.id}}" src="{{ post.audio.url }}" ontimeupdate="updateProgress({{ post.id }})" onended="resetUI({{ post.id }})" onloadedmetadata="initDuration({{ post.id }})"></audio>
                     <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
                     <span class="time-stamp" id="time{{post.id}}">00:00 / 00:00</span>
+                {% elif post.audio_posts %}
+                    <audio id="audio{{post.id}}" src="{{ post.audio_posts.url }}" ontimeupdate="updateProgress({{ post.id }})" onended="resetUI({{ post.id }})" onloadedmetadata="initDuration({{ post.id }})"></audio>
+                    <button class="play-trigger" onclick="togglePlay({{post.id}})" id="playBtn{{post.id}}">▶</button>
+                    <span class="time-stamp" id="time{{post.id}}">00:00 / 00:00</span>
                 {% else %}
-                    <p style="color: white; font-size: 12px;">Audio missing</p>
+                    <p style="color: white; font-size: 14px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px;">Audio missing</p>
                 {% endif %}
             </div>
 
