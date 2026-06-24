@@ -24,8 +24,7 @@ if DEBUG:
 CSRF_TRUSTED_ORIGINS = [
     "https://www.zeed.social",
     "https://zeed.social",
-    "http://zeed.social",
-    "http://www.zeed.social",
+    "https://mysite-0v87.onrender.com",
     "https://*.onrender.com"
 ]
 
@@ -33,6 +32,9 @@ CSRF_TRUSTED_ORIGINS = [
 # APPS
 # -------------------------
 INSTALLED_APPS = [
+    # CRITICAL FIX: WhiteNoise must intercept static files first
+    'whitenoise.runserver_nostatic',
+
     'cloudinary_storage',
     'cloudinary',
 
@@ -42,12 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # CRITICAL FIX: Required for django-allauth (SITE_ID = 1)
 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'rosetta',
-    'whitenoise.runserver_nostatic',
 
     'core',
 ]
@@ -125,7 +127,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 if DEBUG:
-    # LOCAL DEVELOPMENT (Modernized unified storage dictionary)
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -137,7 +138,6 @@ if DEBUG:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 else:
-    # PRODUCTION (RENDER + CLOUDINARY)
     STORAGES = {
         "default": {
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
@@ -191,7 +191,6 @@ SESSION_SAVE_EVERY_REQUEST = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if not DEBUG:
-    # Trust Render's load balancer secure headers
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True

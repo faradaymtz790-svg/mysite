@@ -1,4 +1,5 @@
 {% load socialaccount %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -283,6 +284,7 @@
         }
         .delete-trigger:hover {
             opacity: 1;
+            box-shadow: none;
             transform: scale(1.05);
         }
 
@@ -298,28 +300,29 @@
         .visualizer-bars { 
             display: flex; 
             align-items: flex-end; 
-            gap: 2px; 
-            height: 100%; 
+            gap: 3px; 
+            height: 80px; 
             position: absolute; 
-            bottom: 0; 
+            bottom: 10px; 
             left: 0; 
             right: 0; 
             pointer-events: none; 
             z-index: 2; 
-            padding: 0 15px; 
+            padding: 0 20px; 
         }
         .v-bar { 
             flex: 1; 
-            height: 4px; 
-            border-radius: 2px; 
+            height: 6px; 
+            border-radius: 3px; 
+            background: linear-gradient(to top, var(--primary-green), var(--bright-blue));
             transition: height 0.08s ease-out, opacity 0.1s ease; 
-            opacity: 0.35; 
-            min-height: 4px; 
+            opacity: 0.4; 
+            min-height: 6px; 
         }
 
         .player-controls-wrapper { 
             position: absolute; 
-            bottom: 35px; 
+            top: 20px; 
             left: 20px; 
             z-index: 10; 
             display: flex; 
@@ -676,7 +679,13 @@
         </div>
 
         <div class="audio-visual-container" style="background-image:url('{% if post.image %}{{ post.image.url }}{% else %}https://via.placeholder.com/640x320{% endif %}')">
-            <div class="visualizer-bars" id="viz{{post.id}}"></div>
+            <div class="visualizer-bars" id="viz{{post.id}}">
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+            </div>
             {% if post.audio %}
                 <audio id="audio{{post.id}}" src="{{ post.audio.url }}" onloadedmetadata="initDuration({{post.id}})" ontimeupdate="updateProgress({{post.id}})" onended="stopVisualizer({{post.id}})"></audio>
                 <div class="player-controls-wrapper">
@@ -797,7 +806,7 @@
             }
             
             bars.forEach(b => {
-                const height = Math.random() * 260 + 20;
+                const height = Math.random() * 70 + 10;
                 b.style.height = height + "px";
                 b.style.opacity = "1";
             });
@@ -813,7 +822,7 @@
 
     function stopVisualizer(id) {
         const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-        bars.forEach(b => { b.style.height = "4px"; b.style.opacity = "0.35"; });
+        bars.forEach(b => { b.style.height = "6px"; b.style.opacity = "0.4"; });
         const btn = document.getElementById('playBtn' + id);
         if(btn) btn.innerHTML = "▶";
         const fill = document.getElementById("fill" + id);
@@ -867,7 +876,7 @@
                         totalElement.innerText = data.new_replay_count;
                     }
                 })
-                .catch(err => console.error("Metrics tracking execution failed:", err));
+                .catch(err => console.error("Metrics tracking failed:", err));
 
             }).catch(err => console.error("Playback error:", err));
             
@@ -875,128 +884,51 @@
             audio.pause();
             btn.innerHTML = "▶";
             const bars = document.querySelectorAll(`#viz${id} .v-bar`);
-            bars.forEach(b => { b.style.opacity = "0.35"; });
+            bars.forEach(b => { b.style.opacity = "0.4"; });
         }
     }
 
+    // Completely wrapped submit function to handle background profile updates safely
     document.getElementById('profileUpdateForm').onsubmit = async function(e) {
         e.preventDefault(); 
         const btn = document.getElementById('saveBtn'); 
         btn.disabled = true; 
         btn.innerText = "Saving...";
 
+        const formData = new FormData(this);
+        
         try {
-            const formData = new FormData(this);
-            const imageInput = this.querySelector('input[name="image"]');
-            const coverInput = this.querySelector('input[name="cover_photo"]');
-
-            const res = await fetch("{% url 'update_profile' %}", { 
-                method: 'POST', 
-                body: formData, 
-                headers: { 'X-CSRFToken': getCSRFToken() } 
+            const response = await fetch("{% url 'update_profile' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: formData
             });
-            const d = await res.json(); 
-
-            if(d.success) {
-                if(d.bio) document.getElementById('display-bio').innerText = d.bio;
-                if(d.location) document.getElementById('display-location').innerText = d.location;
-                if(d.links) {
+            
+            const data = await response.json();
+            if (data.success) {
+                if(data.image_url) document.getElementById('display-avatar').src = data.image_url;
+                if(data.cover_url) document.getElementById('display-cover').innerHTML = `<img src="${data.cover_url}" alt='Cover Picture'>`;
+                if(data.bio) document.getElementById('display-bio').innerText = data.bio;
+                if(data.location) document.getElementById('display-location').innerText = data.location;
+                if(data.links) {
                     const linkEl = document.getElementById('display-link');
-                    linkEl.href = d.links;
-                    linkEl.innerText = d.links;
+                    linkEl.href = data.links;
+                    linkEl.innerText = data.links;
                 }
-                if(imageInput && imageInput.files.length > 0) {
-                    const avatarUrl = URL.createObjectURL(imageInput.files[0]);
-                    document.getElementById('display-avatar').src = avatarUrl;
-                    document.querySelectorAll('.post-avatar').forEach(img => img.src = avatarUrl);
-                }
-                if(coverInput && coverInput.files.length > 0) {
-                    const coverUrl = URL.createObjectURL(coverInput.files[0]);
-                    const coverContainer = document.getElementById('display-cover');
-                    coverContainer.innerHTML = `<img src="${coverUrl}" alt='Cover Picture'>`;
-                }
-
                 closeModal();
-                btn.disabled = false;
-                btn.innerText = "Save Changes";
             } else {
-                alert("Error updating profile.");
-                btn.disabled = false;
-                btn.innerText = "Save Changes";
+                alert("Error modifying info: " + JSON.stringify(data.errors));
             }
-        } catch(err) {
-            console.error(err);
+        } catch (error) {
+            console.error("AJAX implementation failed:", error);
+            alert("Connection error running execution routing.");
+        } finally {
             btn.disabled = false;
             btn.innerText = "Save Changes";
         }
     };
-
-    const visualColors = [
-        '#00a86b', '#007bff', '#ff007f', '#7b2cbf', '#ffbe0b', 
-        '#fb5607', '#ff006e', '#8338ec', '#3a86ff', '#4cc9f0', 
-        '#f72585', '#7209b7', '#3d5a80', '#ee6c4d', '#06d6a0'
-    ];
-    
-    document.querySelectorAll('.visualizer-bars').forEach(v => {
-        for(let i=0; i < 60; i++) { 
-            let b = document.createElement("div"); 
-            b.className = "v-bar"; 
-            b.style.backgroundColor = visualColors[i % visualColors.length]; 
-            v.appendChild(b); 
-        }
-    });
-
-    document.querySelectorAll('.follow-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const username = this.getAttribute('data-username').trim(); 
-            const btn = this;
-            
-            fetch(`/follow/${username}/`, { 
-                method: 'POST', 
-                headers: { 
-                    'X-CSRFToken': getCSRFToken(), 
-                    'Content-Type': 'application/json' 
-                } 
-            })
-            .then(r => {
-                if (!r.ok) throw new Error("Action denied or routing signature mismatch.");
-                return r.json();
-            })
-            .then(data => {
-                const btnText = btn.querySelector('.btn-text');
-                if (data.status === 'followed') {
-                    btn.className = "follow-btn btn-unfollow following";
-                    if (btnText) btnText.innerHTML = 'Following';
-                } else {
-                    btn.className = "follow-btn btn-follow";
-                    if (btnText) btnText.innerHTML = '+ Follow';
-                }
-                const badge = document.getElementById(`follower-count-${username}`);
-                if (badge && data.followers_count !== undefined) {
-                    badge.innerHTML = data.followers_count;
-                }
-            })
-            .catch(err => console.error("Follow submission error:", err));
-        });
-    });
-
-    function handleLike(btn, postId) {
-        btn.disabled = true;
-        fetch(`/like-post/${postId}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-        .then(r => r.json()).then(d => {
-            document.getElementById(`like-count-${postId}`).innerText = d.count;
-            d.liked ? btn.classList.add('is-liked') : btn.classList.remove('is-liked');
-            btn.disabled = false;
-        });
-    }
-
-    function deletePost(id) {
-        if(confirm("Permanently delete this post?")) { 
-            fetch(`/delete-post/${id}/`, { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
-            .then(r => r.json()).then(d => { if(d.success) document.getElementById(`post-card-${id}`).remove(); }); 
-        }
-    }
 </script>
-</body> 
+</body>
 </html>
